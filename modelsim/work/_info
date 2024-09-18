@@ -1,0 +1,76 @@
+m255
+K4
+z2
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+dC:/Users/eecastil/Downloads/mips/mips_sp
+vi_cache
+Z0 !s110 1726629611
+!i10b 1
+!s100 XDcEAVi7dGOf2:b`0iAIC2
+Ib@>bz4>0;hG2KbR8MXQb:3
+Z1 VDg1SIo80bB@j0V0VzS_@n1
+Z2 dC:/Users/eecastil/Downloads/MIPS/mips_sp/modelsim
+w1726629328
+8C:/Users/eecastil/Downloads/MIPS/mips_sp/src/i_cache.v
+FC:/Users/eecastil/Downloads/MIPS/mips_sp/src/i_cache.v
+L0 8
+Z3 OV;L;10.5b;63
+r1
+!s85 0
+31
+Z4 !s108 1726629611.000000
+!s107 C:/Users/eecastil/Downloads/MIPS/mips_sp/src/i_cache.v|
+!s90 -reportprogress|300|-work|work|-stats=none|C:/Users/eecastil/Downloads/MIPS/mips_sp/src/i_cache.v|
+!i113 1
+Z5 o-work work
+Z6 tCvgOpt 0
+vifq_tb
+R0
+!i10b 1
+!s100 D]iTl7>MGbzgLTO0Obf1B2
+I<;]U;Sh:FCOca>i3cUQn@0
+R1
+R2
+w1726629599
+8C:/Users/eecastil/Downloads/MIPS/mips_sp/src/ifq_tb.v
+FC:/Users/eecastil/Downloads/MIPS/mips_sp/src/ifq_tb.v
+L0 9
+R3
+r1
+!s85 0
+31
+R4
+!s107 C:/Users/eecastil/Downloads/MIPS/mips_sp/src/ifq_tb.v|
+!s90 -reportprogress|300|-work|work|-stats=none|C:/Users/eecastil/Downloads/MIPS/mips_sp/src/ifq_tb.v|
+!i113 1
+R5
+R6
+vmips_sp
+DXx6 sv_std 3 std 0 22 AD7iAPLo6nTIKk<N0eo=D3
+R0
+!i10b 1
+!s100 T6bW@dBa<>FgAZ_QSjAM[3
+IDQMe>fkTG4:2`MIXGi];53
+R1
+!s105 mips_sp_sv_unit
+S1
+R2
+w1726629463
+8C:/Users/eecastil/Downloads/MIPS/mips_sp/src/mips_sp.sv
+FC:/Users/eecastil/Downloads/MIPS/mips_sp/src/mips_sp.sv
+L0 1
+R3
+r1
+!s85 0
+31
+R4
+!s107 C:/Users/eecastil/Downloads/MIPS/mips_sp/src/mips_sp.sv|
+!s90 -reportprogress|300|-work|work|-sv|-stats=none|C:/Users/eecastil/Downloads/MIPS/mips_sp/src/mips_sp.sv|
+!i113 1
+o-work work -sv
+R6

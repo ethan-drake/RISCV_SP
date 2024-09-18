@@ -1,0 +1,15 @@
+C:/Users/eecastil/Downloads/MIPS/mips_sp/src/i_cache.v {1 {vlog -work work -stats=none C:/Users/eecastil/Downloads/MIPS/mips_sp/src/i_cache.v
+Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+-- Compiling module i_cache
+
+Top level modules:
+	i_cache
+
+} {} {}} C:/Users/eecastil/Downloads/MIPS/mips_sp/src/mips_sp.sv {1 {vlog -work work -sv -stats=none C:/Users/eecastil/Downloads/MIPS/mips_sp/src/mips_sp.sv
+Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+-- Compiling module mips_sp
+
+Top level modules:
+	mips_sp
+
+} {} {}}
