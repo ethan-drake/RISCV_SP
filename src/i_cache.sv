@@ -35,6 +35,7 @@ begin
 end
 
 always @(*) begin
+	
 	if(rd_en & i_rst_n)begin
 		map_Address = (pc_in + (~32'h400_000 + 1'b1)) >> 4'h4;
 		dout = cache_memory[map_Address];
@@ -45,6 +46,17 @@ always @(*) begin
 		dout=0;
 		dout_valid=0;
 	end
+/*
+	if(i_rst_n)begin
+		map_Address = 0;
+		dout=0;
+		dout_valid=0;
+	end
+	else if(rd_en)begin
+		map_Address = (pc_in + (~32'h400_000 + 1'b1)) >> 4'h4;
+		dout = cache_memory[map_Address];
+		dout_valid = 1'b1;
+	end*/
 end
 
 
