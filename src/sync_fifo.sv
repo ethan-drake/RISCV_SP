@@ -5,6 +5,7 @@ module sync_fifo #(parameter DEPTH=4, DATA_WIDTH=128)(
     input w_en,
     input rd_en,
     input flush,
+    input [1:0] jmp_branch_address_b_3_2,
     output [DATA_WIDTH-1:0] data_out,
     output o_full,
     output [4:0] o_rp,
@@ -23,6 +24,10 @@ always @(posedge i_clk, negedge i_rst_n) begin
     if(!i_rst_n | flush)begin
         wp = 5'b0;
         overflow = 0;
+        fifo[0] = 0;
+        fifo[1] = 0;
+        fifo[2] = 0;
+        fifo[3] = 0;
     end
     //fifo write data
     else if(w_en & !full)begin
@@ -35,14 +40,22 @@ always @(posedge i_clk, negedge i_rst_n) begin
         else begin
             overflow=0;
         end
-            
-        
     end
+    if(flush)begin
+        wp = 5'h4;
+        overflow = 0;
+        fifo[0] = data_in;
+        fifo[1] = 0;
+        fifo[2] = 0;
+        fifo[3] = 0;
+    end
+    //fifo 
+
 end
 
 always @(posedge i_clk, negedge i_rst_n) begin
     //Reset or flush
-    if(!i_rst_n | flush)begin
+    if(!i_rst_n)begin
         rp = 5'b0;
     end
     //fifo write data
@@ -51,6 +64,11 @@ always @(posedge i_clk, negedge i_rst_n) begin
         if(rp==5'h10)begin
             rp=5'b0;
         end
+    end
+
+    if(flush)begin
+        rp[4:2] = 0;
+        rp[1:0] = jmp_branch_address_b_3_2;
     end
 end
 /*
@@ -65,6 +83,9 @@ always @(*) begin
     if(!i_rst_n)begin
         full = 1;
     end
+    else if(flush)begin
+        full = 0;
+    end
     else begin
         full = (overflow && (rp[4:2]==0)) ? 1 : (wp[4:2]+1 == rp[4:2]) ? 1 : 0;
     end
@@ -74,7 +95,7 @@ end
 
     assign data_out = ((i_rst_n | !flush) & rd_en) ? fifo[rp[3:2]]:0;
     //assign full = ((wp[4]) && (rp[4:2]==0)) ? 1 : (wp[4:2]+1 == rp[4:2]) ? 1 : 0;
-    assign empty = (wp == rp);
+    assign empty = ({overflow,wp[3:2]} == rp[4:2]);
     assign o_rp = rp;
     assign o_wp = wp;
     assign o_full = full;

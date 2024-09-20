@@ -8,17 +8,17 @@ module ifq(
     input jmp_branch_valid,
     output [31:0] pc_in,
     output o_rd_en,
-    output reg abort,
+    output abort,
     output [31:0] pc_out,
     output [31:0] instr,
-    output reg empty
+    output empty
 );
 
 wire is_full;
-reg flush;
 wire fifo_empty;
 wire[31:0] pc_out_w;
 wire[31:0] pc_in_w;
+wire[31:0] pc_in_w_d;
 wire[127:0] fifo_out;
 wire[4:0] rp,wp;
 wire [31:0] dispatcher_out;
@@ -31,7 +31,8 @@ sync_fifo #(.DEPTH(4),.DATA_WIDTH(128)) fifo(
     .data_in(dout),
     .w_en(dout_valid),
     .rd_en(rd_en),
-    .flush(flush),
+    .flush(jmp_branch_valid),
+    .jmp_branch_address_b_3_2(jmp_branch_address[3:2]),
     .data_out(fifo_out),
     .o_rp(rp),
     .o_wp(wp),
@@ -53,7 +54,7 @@ ffd_param_pc #(.LENGTH(32)) ffd_pc_in(
 	.i_clk(i_clk),
 	.i_rst_n(i_rst_n),
 	.i_en(~is_full),
-	.d(pc_in_w+16),
+	.d(pc_in_w_d+16),
 	.q(pc_in_w)
 );
 
@@ -84,8 +85,11 @@ multiplexor_param #(.LENGTH(32)) bypass_instr_mux (
 );
 
 assign pc_out = pc_out_w;
-assign pc_in = pc_in_w;
+assign pc_in_w_d = jmp_branch_valid ? jmp_branch_address : pc_in_w;
+assign pc_in = jmp_branch_valid ? jmp_branch_address : pc_in_w;
 assign o_rd_en = ~is_full;
+assign abort = 1'b0;
+assign empty = fifo_empty;
 //assign is_full = (rp[3:2]==2'b00 && wp[3:2]==2'b11) ? 1'b1 : 1'b0;
 //assign o_rd_en = (is_full) ? 1'b0 : 1'b1;
 

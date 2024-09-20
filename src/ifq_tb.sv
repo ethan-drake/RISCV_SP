@@ -23,13 +23,12 @@ mips_sp procesador (
 
 initial begin
 	fill_cache();
-	clk = 0;
-	rst_n = 1;
+	init_values();
 	clear_rd_enable();
-	#1 rst_n = 0;
-	#2 rst_n = 1;
-	#0 set_rd_enable();
-	
+	reset_device();
+	set_rd_enable();
+	create_branch_scenario();
+	create_branch_scenario();
 end
 
 task fill_cache;
@@ -43,12 +42,35 @@ task fill_cache;
 	procesador.cache.cache_memory[7] = 128'h000000200000001f0000001e0000001d;  
 endtask
 
+task init_values();
+	clk = 0;
+	rst_n = 1;
+	jmp_branch_address = 0;
+	jmp_branch_valid = 0;
+endtask
+
+task reset_device();
+	#1 rst_n = 0;
+	#2 rst_n = 1;
+endtask
+
 task set_rd_enable;
-	rd_en = 1'b1;
+	#0 rd_en = 1'b1;
 endtask
 
 task clear_rd_enable;
 	rd_en = 1'b0;
+endtask
+
+task create_branch_scenario;
+	#($urandom_range(10,30) * 1ns);
+	@(posedge clk)begin
+		jmp_branch_address = 32'h400_000+($urandom_range(1,15)<<2);
+		jmp_branch_valid = 1'b1;
+	end
+	@(posedge clk)begin
+		jmp_branch_valid = 1'b0;
+	end
 endtask
 
 always begin
