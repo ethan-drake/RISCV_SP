@@ -1,3 +1,10 @@
+// Coder:           Eduardo Ethandrake Castillo Pulido
+// Date:            18/09/24
+// File:			     sync_fifo.sv
+// Module name:	  sync_fifo
+// Project Name:	  mips_sp
+// Description:	  sync_fifo
+
 module sync_fifo #(parameter DEPTH=4, DATA_WIDTH=128)(
     input i_clk,
     input i_rst_n,

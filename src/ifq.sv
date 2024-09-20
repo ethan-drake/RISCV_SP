@@ -1,3 +1,10 @@
+// Coder:           Eduardo Ethandrake Castillo Pulido
+// Date:            18/09/24
+// File:			     ifq.sv
+// Module name:	  ifq
+// Project Name:	  mips_sp
+// Description:	  ifq
+
 module ifq(
     input i_clk,
     input i_rst_n,
@@ -21,8 +28,8 @@ wire[31:0] pc_in_w;
 wire[31:0] pc_in_w_d;
 wire[127:0] fifo_out;
 wire[4:0] rp,wp;
-wire [31:0] dispatcher_out;
-wire [31:0] dispatcher_bypass_out;
+wire [31:0] ifq_mux_out;
+wire [31:0] ifq_mux_bypass_out;
 
 
 sync_fifo #(.DEPTH(4),.DATA_WIDTH(128)) fifo(
@@ -58,28 +65,28 @@ ffd_param_pc #(.LENGTH(32)) ffd_pc_in(
 	.q(pc_in_w)
 );
 
-double_multiplexor_param #(.LENGTH(32)) dispatcher (
+double_multiplexor_param #(.LENGTH(32)) ifq_mux (
     .i_a(fifo_out[31:0]),
     .i_b(fifo_out[63:32]),
 	.i_c(fifo_out[95:64]),
 	.i_d(fifo_out[127:96]),
     .i_selector(rp[1:0]),
-    .out(dispatcher_out)
+    .out(ifq_mux_out)
 );
 
-double_multiplexor_param #(.LENGTH(32)) dispatcher_bypass (
+double_multiplexor_param #(.LENGTH(32)) ifq_mux_bypass (
     .i_a(dout[31:0]),
     .i_b(dout[63:32]),
 	.i_c(dout[95:64]),
 	.i_d(dout[127:96]),
     .i_selector(rp[1:0]),
-    .out(dispatcher_bypass_out)
+    .out(ifq_mux_bypass_out)
 );
 
 
 multiplexor_param #(.LENGTH(32)) bypass_instr_mux (
-    .i_a(dispatcher_out),
-    .i_b(dispatcher_bypass_out),
+    .i_a(ifq_mux_out),
+    .i_b(ifq_mux_bypass_out),
     .i_selector(fifo_empty),
     .out(instr)
 );

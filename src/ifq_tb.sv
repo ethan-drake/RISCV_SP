@@ -12,7 +12,7 @@ reg clk, rst_n,rd_en;
 reg [31:0] jmp_branch_address;
 reg jmp_branch_valid;
 
-mips_sp procesador (
+mips_sp_top procesador (
 	//Inputs - Platform
 	.clk(clk),
 	.rst_n(rst_n),
@@ -65,7 +65,7 @@ endtask
 task create_branch_scenario;
 	#($urandom_range(10,30) * 1ns);
 	@(posedge clk)begin
-		jmp_branch_address = 32'h400_000+($urandom_range(1,15)<<2);
+		jmp_branch_address = 32'h40_0000+($urandom_range(1,15)<<2);
 		jmp_branch_valid = 1'b1;
 	end
 	@(posedge clk)begin
