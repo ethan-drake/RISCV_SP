@@ -35,14 +35,18 @@ common_fifo_data exec_div_fifo_data_in;
 common_fifo_data exec_div_fifo_data_out;
 common_fifo_ctrl exec_div_fifo_ctrl;
 
-
+//wire definition
+wire [6:0] opcode;
+wire [31:0] immediate;
+wire [31:0] jmp_br_addr;
+assign exec_ld_st_fifo_data_in.immediate = jmp_br_addrv;
 //Decoder
 risc_v_decoder decoder(
     .instr(i_fetch_instruction),
     .rs1,
     .rs2,
     .rd,
-    .opcode,
+    .opcode(opcode),
     .func3,
     .func7
 );
@@ -52,8 +56,17 @@ imm_gen immediate_generator(
 	//inputs
 	.i_instruction(i_fetch_instruction),
 	//outputs
-	.o_immediate(exec_ld_st_fifo_data_in.immediate)
+	.o_immediate(immediate)
 );
+
+//JMP & BRANCH ADDRESS CALCULATOR
+br_jmp_addr_calc(
+    .pc(i_fetch_pc_plus_4),
+    .opcode(opcode),
+    .immediate(immediate),
+    .jmp_br_addr(jmp_br_addr)
+);
+
 
 //Dispatch FIFOs
 exec_fifo #(.DEPTH(4), .DATA_WIDTH($bits(int_fifo_data))) int_exec_fifo(
