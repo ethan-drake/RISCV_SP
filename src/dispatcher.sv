@@ -35,6 +35,27 @@ common_fifo_data exec_div_fifo_data_in;
 common_fifo_data exec_div_fifo_data_out;
 common_fifo_ctrl exec_div_fifo_ctrl;
 
+
+//Decoder
+risc_v_decoder decoder(
+    .instr(i_fetch_instruction),
+    .rs1,
+    .rs2,
+    .rd,
+    .opcode,
+    .func3,
+    .func7
+);
+
+//Immediate generator
+imm_gen immediate_generator(
+	//inputs
+	.i_instruction(i_fetch_instruction),
+	//outputs
+	.o_immediate(exec_ld_st_fifo_data_in.immediate)
+);
+
+//Dispatch FIFOs
 exec_fifo #(.DEPTH(4), .DATA_WIDTH($bits(int_fifo_data))) int_exec_fifo(
     .i_clk(i_clk),
     .i_rst_n(i_rst_n),

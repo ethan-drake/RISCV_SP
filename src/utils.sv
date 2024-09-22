@@ -29,5 +29,5 @@ typedef struct packed {
     //1 bit opcode to distinguish between LD&ST
     logic ld_st_opcode;
     //change immediate value for risc-v ISA
-    logic [15:0] immediate;
+    logic [31:0] immediate;
  } ld_st_fifo_data;
