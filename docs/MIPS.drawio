@@ -349,12 +349,13 @@
         <mxCell id="oB-aT5vTAcFPeE-sXGdO-24" value="TAG FIFO" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="-110" y="1110" width="160" height="130" as="geometry" />
         </mxCell>
-        <mxCell id="oB-aT5vTAcFPeE-sXGdO-42" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.381;exitY=0.006;exitDx=0;exitDy=0;startArrow=classic;startFill=1;endArrow=none;endFill=0;exitPerimeter=0;" edge="1" parent="1" source="oB-aT5vTAcFPeE-sXGdO-41">
+        <mxCell id="oB-aT5vTAcFPeE-sXGdO-42" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.381;exitY=0.006;exitDx=0;exitDy=0;startArrow=classic;startFill=1;endArrow=none;endFill=0;exitPerimeter=0;entryX=1.041;entryY=0.976;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="oB-aT5vTAcFPeE-sXGdO-41" target="cbFBZiRL0tx0ivI146Lf-2">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="40" y="540" as="targetPoint" />
             <Array as="points">
-              <mxPoint x="390" y="603" />
-              <mxPoint x="40" y="603" />
+              <mxPoint x="389" y="603" />
+              <mxPoint x="-46" y="603" />
+              <mxPoint x="-46" y="549" />
             </Array>
           </mxGeometry>
         </mxCell>
