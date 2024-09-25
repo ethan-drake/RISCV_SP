@@ -202,7 +202,7 @@
         <mxCell id="oB-aT5vTAcFPeE-sXGdO-22" value="RegFile" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="-110" y="640" width="160" height="130" as="geometry" />
         </mxCell>
-        <mxCell id="oB-aT5vTAcFPeE-sXGdO-23" value="RST" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="oB-aT5vTAcFPeE-sXGdO-23" value="RST (duda con las ANDs)" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="-110" y="810" width="160" height="130" as="geometry" />
         </mxCell>
         <mxCell id="oB-aT5vTAcFPeE-sXGdO-24" value="RST" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
