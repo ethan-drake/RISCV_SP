@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36" version="24.7.16">
   <diagram name="Page-1" id="PrAhHyFqpY0iZm9ffoHx">
-    <mxGraphModel dx="2033" dy="183" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="2274" dy="315" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -228,7 +228,7 @@
         </mxCell>
         <mxCell id="oB-aT5vTAcFPeE-sXGdO-97" value="write_data_rf[31:0]" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="oB-aT5vTAcFPeE-sXGdO-96" vertex="1" connectable="0">
           <mxGeometry x="0.541" y="-1" relative="1" as="geometry">
-            <mxPoint x="-535" y="-282" as="offset" />
+            <mxPoint x="-397" y="-282" as="offset" />
           </mxGeometry>
         </mxCell>
         <mxCell id="oB-aT5vTAcFPeE-sXGdO-98" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;" parent="1" source="oB-aT5vTAcFPeE-sXGdO-22" edge="1" target="14R733E2Z8ilJDnpNXyQ-24">
@@ -243,7 +243,7 @@
         </mxCell>
         <mxCell id="oB-aT5vTAcFPeE-sXGdO-99" value="rs1data_rf[31:0]" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="oB-aT5vTAcFPeE-sXGdO-98" vertex="1" connectable="0">
           <mxGeometry x="0.5465" y="-1" relative="1" as="geometry">
-            <mxPoint x="44" y="-561" as="offset" />
+            <mxPoint x="106" y="-387" as="offset" />
           </mxGeometry>
         </mxCell>
         <mxCell id="oB-aT5vTAcFPeE-sXGdO-101" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.013;exitY=0.924;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;" parent="1" source="oB-aT5vTAcFPeE-sXGdO-22" edge="1" target="14R733E2Z8ilJDnpNXyQ-10">
@@ -258,7 +258,7 @@
         </mxCell>
         <mxCell id="oB-aT5vTAcFPeE-sXGdO-102" value="rs2data_rf[31:0]" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="oB-aT5vTAcFPeE-sXGdO-101" vertex="1" connectable="0">
           <mxGeometry x="0.4374" y="-3" relative="1" as="geometry">
-            <mxPoint x="62" y="-520" as="offset" />
+            <mxPoint x="98" y="-396" as="offset" />
           </mxGeometry>
         </mxCell>
         <mxCell id="oB-aT5vTAcFPeE-sXGdO-22" value="RegFile" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
