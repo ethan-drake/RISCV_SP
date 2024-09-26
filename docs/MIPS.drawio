@@ -170,25 +170,37 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="oB-aT5vTAcFPeE-sXGdO-37" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.561;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="oB-aT5vTAcFPeE-sXGdO-21" edge="1">
+        <mxCell id="oB-aT5vTAcFPeE-sXGdO-37" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.561;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" parent="1" source="oB-aT5vTAcFPeE-sXGdO-21" edge="1" target="14R733E2Z8ilJDnpNXyQ-7">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="230" y="820" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="230" y="890" />
+              <mxPoint x="270" y="890" />
+              <mxPoint x="270" y="1320" />
+              <mxPoint x="28" y="1320" />
+            </Array>
           </mxGeometry>
         </mxCell>
         <mxCell id="oB-aT5vTAcFPeE-sXGdO-38" value="func3[2:0]" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="oB-aT5vTAcFPeE-sXGdO-37" vertex="1" connectable="0">
           <mxGeometry x="0.1392" y="-3" relative="1" as="geometry">
-            <mxPoint x="3" y="2" as="offset" />
+            <mxPoint x="-27" y="-385" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="oB-aT5vTAcFPeE-sXGdO-39" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" edge="1">
+        <mxCell id="oB-aT5vTAcFPeE-sXGdO-39" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.379;entryY=0.033;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" edge="1" target="14R733E2Z8ilJDnpNXyQ-7">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="260" y="820" as="targetPoint" />
             <mxPoint x="260" y="770" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="260" y="870" />
+              <mxPoint x="290" y="870" />
+              <mxPoint x="290" y="1330" />
+              <mxPoint x="70" y="1330" />
+            </Array>
           </mxGeometry>
         </mxCell>
         <mxCell id="oB-aT5vTAcFPeE-sXGdO-40" value="func7[6:0]" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="oB-aT5vTAcFPeE-sXGdO-39" vertex="1" connectable="0">
           <mxGeometry x="-0.0421" relative="1" as="geometry">
-            <mxPoint y="-14" as="offset" />
+            <mxPoint x="-30" y="-333" as="offset" />
           </mxGeometry>
         </mxCell>
         <mxCell id="oB-aT5vTAcFPeE-sXGdO-21" value="Decoder" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
