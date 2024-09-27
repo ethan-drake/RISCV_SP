@@ -9,7 +9,7 @@ module br_jmp_addr_calc(
     input [31:0] pc,
     input [6:0] opcode,
     input [31:0] immediate,
-    output [31:0] jmp_br_addr
+    output reg[31:0] jmp_br_addr
 );
 
 parameter B_TYPE = 7'b1100011;

@@ -16,17 +16,17 @@ module exec_fifo #(parameter DEPTH=4, DATA_WIDTH=128)(
     output o_full,
     output empty
 );
-
+localparam POINTER_WIDTH = $clog2(DEPTH);
 reg [DATA_WIDTH-1:0] fifo[DEPTH];
-reg [4:0]wp;
-reg [4:0]rp;
+reg [POINTER_WIDTH:0]wp;
+reg [POINTER_WIDTH:0]rp;
 reg full;
 reg overflow;
 //writing
 always @(posedge i_clk, negedge i_rst_n) begin
     //Reset or flush
     if(!i_rst_n | flush)begin
-        wp = 5'b0;
+        wp = 0;
         overflow = 0;
         fifo[0] = 0;
         fifo[1] = 0;
@@ -35,9 +35,9 @@ always @(posedge i_clk, negedge i_rst_n) begin
     end
     //fifo write data
     else if(w_en & !full)begin
-        fifo[wp[3:0]] = data_in;
-        wp = wp+4;
-        if(wp[4])begin
+        fifo[wp[POINTER_WIDTH-1:0]] = data_in;
+        wp = wp+1;
+        if(wp[POINTER_WIDTH])begin
             wp=0;
             overflow = 1;
         end
@@ -60,12 +60,12 @@ end
 always @(posedge i_clk, negedge i_rst_n) begin
     //Reset or flush
     if(!i_rst_n)begin
-        rp = 5'b0;
+        rp = 0;
     end
     //fifo write data
     else if(rd_en)begin
         rp=rp+1;
-        if(rp==5'h10)begin
+        if(rp[POINTER_WIDTH])begin
             rp=5'b0;
         end
     end
@@ -90,15 +90,15 @@ always @(*) begin
         full = 0;
     end
     else begin
-        full = (overflow && (rp[4:0]==0)) ? 1 : (wp[4:0]+1 == rp[4:0]) ? 1 : 0;
+        full = (overflow && (rp[POINTER_WIDTH:0]==0)) ? 1 : (wp[POINTER_WIDTH:0]+1 == rp[POINTER_WIDTH:0]) ? 1 : 0;
     end
 end
 
 
 
-    assign data_out = ((i_rst_n | !flush) & rd_en) ? fifo[rp[3:0]]:0;
+    assign data_out = ((i_rst_n | !flush) & rd_en) ? fifo[rp[POINTER_WIDTH-1:0]]:0;
     //assign full = ((wp[4]) && (rp[4:2]==0)) ? 1 : (wp[4:2]+1 == rp[4:2]) ? 1 : 0;
-    assign empty = ({overflow,wp[3:0]} == rp[4:0]);
+    assign empty = ({overflow,wp[POINTER_WIDTH-1:0]} == rp[POINTER_WIDTH:0]);
     assign o_full = full;
 
 endmodule

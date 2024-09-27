@@ -12,13 +12,18 @@ reg clk, rst_n,rd_en;
 reg [31:0] jmp_branch_address;
 reg jmp_branch_valid;
 
-mips_sp_top procesador (
+riscv_sp_top procesador(
 	//Inputs - Platform
 	.clk(clk),
 	.rst_n(rst_n),
-	.i_rd_en(rd_en),
-	.jmp_branch_address(jmp_branch_address),
-    .jmp_branch_valid(jmp_branch_valid)
+    .i_rd_en(rd_en),
+    //input [31:0] jmp_branch_address,
+    //input jmp_branch_valid
+    .cdb_tag(0),
+    .cdb_valid(0),
+    .cdb_data(0),
+    .cdb_branch(0),
+    .cdb_branch_taken(0)
 );
 
 initial begin
@@ -27,19 +32,19 @@ initial begin
 	clear_rd_enable();
 	reset_device();
 	set_rd_enable();
-	create_branch_scenario();
-	create_branch_scenario();
+	//create_branch_scenario();
+	//create_branch_scenario();
 end
 
 task fill_cache;
-	procesador.cache.cache_memory[0] = 128'h00000004000000030000000200000001;
-	procesador.cache.cache_memory[1] = 128'h00000008000000070000000600000005; 
-	procesador.cache.cache_memory[2] = 128'h0000000c0000000b0000000a00000009; 
-	procesador.cache.cache_memory[3] = 128'h000000100000000f0000000e0000000d;  
-	procesador.cache.cache_memory[4] = 128'h00000014000000130000001200000011;  
-	procesador.cache.cache_memory[5] = 128'h00000018000000170000001600000015;  
-	procesador.cache.cache_memory[6] = 128'h0000001c0000001b0000001a00000019;  
-	procesador.cache.cache_memory[7] = 128'h000000200000001f0000001e0000001d;  
+	procesador.cache.cache_memory[0] = 128'h007302b303c0039301e0031301400293;
+	procesador.cache.cache_memory[1] = 128'h000000000062f4330072e3b306400513; 
+	procesador.cache.cache_memory[2] = 128'h00000000000000000000000000000000; 
+	procesador.cache.cache_memory[3] = 128'h00000000000000000000000000000000;  
+	procesador.cache.cache_memory[4] = 128'h00000000000000000000000000000000;  
+	procesador.cache.cache_memory[5] = 128'h00000000000000000000000000000000;  
+	procesador.cache.cache_memory[6] = 128'h00000000000000000000000000000000;  
+	procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;  
 endtask
 
 task init_values();
