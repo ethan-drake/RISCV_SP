@@ -21,7 +21,11 @@ module dispatcher(
     input cdb_valid,
     input [31:0] cdb_data,
     input cdb_branch,
-    input cdb_branch_taken
+    input cdb_branch_taken,
+    input tb_int_rd,
+    input tb_ld_sw_rd,
+    input tb_mult_rd,
+    input tb_div_rd
 );
 
 assign dispatch_jmp_valid = 0;
@@ -195,7 +199,7 @@ exec_fifo #(.DEPTH(4), .DATA_WIDTH($bits(int_fifo_data))) int_exec_fifo(
     .i_rst_n(i_rst_n),
     .data_in(exec_int_fifo_data_in),
     .w_en(exec_int_fifo_ctrl.dispatch_en),
-    .rd_en(1'b0),
+    .rd_en(tb_int_rd),
     .flush(1'b0),
     .data_out(exec_int_fifo_data_out),
     .o_full(exec_int_fifo_ctrl.queue_full),
@@ -207,7 +211,7 @@ exec_fifo #(.DEPTH(4), .DATA_WIDTH($bits(ld_st_fifo_data))) ld_st_exec_fifo(
     .i_rst_n(i_rst_n),
     .data_in(exec_ld_st_fifo_data_in),
     .w_en(exec_ld_st_fifo_ctrl.dispatch_en),
-    .rd_en(1'b0),
+    .rd_en(tb_ld_sw_rd),
     .flush(1'b0),
     .data_out(exec_ld_st_fifo_data_out),
     .o_full(exec_ld_st_fifo_ctrl.queue_full),
@@ -219,7 +223,7 @@ exec_fifo #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) mult_exec_fifo(
     .i_rst_n(i_rst_n),
     .data_in(exec_mult_fifo_data_in),
     .w_en(exec_mult_fifo_ctrl.dispatch_en),
-    .rd_en(1'b0),
+    .rd_en(tb_mult_rd),
     .flush(1'b0),
     .data_out(exec_mult_fifo_data_out),
     .o_full(exec_mult_fifo_ctrl.queue_full),
@@ -231,12 +235,14 @@ exec_fifo #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) div_exec_fifo(
     .i_rst_n(i_rst_n),
     .data_in(exec_div_fifo_data_in),
     .w_en(exec_div_fifo_ctrl.dispatch_en),
-    .rd_en(1'b0),
+    .rd_en(tb_div_rd),
     .flush(1'b0),
     .data_out(exec_div_fifo_data_out),
     .o_full(exec_div_fifo_ctrl.queue_full),
     .empty(exec_div_fifo_ctrl.queue_empty)
 );
 
+
+assign dispatch_rd_en = ~(exec_int_fifo_ctrl.queue_full | exec_ld_st_fifo_ctrl.queue_full | exec_mult_fifo_ctrl.queue_full | exec_div_fifo_ctrl.queue_full);
 
 endmodule

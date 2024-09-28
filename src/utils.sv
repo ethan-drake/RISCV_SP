@@ -28,7 +28,7 @@ typedef struct packed {
 
  typedef struct packed {
     common_fifo_data common_data;
-    logic [2:0] opcode;
+    logic [6:0] opcode;
     logic [2:0] func3;
     logic [6:0] func7;
  } int_fifo_data;

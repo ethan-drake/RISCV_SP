@@ -5,36 +5,163 @@
 // Project Name:	  mips_top
 // Description:	  TB to test mips implementation
 
+`include "utils.sv"
  `timescale 1ns / 1ps
 module ifq_tb();
 
 reg clk, rst_n,rd_en;
 reg [31:0] jmp_branch_address;
 reg jmp_branch_valid;
-
+reg tb_int_rd, tb_ld_sw_rd, tb_mult_rd, tb_div_rd;
+reg [31:0] tb_int_result;
 riscv_sp_top procesador(
 	//Inputs - Platform
 	.clk(clk),
 	.rst_n(rst_n),
-    .i_rd_en(rd_en),
+    //.i_rd_en(rd_en),
     //input [31:0] jmp_branch_address,
     //input jmp_branch_valid
     .cdb_tag(0),
     .cdb_valid(0),
     .cdb_data(0),
     .cdb_branch(0),
-    .cdb_branch_taken(0)
+    .cdb_branch_taken(0),
+	.tb_int_rd(tb_int_rd),
+    .tb_ld_sw_rd(tb_ld_sw_rd),
+    .tb_mult_rd(tb_mult_rd),
+    .tb_div_rd(tb_div_rd)
 );
 
 initial begin
 	fill_cache();
 	init_values();
-	clear_rd_enable();
+	//clear_rd_enable();
 	reset_device();
-	set_rd_enable();
+	//set_rd_enable();
 	//create_branch_scenario();
 	//create_branch_scenario();
 end
+int_fifo_data int_exec_fifo_data;
+
+always @(posedge clk) begin
+	execute_int_fifo();
+	execute_ld_sw_fifo();
+	execute_mult_fifo();
+	execute_div_fifo();
+end
+
+task execute_int_fifo;
+	if(!procesador.dispatcher.int_exec_fifo.empty)begin
+		$display("int operation detected, reading");
+		tb_int_rd=1'b1;
+		int_exec_fifo_data = procesador.dispatcher.int_exec_fifo.data_out;
+		$display("%h",int_exec_fifo_data);
+		//$display("%b",int_exec_fifo_data.opcode);
+		//$display("%h",int_exec_fifo_data.func3);
+		//$display("%h",int_exec_fifo_data.func7);
+		exec_alu(int_exec_fifo_data.opcode,int_exec_fifo_data.func3,int_exec_fifo_data.func7,int_exec_fifo_data.common_data.rs1_data,int_exec_fifo_data.common_data.rs2_data,tb_int_result);
+	end
+endtask
+
+task execute_ld_sw_fifo;
+endtask
+
+task execute_mult_fifo;
+endtask
+
+task execute_div_fifo;
+endtask
+
+task exec_alu(input logic[6:0] opcode,input logic[6:0] func3,input logic[6:0] func7,input logic[31:0] a,input logic[31:0] b,output logic[31:0] c);
+	case (opcode)
+		R_TYPE:begin
+			case (func3)
+				3'h0:begin
+					if(func7==7'h20)begin
+						$display("executing SUB with:");
+						$display("rs1: %h",a);
+						$display("rs2: %h",b);
+						c=a-b;
+						$display("RESULT: %h",c);
+					end
+					else if(func7==7'h00)begin
+						$display("executing ADD with:");
+						$display("rs1: %h",a);
+						$display("rs2: %h",b);
+						c=a+b;
+						$display("RESULT: %h",c);
+					end
+					else begin
+						c=0;
+					end
+				end
+				3'h4:begin
+					$display("executing XOR with:");
+					$display("rs1: %h",a);
+					$display("rs2: %h",b);
+					c=a^b;
+					$display("RESULT: %h",c);
+				end
+				3'h6:begin
+					$display("executing OR with:");
+					$display("rs1: %h",a);
+					$display("rs2: %h",b);
+					c=a|b;
+					$display("RESULT: %h",c);
+				end
+				3'h7:begin
+					$display("executing AND with:");
+					$display("rs1: %h",a);
+					$display("rs2: %h",b);
+					c=a&b;
+					$display("RESULT: %h",c);
+				end
+				default:begin
+					c=0;
+				end
+			endcase
+		end 
+		I_TYPE:begin
+			case (func3)
+				3'h0:begin
+					$display("executing ADDI with:");
+					$display("rs1: %h",a);
+					$display("rs2: %h",b);
+					c=a+b;
+					$display("RESULT: %h",c);
+				end
+				3'h4:begin
+					$display("executing XORI with:");
+					$display("rs1: %h",a);
+					$display("rs2: %h",b);
+					c=a^b;
+					$display("RESULT: %h",c);
+				end
+				3'h6:begin
+					$display("executing ORI with:");
+					$display("rs1: %h",a);
+					$display("rs2: %h",b);
+					c=a|b;
+					$display("RESULT: %h",c);
+				end
+				3'h7:begin
+					$display("executing ANDI with:");
+					$display("rs1: %h",a);
+					$display("rs2: %h",b);
+					c=a&b;
+					$display("RESULT: %h",c);
+				end
+				default:begin
+					c=0;
+				end
+			endcase
+		end
+		default:begin
+			c=0;
+		end
+	endcase
+endtask
+
 
 task fill_cache;
 	procesador.cache.cache_memory[0] = 128'h007302b303c0039301e0031301400293;
@@ -52,6 +179,10 @@ task init_values();
 	rst_n = 1;
 	jmp_branch_address = 0;
 	jmp_branch_valid = 0;
+	tb_int_rd = 1'b0;
+	tb_ld_sw_rd = 1'b0;
+	tb_mult_rd = 1'b0;
+	tb_div_rd = 1'b0;
 endtask
 
 task reset_device();
