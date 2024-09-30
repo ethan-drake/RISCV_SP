@@ -13,7 +13,9 @@ reg clk, rst_n,rd_en;
 reg [31:0] jmp_branch_address;
 reg jmp_branch_valid;
 reg tb_int_rd, tb_ld_sw_rd, tb_mult_rd, tb_div_rd;
-reg [31:0] tb_int_result;
+reg [31:0] tb_int_result, tb_ld_sw_result, tb_mult_result, tb_div_result;
+reg [5:0] cdb_tag;
+reg cdb_valid;
 riscv_sp_top procesador(
 	//Inputs - Platform
 	.clk(clk),
@@ -21,9 +23,9 @@ riscv_sp_top procesador(
     //.i_rd_en(rd_en),
     //input [31:0] jmp_branch_address,
     //input jmp_branch_valid
-    .cdb_tag(0),
-    .cdb_valid(0),
-    .cdb_data(0),
+    .cdb_tag(cdb_tag),
+    .cdb_valid(cdb_valid),
+    .cdb_data(tb_int_result),
     .cdb_branch(0),
     .cdb_branch_taken(0),
 	.tb_int_rd(tb_int_rd),
@@ -44,6 +46,14 @@ end
 int_fifo_data int_exec_fifo_data;
 
 always @(posedge clk) begin
+	cdb_valid = 1'b0;
+	tb_int_result = 0;
+	cdb_tag = 6'h0;
+	tb_int_rd=1'b0;
+	@(posedge clk);
+	@(posedge clk);
+	@(posedge clk);
+	@(posedge clk);
 	execute_int_fifo();
 	execute_ld_sw_fifo();
 	execute_mult_fifo();
@@ -51,15 +61,34 @@ always @(posedge clk) begin
 end
 
 task execute_int_fifo;
-	if(!procesador.dispatcher.int_exec_fifo.empty)begin
-		$display("int operation detected, reading");
+	
+	if((!procesador.dispatcher.int_exec_fifo.empty))begin
 		tb_int_rd=1'b1;
-		int_exec_fifo_data = procesador.dispatcher.int_exec_fifo.data_out;
+		#0 int_exec_fifo_data = procesador.dispatcher.int_exec_fifo.data_out;
 		$display("%h",int_exec_fifo_data);
-		//$display("%b",int_exec_fifo_data.opcode);
-		//$display("%h",int_exec_fifo_data.func3);
-		//$display("%h",int_exec_fifo_data.func7);
-		exec_alu(int_exec_fifo_data.opcode,int_exec_fifo_data.func3,int_exec_fifo_data.func7,int_exec_fifo_data.common_data.rs1_data,int_exec_fifo_data.common_data.rs2_data,tb_int_result);
+		$display("rs1 data xx: %h",procesador.dispatcher.int_exec_fifo.data_out[83:52]);
+		$display("rs1 data valid xx: %h",procesador.dispatcher.int_exec_fifo.data_out[51]);
+		$display("rs1 tag xx: %h",procesador.dispatcher.int_exec_fifo.data_out[50:45]);
+		$display("rs2 data xx: %h",procesador.dispatcher.int_exec_fifo.data_out[44:13]);
+		$display("rs2 data valid xx: %h",procesador.dispatcher.int_exec_fifo.data_out[12]);
+		$display("rs2 tag xx: %h",procesador.dispatcher.int_exec_fifo.data_out[11:6]);
+		$display("rd tag xx: %h",procesador.dispatcher.int_exec_fifo.data_out[5:0]);
+
+		if(int_exec_fifo_data.opcode!=0)begin
+			$display("int operation detected, reading");
+			$display("%h",int_exec_fifo_data);
+			//$display("%b",int_exec_fifo_data.opcode);
+			//$display("%h",int_exec_fifo_data.func3);
+			//$display("%h",int_exec_fifo_data.func7);
+			exec_alu(int_exec_fifo_data.opcode,int_exec_fifo_data.func3,int_exec_fifo_data.func7,int_exec_fifo_data.common_data.rs1_data,int_exec_fifo_data.common_data.rs2_data,tb_int_result);
+			cdb_tag = int_exec_fifo_data.common_data.rd_tag;
+			cdb_valid = 1'b1;
+		end
+		
+	end
+	else begin
+		tb_int_rd = 1'b0;
+		cdb_valid = 1'b0;
 	end
 endtask
 

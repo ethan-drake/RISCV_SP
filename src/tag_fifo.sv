@@ -16,10 +16,11 @@ module tag_fifo #(parameter DEPTH=64, DATA_WIDTH=6)(
     output fifo_full_tf,
     output empty_fifo_tf
 );
+localparam POINTER_WIDTH = $clog2(DEPTH);
 
 reg [DATA_WIDTH-1:0] fifo[DEPTH];
-reg [DEPTH:0]wp;
-reg [DEPTH:0]rp;
+reg [POINTER_WIDTH:0]wp;
+reg [POINTER_WIDTH:0]rp;
 reg full;
 reg overflow;
 
@@ -101,10 +102,10 @@ always @(posedge i_clk, negedge i_rst_n) begin
     end
     //fifo write data
     else if(cdb_tag_valid_tf & !full)begin
-        fifo[wp[DEPTH-1:0]] = cdb_tag_data_tf;
+        fifo[wp[POINTER_WIDTH-1:0]] = cdb_tag_data_tf;
         wp = wp+1;
-        if(wp[DEPTH])begin
-            wp=0;
+        if(wp[POINTER_WIDTH])begin
+            wp[POINTER_WIDTH]=0;
             overflow = 1;
         end
         else begin
@@ -127,7 +128,7 @@ always @(posedge i_clk, negedge i_rst_n) begin
     //fifo write data
     else if(rd_en_tf)begin
         rp=rp+1;
-        if(rp==7'b1000000)begin
+        if(rp[POINTER_WIDTH])begin
             rp=7'b0;
         end
     end
@@ -145,15 +146,15 @@ always @(*) begin
         full = 0;
     end
     else begin
-        full = (overflow && (rp==0)) ? 1 : (wp+1 == rp) ? 1 : 0;
+        full = (overflow && (rp[POINTER_WIDTH:0]==0)) ? 1 : (wp[POINTER_WIDTH:0]+1 == rp[POINTER_WIDTH:0]) ? 1 : 0;
     end
 end
 
 
 
-    assign tag_out_tf = ((i_rst_n | !flush) & rd_en_tf) ? fifo[rp[DEPTH-1:0]]:0;
+    assign tag_out_tf = ((i_rst_n | !flush) & rd_en_tf) ? fifo[rp[POINTER_WIDTH-1:0]]:0;
     //assign full = ((wp[4]) && (rp[4:2]==0)) ? 1 : (wp[4:2]+1 == rp[4:2]) ? 1 : 0;
-    assign empty_fifo_tf = ({overflow,wp[DEPTH-1:0]} == rp);
+    assign empty_fifo_tf = ({overflow,wp[POINTER_WIDTH-1:0]} == rp[POINTER_WIDTH:0]);
     assign fifo_full_tf = full;
 
 endmodule

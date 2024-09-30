@@ -25,7 +25,7 @@ reg [31:0] registers [0:31];
 
 //Syncronus write to registers
 always @(posedge clk) begin
-	if(wen_rf && write_addr_rf!=5'h0) begin
+	if(write_addr_rf!=5'h0) begin
 		registers[write_addr_rf] <= write_data_rf;
 	end
 end

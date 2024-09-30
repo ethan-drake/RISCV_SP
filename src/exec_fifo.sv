@@ -14,7 +14,10 @@ module exec_fifo #(parameter DEPTH=4, DATA_WIDTH=128)(
     input flush,
     output [DATA_WIDTH-1:0] data_out,
     output o_full,
-    output empty
+    output empty,
+    input [5:0] cdb_tag,
+    input cdb_valid,
+    input [31:0] cdb_data
 );
 localparam POINTER_WIDTH = $clog2(DEPTH);
 reg [DATA_WIDTH-1:0] fifo[DEPTH];
@@ -22,6 +25,41 @@ reg [POINTER_WIDTH:0]wp;
 reg [POINTER_WIDTH:0]rp;
 reg full;
 reg overflow;
+
+//updating
+always @(posedge i_clk) begin
+    if (cdb_valid)begin
+        //rs1 update
+        //checks if rs1 is not valid and tag is equal to cdb_tag
+        if(fifo[0][51]==1'b0 && fifo[0][50:45]==cdb_tag)begin
+            fifo[0][83:52]=cdb_data;
+        end
+        if(fifo[1][51]==1'b0 && fifo[1][50:45]==cdb_tag)begin
+            fifo[1][83:52]=cdb_data;
+        end
+        if(fifo[2][51]==1'b0 && fifo[2][50:45]==cdb_tag)begin
+            fifo[2][83:52]=cdb_data;
+        end
+        if(fifo[3][51]==1'b0 && fifo[3][50:45]==cdb_tag)begin
+            fifo[3][83:52]=cdb_data;
+        end
+
+        //rs2 update
+        //checks if rs2 is not valid and tag is equal to cdb_tag
+        if(fifo[0][12]==1'b0 && fifo[0][11:6]==cdb_tag)begin
+            fifo[0][44:13]=cdb_data;
+        end
+        if(fifo[1][12]==1'b0 && fifo[1][11:6]==cdb_tag)begin
+            fifo[1][44:13]=cdb_data;
+        end
+        if(fifo[2][12]==1'b0 && fifo[2][11:6]==cdb_tag)begin
+            fifo[2][44:13]=cdb_data;
+        end
+        if(fifo[3][12]==1'b0 && fifo[3][11:6]==cdb_tag)begin
+            fifo[3][44:13]=cdb_data;
+        end
+    end
+end
 //writing
 always @(posedge i_clk, negedge i_rst_n) begin
     //Reset or flush
