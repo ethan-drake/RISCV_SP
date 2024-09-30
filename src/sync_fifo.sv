@@ -100,7 +100,7 @@ end
 
 
 
-    assign data_out = ((i_rst_n | !flush) & rd_en) ? fifo[rp[3:2]]:0;
+    assign data_out = (i_rst_n | !flush) ? fifo[rp[3:2]]:0;
     //assign full = ((wp[4]) && (rp[4:2]==0)) ? 1 : (wp[4:2]+1 == rp[4:2]) ? 1 : 0;
     assign empty = ({overflow,wp[3:2]} == rp[4:2]);
     assign o_rp = rp;

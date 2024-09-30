@@ -193,9 +193,9 @@ endtask
 
 
 task fill_cache;
-	procesador.cache.cache_memory[0] = 128'h007302b303c0039301e0031301400293;
-	procesador.cache.cache_memory[1] = 128'h000000000062f4330072e3b306400513; 
-	procesador.cache.cache_memory[2] = 128'h00000000000000000000000000000000; 
+	procesador.cache.cache_memory[0] = 128'hfe528ae303c0039301e0031301400293;
+	procesador.cache.cache_memory[1] = 128'h0062f4330072e3b306400513007302b3; 
+	procesador.cache.cache_memory[2] = 128'h0000000000000000000000000000006f; 
 	procesador.cache.cache_memory[3] = 128'h00000000000000000000000000000000;  
 	procesador.cache.cache_memory[4] = 128'h00000000000000000000000000000000;  
 	procesador.cache.cache_memory[5] = 128'h00000000000000000000000000000000;  

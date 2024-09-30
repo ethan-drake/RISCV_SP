@@ -28,8 +28,7 @@ module dispatcher(
     input tb_div_rd
 );
 
-assign dispatch_jmp_valid = 0;
-assign dispatch_jmp_br_addr = 0;
+
 
 //Dispatch integer structure instantiation
 int_fifo_data exec_int_fifo_data_in;
@@ -65,7 +64,7 @@ wire rd_enable;
 wire rs1valid_rst, rs2valid_rst;
 wire [31:0] rs1data_rf, rs2data_rf;
 wire [4:0] wen_regfile_rst;
-
+wire jmp_detected,branch_detected;
 //Decoder
 risc_v_decoder decoder(
     .instr(i_fetch_instruction),
@@ -164,7 +163,9 @@ br_jmp_addr_calc br_jmp_addr_calc(
     .pc(i_fetch_pc_plus_4),
     .opcode(opcode),
     .immediate(immediate),
-    .jmp_br_addr(jmp_br_addr)
+    .jmp_br_addr(jmp_br_addr),
+    .jmp_detected(jmp_detected),
+    .branch_detected(branch_detected)
 );
 
 //Dispatch packet generator
@@ -254,7 +255,9 @@ exec_fifo #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) div_exec_fifo(
     .cdb_data(cdb_data)
 );
 
+assign dispatch_jmp_valid = jmp_detected;//or branch cdb logic TBD
+assign dispatch_jmp_br_addr = jmp_br_addr; //cdb branch logic TBD
 
-assign dispatch_rd_en = ~(exec_int_fifo_ctrl.queue_full | exec_ld_st_fifo_ctrl.queue_full | exec_mult_fifo_ctrl.queue_full | exec_div_fifo_ctrl.queue_full);
+assign dispatch_rd_en = ~branch_detected & (~(exec_int_fifo_ctrl.queue_full | exec_ld_st_fifo_ctrl.queue_full | exec_mult_fifo_ctrl.queue_full | exec_div_fifo_ctrl.queue_full));
 
 endmodule
