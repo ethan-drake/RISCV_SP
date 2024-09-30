@@ -15,7 +15,7 @@ reg jmp_branch_valid;
 reg tb_int_rd, tb_ld_sw_rd, tb_mult_rd, tb_div_rd;
 reg [31:0] tb_int_result, tb_ld_sw_result, tb_mult_result, tb_div_result;
 reg [5:0] cdb_tag;
-reg cdb_valid;
+reg cdb_valid, cdb_branch, cdb_branch_taken;
 riscv_sp_top procesador(
 	//Inputs - Platform
 	.clk(clk),
@@ -26,8 +26,8 @@ riscv_sp_top procesador(
     .cdb_tag(cdb_tag),
     .cdb_valid(cdb_valid),
     .cdb_data(tb_int_result),
-    .cdb_branch(0),
-    .cdb_branch_taken(0),
+    .cdb_branch(cdb_branch),
+    .cdb_branch_taken(cdb_branch_taken),
 	.tb_int_rd(tb_int_rd),
     .tb_ld_sw_rd(tb_ld_sw_rd),
     .tb_mult_rd(tb_mult_rd),
@@ -50,6 +50,8 @@ always @(posedge clk) begin
 	tb_int_result = 0;
 	cdb_tag = 6'h0;
 	tb_int_rd=1'b0;
+	cdb_branch=1'b0;
+	cdb_branch_taken=1'b0;
 	@(posedge clk);
 	@(posedge clk);
 	@(posedge clk);
@@ -77,12 +79,15 @@ task execute_int_fifo;
 		if(int_exec_fifo_data.opcode!=0)begin
 			$display("int operation detected, reading");
 			$display("%h",int_exec_fifo_data);
-			//$display("%b",int_exec_fifo_data.opcode);
-			//$display("%h",int_exec_fifo_data.func3);
-			//$display("%h",int_exec_fifo_data.func7);
-			exec_alu(int_exec_fifo_data.opcode,int_exec_fifo_data.func3,int_exec_fifo_data.func7,int_exec_fifo_data.common_data.rs1_data,int_exec_fifo_data.common_data.rs2_data,tb_int_result);
-			cdb_tag = int_exec_fifo_data.common_data.rd_tag;
-			cdb_valid = 1'b1;
+			if(int_exec_fifo_data.opcode != BRANCH_TYPE)begin
+				exec_alu(int_exec_fifo_data.opcode,int_exec_fifo_data.func3,int_exec_fifo_data.func7,int_exec_fifo_data.common_data.rs1_data,int_exec_fifo_data.common_data.rs2_data,tb_int_result);
+				cdb_tag = int_exec_fifo_data.common_data.rd_tag;
+				cdb_valid = 1'b1;
+			end
+			else begin
+				calculate_branch(int_exec_fifo_data.func3,int_exec_fifo_data.common_data.rs1_data,int_exec_fifo_data.common_data.rs2_data,cdb_branch_taken);
+				cdb_branch = 1'b1;
+			end
 		end
 		
 	end
@@ -99,6 +104,28 @@ task execute_mult_fifo;
 endtask
 
 task execute_div_fifo;
+endtask
+
+task calculate_branch(input logic[6:0] func3,input logic[31:0] a,input logic[31:0] b,output logic take_branch);
+	case (func3)
+		3'h0:begin
+			$display("executing BEQ with:");
+			$display("rs1: %h",a);
+			$display("rs2: %h",b);
+			take_branch=(a==b);
+			$display("RESULT: %h",take_branch);
+		end
+		3'h1:begin
+			$display("executing BNE with:");
+			$display("rs1: %h",a);
+			$display("rs2: %h",b);
+			take_branch=(a!=b);
+			$display("RESULT: %h",take_branch);
+		end 
+		default:begin
+			take_branch=1'b0;
+		end 
+	endcase
 endtask
 
 task exec_alu(input logic[6:0] opcode,input logic[6:0] func3,input logic[6:0] func7,input logic[31:0] a,input logic[31:0] b,output logic[31:0] c);
