@@ -17,7 +17,9 @@ module sync_fifo #(parameter DEPTH=4, DATA_WIDTH=128)(
     output o_full,
     output [4:0] o_rp,
     output [4:0] o_wp,
-    output empty
+    output empty,
+    output empty_rd_plus_1,
+    input fetch_next_instr
 );
 
 reg [DATA_WIDTH-1:0] fifo[DEPTH];
@@ -67,7 +69,12 @@ always @(posedge i_clk, negedge i_rst_n) begin
     end
     //fifo write data
     else if(rd_en)begin
-        rp=rp+1;
+        if (fetch_next_instr)begin
+            rp=rp+2;
+        end
+        else begin
+            rp=rp+1;
+        end
         if(rp==5'h10)begin
             rp=5'b0;
         end
@@ -106,5 +113,7 @@ end
     assign o_rp = rp;
     assign o_wp = wp;
     assign o_full = full;
+
+    assign empty_rd_plus_1 = ({overflow,wp[3:2]} == (rp[4:2]+1));
 
 endmodule

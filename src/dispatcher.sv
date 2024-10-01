@@ -25,7 +25,8 @@ module dispatcher(
     input tb_int_rd,
     input tb_ld_sw_rd,
     input tb_mult_rd,
-    input tb_div_rd
+    input tb_div_rd,
+    output fetch_next_instr
 );
 
 
@@ -275,5 +276,7 @@ assign dispatch_jmp_valid = jmp_detected | cdb_branch_taken;//or branch cdb logi
 assign dispatch_jmp_br_addr = jmp_br_addr; //cdb branch logic TBD
 
 assign dispatch_rd_en = cdb_branch | (~branch_detected & (~(exec_int_fifo_ctrl.queue_full | exec_ld_st_fifo_ctrl.queue_full | exec_mult_fifo_ctrl.queue_full | exec_div_fifo_ctrl.queue_full)));
+
+assign fetch_next_instr = (cdb_branch==1) && (cdb_branch_taken==0) ? 1:0;
 
 endmodule

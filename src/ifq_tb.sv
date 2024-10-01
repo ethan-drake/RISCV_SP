@@ -61,7 +61,7 @@ reg branch_lock;
 
 always @(posedge clk) begin
 	if(procesador.dispatcher.exec_int_fifo_ctrl.dispatch_en)begin
-		if(!branch_lock)begin
+		if(!branch_lock | procesador.dispatcher.fetch_next_instr)begin
 			$display("Adding INSTR: %h",procesador.dispatcher.i_fetch_instruction);
 			fifo_opts.push_back(0);
 		end

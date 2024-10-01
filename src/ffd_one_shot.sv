@@ -38,13 +38,14 @@ begin
 			q <= d;
 			temp <=1'b1;
 		end
-		if(release_one_shot)begin
-			already_launched <=0;
-		end
+		
 	end
 	else begin
 		q <= 0;
 		temp <=1'b0;
+	end
+	if(release_one_shot)begin
+		already_launched <=0;
 	end
 end
 

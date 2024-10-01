@@ -24,6 +24,10 @@ wire [31:0] jmp_branch_address;
 wire jmp_branch_valid;
 wire empty;
 
+
+//BR NOT TAKEN SCENARIO
+wire fetch_next_instr;
+
 i_cache cache(
     .pc_in({pc_in[31:4],4'b0}),
 	.rd_en(rd_en),
@@ -44,6 +48,7 @@ ifq ifq_module(
     .rd_en(i_rd_en),
     .jmp_branch_address(jmp_branch_address),
     .jmp_branch_valid(jmp_branch_valid),
+    .fetch_next_instr(fetch_next_instr),
     .pc_in(pc_in),
     .o_rd_en(rd_en),
     .abort(abort),
@@ -70,7 +75,8 @@ dispatcher dispatcher(
     .tb_int_rd(tb_int_rd),
     .tb_ld_sw_rd(tb_ld_sw_rd),
     .tb_mult_rd(tb_mult_rd),
-    .tb_div_rd(tb_div_rd)
+    .tb_div_rd(tb_div_rd),
+    .fetch_next_instr(fetch_next_instr)
 );
 
 endmodule
