@@ -25,6 +25,7 @@ reg [POINTER_WIDTH:0]wp;
 reg [POINTER_WIDTH:0]rp;
 reg full;
 reg overflow;
+reg pre_full;
 
 //updating
 always @(posedge i_clk) begin

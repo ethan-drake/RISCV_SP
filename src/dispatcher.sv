@@ -177,6 +177,8 @@ ffd_one_shot branch_detected_one_shot(
     .i_rst_n(i_rst_n),
     .i_en(branch_detected),
     .d(1'b1),
+    .hold(~exec_int_fifo_ctrl.queue_full),
+    .release_one_shot(cdb_branch),
     .q(br_stall_one_shot)
 );
 

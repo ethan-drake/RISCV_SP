@@ -110,6 +110,8 @@ always @(*) begin
                 ld_st_dispatch_en = 1'b0;
             end
             LUI_TYPE: begin
+                cmn_fifo_data.rs2_data = immediate;
+                cmn_fifo_data.rs2_data_valid = 1'b1;
                 int_dispatch_en = 1'b1;
                 mult_dispatch_en = 1'b0;
                 div_dispatch_en = 1'b0;
@@ -141,15 +143,15 @@ assign o_int_fifo_data.opcode = opcode;
 assign o_int_fifo_data.func3 = func3;
 assign o_int_fifo_data.func7 = func7;
 
-assign o_ld_st_fifo_data.ld_st_opcode = opcode;
+assign o_ld_st_fifo_data.ld_st_opcode = (opcode==STORE_TYPE) ? 1'b1: 1'b0;
 assign o_ld_st_fifo_data.func3 = func3;
+assign o_ld_st_fifo_data.immediate = immediate;
 
 
 assign o_mult_fifo_data = cmn_fifo_data;
 assign o_div_fifo_data = cmn_fifo_data;
 assign o_int_fifo_data.common_data = cmn_fifo_data;
 assign o_ld_st_fifo_data.common_data = cmn_fifo_data;
-assign o_ld_st_fifo_data.immediate = jmp_br_addr;
 
 
 endmodule
