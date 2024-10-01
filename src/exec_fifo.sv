@@ -83,6 +83,9 @@ always @(posedge i_clk, negedge i_rst_n) begin
             overflow=0;
         end
     end
+    else if(!w_en & !full)begin
+        overflow=0;
+    end
     if(flush)begin
         wp = 0;
         overflow = 0;
@@ -136,7 +139,8 @@ end
 
     assign data_out = ((i_rst_n | !flush) & rd_en) ? fifo[rp[POINTER_WIDTH-1:0]]:0;
     //assign full = ((wp[4]) && (rp[4:2]==0)) ? 1 : (wp[4:2]+1 == rp[4:2]) ? 1 : 0;
-    assign empty = ({overflow,wp[POINTER_WIDTH-1:0]} == rp[POINTER_WIDTH:0]);
+//    assign empty = ({overflow,wp[POINTER_WIDTH-1:0]} == rp[POINTER_WIDTH:0]);
+    assign empty = (wp==rp);
     assign o_full = full;
 
 endmodule

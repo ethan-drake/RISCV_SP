@@ -24,6 +24,7 @@ module ifq(
 wire is_full;
 wire fifo_empty;
 wire[31:0] pc_out_w;
+wire[31:0] pc_out_w_d;
 wire[31:0] pc_in_w;
 wire[31:0] pc_in_w_d;
 wire[127:0] fifo_out;
@@ -51,8 +52,8 @@ ffd_param_pc #(.LENGTH(32)) ffd_pc_out(
 	//inputs
 	.i_clk(i_clk),
 	.i_rst_n(i_rst_n),
-	.i_en(rd_en),
-	.d(pc_out_w+4),
+	.i_en(rd_en|jmp_branch_valid),
+	.d(pc_out_w_d),
 	.q(pc_out_w)
 );
 
@@ -92,6 +93,7 @@ multiplexor_param #(.LENGTH(32)) bypass_instr_mux (
 );
 
 assign pc_out = pc_out_w;
+assign pc_out_w_d = jmp_branch_valid ? jmp_branch_address : (pc_out_w+4);
 assign pc_in_w_d = jmp_branch_valid ? jmp_branch_address : pc_in_w;
 assign pc_in = jmp_branch_valid ? jmp_branch_address : pc_in_w;
 assign o_rd_en = ~is_full;

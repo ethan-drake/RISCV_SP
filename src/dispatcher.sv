@@ -65,6 +65,8 @@ wire rs1valid_rst, rs2valid_rst;
 wire [31:0] rs1data_rf, rs2data_rf;
 wire [4:0] wen_regfile_rst;
 wire jmp_detected,branch_detected;
+wire br_stall_one_shot;
+
 //Decoder
 risc_v_decoder decoder(
     .instr(i_fetch_instruction),
@@ -168,6 +170,16 @@ br_jmp_addr_calc br_jmp_addr_calc(
     .branch_detected(branch_detected)
 );
 
+//one shot signal for branch stalling
+//this is to allow just one branch operation to enter int fifo
+ffd_one_shot branch_detected_one_shot(
+    .i_clk(i_clk),
+    .i_rst_n(i_rst_n),
+    .i_en(branch_detected),
+    .d(1'b1),
+    .q(br_stall_one_shot)
+);
+
 //Dispatch packet generator
 
 dispatch_gen dispatch_gen(
@@ -183,6 +195,8 @@ dispatch_gen dispatch_gen(
     .rs1_tag({rs1valid_rst,rs1_tag_rst}),
     .rs2_tag({rs2valid_rst,rs2_tag_rst}),
     .rd_tag(tag_out_tf),
+    .branch_stall(branch_detected),
+    .br_stall_one_shot(br_stall_one_shot),
     .o_mult_fifo_data(exec_mult_fifo_data_in),
     .o_div_fifo_data(exec_div_fifo_data_in),
     .int_dispatch_en(exec_int_fifo_ctrl.dispatch_en),
@@ -201,7 +215,7 @@ exec_fifo #(.DEPTH(4), .DATA_WIDTH($bits(int_fifo_data))) int_exec_fifo(
     .data_in(exec_int_fifo_data_in),
     .w_en(exec_int_fifo_ctrl.dispatch_en),
     .rd_en(tb_int_rd),
-    .flush(1'b0),
+    .flush(cdb_branch_taken),
     .data_out(exec_int_fifo_data_out),
     .o_full(exec_int_fifo_ctrl.queue_full),
     .empty(exec_int_fifo_ctrl.queue_empty),
@@ -216,7 +230,7 @@ exec_fifo #(.DEPTH(4), .DATA_WIDTH($bits(ld_st_fifo_data))) ld_st_exec_fifo(
     .data_in(exec_ld_st_fifo_data_in),
     .w_en(exec_ld_st_fifo_ctrl.dispatch_en),
     .rd_en(tb_ld_sw_rd),
-    .flush(1'b0),
+    .flush(cdb_branch_taken),
     .data_out(exec_ld_st_fifo_data_out),
     .o_full(exec_ld_st_fifo_ctrl.queue_full),
     .empty(exec_ld_st_fifo_ctrl.queue_empty),
@@ -231,7 +245,7 @@ exec_fifo #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) mult_exec_fifo(
     .data_in(exec_mult_fifo_data_in),
     .w_en(exec_mult_fifo_ctrl.dispatch_en),
     .rd_en(tb_mult_rd),
-    .flush(1'b0),
+    .flush(cdb_branch_taken),
     .data_out(exec_mult_fifo_data_out),
     .o_full(exec_mult_fifo_ctrl.queue_full),
     .empty(exec_mult_fifo_ctrl.queue_empty),
@@ -246,7 +260,7 @@ exec_fifo #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) div_exec_fifo(
     .data_in(exec_div_fifo_data_in),
     .w_en(exec_div_fifo_ctrl.dispatch_en),
     .rd_en(tb_div_rd),
-    .flush(1'b0),
+    .flush(cdb_branch_taken),
     .data_out(exec_div_fifo_data_out),
     .o_full(exec_div_fifo_ctrl.queue_full),
     .empty(exec_div_fifo_ctrl.queue_empty),
@@ -255,9 +269,9 @@ exec_fifo #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) div_exec_fifo(
     .cdb_data(cdb_data)
 );
 
-assign dispatch_jmp_valid = jmp_detected;//or branch cdb logic TBD
+assign dispatch_jmp_valid = jmp_detected | cdb_branch_taken;//or branch cdb logic TBD
 assign dispatch_jmp_br_addr = jmp_br_addr; //cdb branch logic TBD
 
-assign dispatch_rd_en = ~branch_detected & (~(exec_int_fifo_ctrl.queue_full | exec_ld_st_fifo_ctrl.queue_full | exec_mult_fifo_ctrl.queue_full | exec_div_fifo_ctrl.queue_full));
+assign dispatch_rd_en = cdb_branch | (~branch_detected & (~(exec_int_fifo_ctrl.queue_full | exec_ld_st_fifo_ctrl.queue_full | exec_mult_fifo_ctrl.queue_full | exec_div_fifo_ctrl.queue_full)));
 
 endmodule
