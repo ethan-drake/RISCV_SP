@@ -38,13 +38,13 @@ always @(*) begin
         cmn_fifo_data.rs1_data_valid = 1'b1;
     end
     else begin
-        cmn_fifo_data.rs1_data_valid = 1'b0;
+        cmn_fifo_data.rs1_data_valid = ~rs1_tag[6];//1'b0;
     end
     if (rs2 == 0)begin
         cmn_fifo_data.rs2_data_valid = 1'b1;
     end
     else begin
-        cmn_fifo_data.rs2_data_valid = 1'b0;
+        cmn_fifo_data.rs2_data_valid = ~rs2_tag[6];//1'b0;
     end
     if (!branch_stall || br_stall_one_shot)begin
         case (opcode)

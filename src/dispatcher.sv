@@ -86,7 +86,7 @@ rst rst_module(
     .waddr0_rst(decode_rd_addr),
     .wen0_rst(rd_enable),
     //write port 1
-    .wdata1_rst(32'h0),
+    .wdata1_rst(7'h0),
     .wen1_rst(),
 
     //read ports
@@ -212,13 +212,13 @@ dispatch_gen dispatch_gen(
 
 
 //Dispatch FIFOs
-exec_fifo #(.DEPTH(4), .DATA_WIDTH($bits(int_fifo_data))) int_exec_fifo(
+exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(int_fifo_data))) int_exec_fifo(
     .i_clk(i_clk),
     .i_rst_n(i_rst_n),
     .data_in(exec_int_fifo_data_in),
     .w_en(exec_int_fifo_ctrl.dispatch_en),
     .rd_en(tb_int_rd),
-    .flush(cdb_branch_taken),
+    .flush(1'b0),//cdb_branch_taken),
     .data_out(exec_int_fifo_data_out),
     .o_full(exec_int_fifo_ctrl.queue_full),
     .empty(exec_int_fifo_ctrl.queue_empty),
@@ -227,13 +227,13 @@ exec_fifo #(.DEPTH(4), .DATA_WIDTH($bits(int_fifo_data))) int_exec_fifo(
     .cdb_data(cdb_data)
 );
 
-exec_fifo #(.DEPTH(4), .DATA_WIDTH($bits(ld_st_fifo_data))) ld_st_exec_fifo(
+exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(ld_st_fifo_data))) ld_st_exec_fifo(
     .i_clk(i_clk),
     .i_rst_n(i_rst_n),
     .data_in(exec_ld_st_fifo_data_in),
     .w_en(exec_ld_st_fifo_ctrl.dispatch_en),
     .rd_en(tb_ld_sw_rd),
-    .flush(cdb_branch_taken),
+    .flush(1'b0),//cdb_branch_taken),
     .data_out(exec_ld_st_fifo_data_out),
     .o_full(exec_ld_st_fifo_ctrl.queue_full),
     .empty(exec_ld_st_fifo_ctrl.queue_empty),
@@ -242,13 +242,13 @@ exec_fifo #(.DEPTH(4), .DATA_WIDTH($bits(ld_st_fifo_data))) ld_st_exec_fifo(
     .cdb_data(cdb_data)
 );
 
-exec_fifo #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) mult_exec_fifo(
+exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) mult_exec_fifo(
     .i_clk(i_clk),
     .i_rst_n(i_rst_n),
     .data_in(exec_mult_fifo_data_in),
     .w_en(exec_mult_fifo_ctrl.dispatch_en),
     .rd_en(tb_mult_rd),
-    .flush(cdb_branch_taken),
+    .flush(1'b0),//cdb_branch_taken),
     .data_out(exec_mult_fifo_data_out),
     .o_full(exec_mult_fifo_ctrl.queue_full),
     .empty(exec_mult_fifo_ctrl.queue_empty),
@@ -257,13 +257,13 @@ exec_fifo #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) mult_exec_fifo(
     .cdb_data(cdb_data)
 );
 
-exec_fifo #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) div_exec_fifo(
+exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) div_exec_fifo(
     .i_clk(i_clk),
     .i_rst_n(i_rst_n),
     .data_in(exec_div_fifo_data_in),
     .w_en(exec_div_fifo_ctrl.dispatch_en),
     .rd_en(tb_div_rd),
-    .flush(cdb_branch_taken),
+    .flush(1'b0),//cdb_branch_taken),
     .data_out(exec_div_fifo_data_out),
     .o_full(exec_div_fifo_ctrl.queue_full),
     .empty(exec_div_fifo_ctrl.queue_empty),

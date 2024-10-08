@@ -10,6 +10,14 @@ typedef enum bit[6:0]{
    AUIPC_TYPE=7'b0010111
 } riscv_opcode;
 
+typedef struct packed {
+  bit [5:0] cdb_tag;
+  bit cdb_valid;
+  bit [31:0] cdb_result;
+  bit cdb_branch;
+  bit cdb_branch_taken;
+} cdb_bfm;
+
 typedef enum bit[1:0] { 
    INT_FIFO=2'h0,
    LD_ST_FIFO=2'h1,
@@ -18,13 +26,13 @@ typedef enum bit[1:0] {
 } fifo_data_type;
 
 typedef struct packed {
-   logic [31:0] rs1_data; //83:52
-   logic rs1_data_valid; //51
-   logic [5:0] rs1_tag; //50:45
-   logic [31:0] rs2_data; //44:13//:30
-   logic rs2_data_valid; //12//29
-   logic [5:0] rs2_tag; //11:6//28:23
-   logic [5:0] rd_tag;  //5:0
+   logic [31:0] rs1_data;  //83:52
+   logic rs1_data_valid;   //51
+   logic [5:0] rs1_tag;    //50:45
+   logic [31:0] rs2_data;  //44:13
+   logic rs2_data_valid;   //12
+   logic [5:0] rs2_tag;    //11:6
+   logic [5:0] rd_tag;     //5:0
  } common_fifo_data;
 
 typedef struct packed {
