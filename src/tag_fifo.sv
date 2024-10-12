@@ -146,7 +146,8 @@ always @(*) begin
         full = 0;
     end
     else begin
-        full = (overflow && (rp[POINTER_WIDTH:0]==0)) ? 1 : (wp[POINTER_WIDTH:0]+1 == rp[POINTER_WIDTH:0]) ? 1 : 0;
+        //full = (overflow && (rp[POINTER_WIDTH:0]==0)) ? 1 : (wp[POINTER_WIDTH:0]+1 == rp[POINTER_WIDTH:0]) ? 1 : 0;
+		full = (overflow && (rp[POINTER_WIDTH:0]==0)) ? 1 : (wp[POINTER_WIDTH:0] == rp[POINTER_WIDTH:0]) ? 1 : 0;
     end
 end
 
@@ -154,7 +155,8 @@ end
 
     assign tag_out_tf = ((i_rst_n | !flush) & rd_en_tf) ? fifo[rp[POINTER_WIDTH-1:0]]:0;
     //assign full = ((wp[4]) && (rp[4:2]==0)) ? 1 : (wp[4:2]+1 == rp[4:2]) ? 1 : 0;
-    assign empty_fifo_tf = ({overflow,wp[POINTER_WIDTH-1:0]} == rp[POINTER_WIDTH:0]);
-    assign fifo_full_tf = full;
+    //assign empty_fifo_tf = full ? 0 : ({overflow,wp[POINTER_WIDTH-1:0]} == rp[POINTER_WIDTH:0]);
+    assign empty_fifo_tf = full ? 0 : (wp == rp);
+	assign fifo_full_tf = full;
 
 endmodule

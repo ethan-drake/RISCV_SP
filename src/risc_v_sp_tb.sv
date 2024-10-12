@@ -535,12 +535,24 @@ task exec_alu(input logic[6:0] opcode,input logic[6:0] func3,input logic[6:0] fu
 	endcase
 endtask
 
+//-*************** Chache first verification ***********************************//
+//task fill_cache;
+//	procesador.cache.cache_memory[0] = 128'h01e003130058a223100108b700400293;
+//	procesador.cache.cache_memory[1] = 128'h00200513007302b3fe0286e300300393; 
+//	procesador.cache.cache_memory[2] = 128'h0063046302734633027285b30048a803; 
+//	procesador.cache.cache_memory[3] = 128'h000000000000006f0062f4330072e3b3;  
+//	procesador.cache.cache_memory[4] = 128'h00000000000000000000000000000000;  
+//	procesador.cache.cache_memory[5] = 128'h00000000000000000000000000000000;  
+//	procesador.cache.cache_memory[6] = 128'h00000000000000000000000000000000;  
+//	procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;  
+//endtask
 
+//-*************** Chache second verification ***********************************//
 task fill_cache;
-	procesador.cache.cache_memory[0] = 128'h01e003130058a223100108b700400293;
-	procesador.cache.cache_memory[1] = 128'h00200513007302b3fe0286e300300393; 
-	procesador.cache.cache_memory[2] = 128'h0063046302734633027285b30048a803; 
-	procesador.cache.cache_memory[3] = 128'h000000000000006f0062f4330072e3b3;  
+	procesador.cache.cache_memory[0] = 128'h01e60313027346330030039301e00313;
+	procesador.cache.cache_memory[1] = 128'h01b603130056039301a6031300460393; 
+	procesador.cache.cache_memory[2] = 128'h00000000000000000000006f00660393; 
+	procesador.cache.cache_memory[3] = 128'h00000000000000000000000000000000;  
 	procesador.cache.cache_memory[4] = 128'h00000000000000000000000000000000;  
 	procesador.cache.cache_memory[5] = 128'h00000000000000000000000000000000;  
 	procesador.cache.cache_memory[6] = 128'h00000000000000000000000000000000;  

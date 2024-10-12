@@ -32,38 +32,38 @@ always @(posedge i_clk) begin
     if (cdb_valid)begin
         //rs1 update
         //checks if rs1 is not valid and tag is equal to cdb_tag
-        if(rsv_station[0][51]==1'b0 && rsv_station[0][50:45]==cdb_tag)begin
+        if(rsv_station[0] !=0 && rsv_station[0][51]==1'b0 && rsv_station[0][50:45]==cdb_tag)begin
             rsv_station[0][83:52]=cdb_data;
             rsv_station[0][51]=1'b1; //set rs1 as valid because from cdb fwd
         end
-        if(rsv_station[1][51]==1'b0 && rsv_station[1][50:45]==cdb_tag)begin
+        if(rsv_station[1] !=0 && rsv_station[1][51]==1'b0 && rsv_station[1][50:45]==cdb_tag)begin
             rsv_station[1][83:52]=cdb_data;
             rsv_station[1][51]=1'b1; //set rs1 as valid because from cdb fwd
         end
-        if(rsv_station[2][51]==1'b0 && rsv_station[2][50:45]==cdb_tag)begin
+        if(rsv_station[2] !=0 && rsv_station[2][51]==1'b0 && rsv_station[2][50:45]==cdb_tag)begin
             rsv_station[2][83:52]=cdb_data;
             rsv_station[2][51]=1'b1; //set rs1 as valid because from cdb fwd
         end
-        if(rsv_station[3][51]==1'b0 && rsv_station[3][50:45]==cdb_tag)begin
+        if(rsv_station[3] !=0 && rsv_station[3][51]==1'b0 && rsv_station[3][50:45]==cdb_tag)begin
             rsv_station[3][83:52]=cdb_data;
             rsv_station[3][51]=1'b1; //set rs1 as valid because from cdb fwd
         end
 
         //rs2 update
         //checks if rs2 is not valid and tag is equal to cdb_tag
-        if(rsv_station[0][12]==1'b0 && rsv_station[0][11:6]==cdb_tag)begin
+        if(rsv_station[0] !=0 && rsv_station[0][12]==1'b0 && rsv_station[0][11:6]==cdb_tag)begin
             rsv_station[0][44:13]=cdb_data;
             rsv_station[0][12]=1'b1; //set rs2 as valid because from cdb fwd
         end
-        if(rsv_station[1][12]==1'b0 && rsv_station[1][11:6]==cdb_tag)begin
+        if(rsv_station[1] !=0 && rsv_station[1][12]==1'b0 && rsv_station[1][11:6]==cdb_tag)begin
             rsv_station[1][44:13]=cdb_data;
             rsv_station[1][12]=1'b1; //set rs2 as valid because from cdb fwd
         end
-        if(rsv_station[2][12]==1'b0 && rsv_station[2][11:6]==cdb_tag)begin
+        if(rsv_station[2] !=0 && rsv_station[2][12]==1'b0 && rsv_station[2][11:6]==cdb_tag)begin
             rsv_station[2][44:13]=cdb_data;
             rsv_station[2][12]=1'b1; //set rs2 as valid because from cdb fwd
         end
-        if(rsv_station[3][12]==1'b0 && rsv_station[3][11:6]==cdb_tag)begin
+        if(rsv_station[3] !=0 && rsv_station[3][12]==1'b0 && rsv_station[3][11:6]==cdb_tag)begin
             rsv_station[3][44:13]=cdb_data;
             rsv_station[3][12]=1'b1; //set rs2 as valid because from cdb fwd
         end
@@ -146,21 +146,41 @@ always @(*) begin
     end
     else if(rd_en)begin
         //check if location is occupied and rs2 is valid and rs1 is valid
-        if(occupied[0] && rsv_station[0][12]==1'b1 && rsv_station[0][51]==1'b1)begin
-            data_out = rsv_station[0];
-            occupied_mask = 4'b1110;
-        end
-        else if(occupied[1] && rsv_station[1][12]==1'b1 && rsv_station[1][51]==1'b1)begin
-            data_out = rsv_station[1];
-            occupied_mask = 4'b1101;
+        //if(occupied[0] && rsv_station[0][12]==1'b1 && rsv_station[0][51]==1'b1)begin
+        //    data_out = rsv_station[0];
+        //    occupied_mask = 4'b1110;
+        //end
+        //else if(occupied[1] && rsv_station[1][12]==1'b1 && rsv_station[1][51]==1'b1)begin
+        //    data_out = rsv_station[1];
+        //    occupied_mask = 4'b1101;
+        //end
+        //else if(occupied[2] && rsv_station[2][12]==1'b1 && rsv_station[2][51]==1'b1)begin
+        //    data_out = rsv_station[2];
+        //    occupied_mask = 4'b1011;
+        //end
+        //else if(occupied[3] && rsv_station[3][12]==1'b1 && rsv_station[3][51]==1'b1)begin
+        //    data_out = rsv_station[3];
+        //    occupied_mask = 4'b0111;
+        //end
+        //else begin
+        //    data_out=0;
+        //    occupied_mask = 4'b1111;
+        //end
+        if(occupied[3] && rsv_station[3][12]==1'b1 && rsv_station[3][51]==1'b1)begin
+            data_out = rsv_station[3];
+            occupied_mask = 4'b0111;
         end
         else if(occupied[2] && rsv_station[2][12]==1'b1 && rsv_station[2][51]==1'b1)begin
             data_out = rsv_station[2];
             occupied_mask = 4'b1011;
         end
-        else if(occupied[3] && rsv_station[3][12]==1'b1 && rsv_station[3][51]==1'b1)begin
-            data_out = rsv_station[3];
-            occupied_mask = 4'b0111;
+        else if(occupied[1] && rsv_station[1][12]==1'b1 && rsv_station[1][51]==1'b1)begin
+            data_out = rsv_station[1];
+            occupied_mask = 4'b1101;
+        end
+        else if(occupied[0] && rsv_station[0][12]==1'b1 && rsv_station[0][51]==1'b1)begin
+            data_out = rsv_station[0];
+            occupied_mask = 4'b1110;
         end
         else begin
             data_out=0;
