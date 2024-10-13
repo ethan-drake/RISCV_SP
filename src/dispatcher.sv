@@ -123,8 +123,8 @@ tag_fifo #(.DEPTH(64), .DATA_WIDTH(6)) tag_fifo_module(
     .empty_fifo_tf(empty_fifo_tf)
 );
 
-assign sel_rs1_cdb_mux = ({rs1valid_rst,rs1_tag_rst}== {1'b1,cdb_tag});
-assign sel_rs2_cdb_mux = ({rs2valid_rst,rs2_tag_rst}== {1'b1,cdb_tag});
+assign sel_rs1_cdb_mux = ({rs1valid_rst,rs1_tag_rst}== {1'b1,cdb_tag}) && cdb_valid;
+assign sel_rs2_cdb_mux = ({rs2valid_rst,rs2_tag_rst}== {1'b1,cdb_tag}) && cdb_valid;
 
 
 multiplexor_param #(.LENGTH(32)) rs1_cdb_mux(
@@ -191,6 +191,8 @@ dispatch_gen dispatch_gen(
     .rs2(decode_rs2_addr),
     .rs1_data(dispatch_rs1_data),
     .rs2_data(dispatch_rs2_data),
+    .cdb_rs1_sel(sel_rs1_cdb_mux),
+    .cdb_rs2_sel(sel_rs2_cdb_mux),
     .opcode(opcode),
     .func3(decode_func3),
     .func7(decode_func7),

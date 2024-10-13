@@ -146,46 +146,46 @@ always @(*) begin
     end
     else if(rd_en)begin
         //check if location is occupied and rs2 is valid and rs1 is valid
-        //if(occupied[0] && rsv_station[0][12]==1'b1 && rsv_station[0][51]==1'b1)begin
-        //    data_out = rsv_station[0];
-        //    occupied_mask = 4'b1110;
-        //end
-        //else if(occupied[1] && rsv_station[1][12]==1'b1 && rsv_station[1][51]==1'b1)begin
-        //    data_out = rsv_station[1];
-        //    occupied_mask = 4'b1101;
-        //end
-        //else if(occupied[2] && rsv_station[2][12]==1'b1 && rsv_station[2][51]==1'b1)begin
-        //    data_out = rsv_station[2];
-        //    occupied_mask = 4'b1011;
-        //end
-        //else if(occupied[3] && rsv_station[3][12]==1'b1 && rsv_station[3][51]==1'b1)begin
-        //    data_out = rsv_station[3];
-        //    occupied_mask = 4'b0111;
-        //end
-        //else begin
-        //    data_out=0;
-        //    occupied_mask = 4'b1111;
-        //end
-        if(occupied[3] && rsv_station[3][12]==1'b1 && rsv_station[3][51]==1'b1)begin
-            data_out = rsv_station[3];
-            occupied_mask = 4'b0111;
-        end
-        else if(occupied[2] && rsv_station[2][12]==1'b1 && rsv_station[2][51]==1'b1)begin
-            data_out = rsv_station[2];
-            occupied_mask = 4'b1011;
+        if(occupied[0] && rsv_station[0][12]==1'b1 && rsv_station[0][51]==1'b1)begin
+            data_out = rsv_station[0];
+            occupied_mask = 4'b1110;
         end
         else if(occupied[1] && rsv_station[1][12]==1'b1 && rsv_station[1][51]==1'b1)begin
             data_out = rsv_station[1];
             occupied_mask = 4'b1101;
         end
-        else if(occupied[0] && rsv_station[0][12]==1'b1 && rsv_station[0][51]==1'b1)begin
-            data_out = rsv_station[0];
-            occupied_mask = 4'b1110;
+        else if(occupied[2] && rsv_station[2][12]==1'b1 && rsv_station[2][51]==1'b1)begin
+            data_out = rsv_station[2];
+            occupied_mask = 4'b1011;
+        end
+        else if(occupied[3] && rsv_station[3][12]==1'b1 && rsv_station[3][51]==1'b1)begin
+            data_out = rsv_station[3];
+            occupied_mask = 4'b0111;
         end
         else begin
             data_out=0;
             occupied_mask = 4'b1111;
         end
+        //if(occupied[3] && rsv_station[3][12]==1'b1 && rsv_station[3][51]==1'b1)begin
+        //    data_out = rsv_station[3];
+        //    occupied_mask = 4'b0111;
+        //end
+        //else if(occupied[2] && rsv_station[2][12]==1'b1 && rsv_station[2][51]==1'b1)begin
+        //    data_out = rsv_station[2];
+        //    occupied_mask = 4'b1011;
+        //end
+        //else if(occupied[1] && rsv_station[1][12]==1'b1 && rsv_station[1][51]==1'b1)begin
+        //    data_out = rsv_station[1];
+        //    occupied_mask = 4'b1101;
+        //end
+        //else if(occupied[0] && rsv_station[0][12]==1'b1 && rsv_station[0][51]==1'b1)begin
+        //    data_out = rsv_station[0];
+        //    occupied_mask = 4'b1110;
+        //end
+        //else begin
+        //    data_out=0;
+        //    occupied_mask = 4'b1111;
+        //end
     end
     else begin
         data_out=0;

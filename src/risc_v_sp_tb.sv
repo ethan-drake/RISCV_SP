@@ -21,13 +21,62 @@ reg cdb_valid, cdb_branch, cdb_branch_taken;
 
 bit [31:0] memory [0:31];
 
+`define TEST "TEST_1"
+
+`ifdef PRUEBA
+	$display("AQUI ESTOOOOOOOOOOOY");
+`endif
+
+initial begin
+	string test_name;
+	if($value$plusargs("TEST_NAME=%s",test_name))
+	begin
+		$display("TEST_NAME received");
+	end
+  	case (test_name)
+		"TEST_1":begin
+			$display("EXECUTING: FE first verification");
+			init_test_1_cache();
+		end 
+		"TEST_2":begin
+			$display("EXECUTING: FE second verification (full int rsv station)");
+			init_test_2_cache();
+		end 
+		"TEST_3":begin
+			$display("EXECUTING: FE third verification (full mult rsv station)");
+			init_test_3_cache();
+		end 
+		"TEST_4":begin
+			$display("EXECUTING: FE fourth verification (full div rsv station)");
+			init_test_4_cache();
+		end 
+		"TEST_5":begin
+			$display("EXECUTING: FE fifth verification (full mem rsv station)");
+			init_test_5_cache();
+		end 
+		"TEST_6":begin
+			$display("EXECUTING: FE sixth verification (sw and lw with adds after)");
+			init_test_6_cache();
+		end 
+		"TEST_7":begin
+			$display("EXECUTING: FE seventh verification (Two stores led by two loads with toggling base address between them)");
+			init_test_7_cache();
+		end 
+		default:begin
+			$warning("NO MATCH TEST FOUND, executing first test by default");
+			init_test_1_cache();
+		end 
+	endcase 
+
+	init_values();
+	reset_device();
+end
+
+
 riscv_sp_top procesador(
 	//Inputs - Platform
 	.clk(clk),
 	.rst_n(rst_n),
-    //.i_rd_en(rd_en),
-    //input [31:0] jmp_branch_address,
-    //input jmp_branch_valid
     .cdb_tag(cdb_tag),
     .cdb_valid(cdb_valid),
     .cdb_data(bfm_result),
@@ -39,15 +88,6 @@ riscv_sp_top procesador(
     .tb_div_rd(tb_div_rd)
 );
 
-initial begin
-	fill_cache();
-	init_values();
-	//clear_rd_enable();
-	reset_device();
-	//set_rd_enable();
-	//create_branch_scenario();
-	//create_branch_scenario();
-end
 int_fifo_data int_exec_fifo_data;
 common_fifo_data mult_fifo_data;
 common_fifo_data div_fifo_data;
@@ -66,73 +106,11 @@ int fifo_opts[$];
 int current_opt;
 
 reg branch_lock;
-/*
-always @(posedge clk) begin
-	if(procesador.dispatcher.exec_int_fifo_ctrl.dispatch_en)begin
-		if(!branch_lock | procesador.dispatcher.fetch_next_instr)begin
-			$display("Adding INSTR: %h",procesador.dispatcher.i_fetch_instruction);
-			fifo_opts.push_back(0);
-		end
-		if(procesador.dispatcher.branch_detected)begin
-			branch_lock=1;
-		end
-	end
-	else if(procesador.dispatcher.exec_mult_fifo_ctrl.dispatch_en)begin
-		$display("Adding INSTR: %h",procesador.dispatcher.i_fetch_instruction);
-		fifo_opts.push_back(1);
-	end
-	else if(procesador.dispatcher.exec_div_fifo_ctrl.dispatch_en)begin
-		$display("Adding INSTR: %h",procesador.dispatcher.i_fetch_instruction);
-		fifo_opts.push_back(2);
-	end
-	else if(procesador.dispatcher.exec_ld_st_fifo_ctrl.dispatch_en)begin
-		$display("Adding INSTR: %h",procesador.dispatcher.i_fetch_instruction);
-		fifo_opts.push_back(3);
-		
-	end
-	if(cdb_branch)begin
-		branch_lock=0;
-	end
-	$display("FIFO: %p", fifo_opts);
-end
 
 always @(posedge clk) begin
-	cdb_valid = 1'b0;
-	tb_int_result = 0;
-	cdb_tag = 6'h0;
-	tb_int_rd=1'b0;
-	cdb_branch=1'b0;
-	cdb_branch_taken=1'b0;
-	if(fifo_opts.size()>0)begin
-	@(posedge clk);
-	@(posedge clk);
-	current_opt = fifo_opts.pop_front();
-	case (current_opt)
-		0: begin
-			$display("ATTENDING INT FIFO");
-			execute_int_fifo();
-		end
-		1: begin
-			$display("ATTENDING MULT FIFO");
-			execute_mult_fifo();
-		end
-		2: begin
-			$display("ATTENDING DIV FIFO");
-			execute_div_fifo();
-		end
-		3: begin
-			$display("ATTENDING MEM FIFO");
-			execute_ld_sw_fifo();
-		end
-		default: begin
-		end
-	endcase
-	end
-end
-*/
-
-always @(posedge clk) begin
+	`ifdef DEBUG
 	$display("ATTENDING INT FIFO");
+	`endif
 	execute_int_fifo();
 end
 
@@ -140,7 +118,9 @@ always @(posedge clk)begin
 	//two cycles of latency
 	@(posedge clk);
 	@(posedge clk);
+	`ifdef DEBUG
 	$display("ATTENDING MULT FIFO");
+	`endif
 	execute_mult_fifo();
 end
 
@@ -149,7 +129,9 @@ always @(posedge clk)begin
 	@(posedge clk);
 	@(posedge clk);
 	@(posedge clk);
+	`ifdef DEBUG
 	$display("ATTENDING DIV FIFO");
+	`endif
 	execute_div_fifo();
 end
 
@@ -159,7 +141,9 @@ always @(posedge clk)begin
 	@(posedge clk);
 	@(posedge clk);
 	@(posedge clk);
+	`ifdef DEBUG
 	$display("ATTENDING MEM FIFO");
+	`endif
 	execute_ld_sw_fifo();
 end
 
@@ -171,7 +155,9 @@ always @(posedge clk) begin
 	cdb_branch_taken=0;
 	cdb_valid=0;
 	if(cdb_publish.size()>0)begin
+		`ifdef DEBUG
 		$display("CDB BRANCH PUBLISH RESULTS: %p", cdb_publish);
+		`endif
 		current_publish = cdb_publish.pop_front();
 		cdb_tag = current_publish.cdb_tag;
 		bfm_result = current_publish.cdb_result;
@@ -233,13 +219,7 @@ task execute_int_fifo;
 		$display("rs2 tag xx: %h",procesador.dispatcher.int_exec_fifo.data_out[11:6]);
 		$display("rd tag xx: %h",procesador.dispatcher.int_exec_fifo.data_out[5:0]);
 		`endif
-		if(int_exec_fifo_data == 0)begin
-			$display("ZERO VALUE ENCOUNTERED!!!!!!!!!!!!!");
-		end
-		else begin
-		//if(int_exec_fifo_data.opcode!=0)begin
-			
-			//$display("%h",int_exec_fifo_data);
+		if(int_exec_fifo_data != 0)begin
 			if(int_exec_fifo_data.opcode != BRANCH_TYPE)begin
 				$display("int operation detected, reading");				
 				exec_alu(int_exec_fifo_data.opcode,int_exec_fifo_data.func3,int_exec_fifo_data.func7,int_exec_fifo_data.common_data.rs1_data,int_exec_fifo_data.common_data.rs2_data,int_submit.cdb_result);
@@ -248,13 +228,9 @@ task execute_int_fifo;
 				int_submit.cdb_branch = 0;
 				int_submit.cdb_branch_taken = 0;
 				cdb_publish.push_back(int_submit);
-//				set_cdb_valid();
 			end
 			else begin
 				$display("branch operation detected, reading");
-			//	if(cdb_valid)begin
-			//		$error("CDB VALID IS ALREADY SET !!!");
-			//	end
 				calculate_branch(int_exec_fifo_data.func3,int_exec_fifo_data.common_data.rs1_data,int_exec_fifo_data.common_data.rs2_data,int_submit.cdb_branch_taken);
 				int_submit.cdb_branch = 1'b1;
 				int_submit.cdb_valid = 1'b0;
@@ -267,7 +243,6 @@ task execute_int_fifo;
 	end
 	else begin
 		tb_int_rd = 1'b0;
-		//cdb_valid = 1'b0;
 	end
 endtask
 
@@ -292,21 +267,16 @@ task execute_ld_sw_fifo;
 		end
 		else begin
 			$display("LOAD operation detected");
-			//if(cdb_valid)begin
-			//		$error("CDB VALID IS ALREADY SET !!!");
-			//end
 			load_mem(mem_fifo_data.common_data.rs1_data,mem_fifo_data.immediate, mem_submit.cdb_result);
 			mem_submit.cdb_tag = mem_fifo_data.common_data.rd_tag;
 			mem_submit.cdb_valid = 1;
 			mem_submit.cdb_branch = 0;
 			mem_submit.cdb_branch_taken = 0;
 			cdb_publish.push_back(mem_submit);
-			//set_cdb_valid();
 		end
 	end
 	else begin
 		tb_ld_sw_rd = 1'b0;
-		//cdb_valid = 1'b0;
 	end
 endtask
 
@@ -535,23 +505,84 @@ task exec_alu(input logic[6:0] opcode,input logic[6:0] func3,input logic[6:0] fu
 	endcase
 endtask
 
-//-*************** Chache first verification ***********************************//
-//task fill_cache;
-//	procesador.cache.cache_memory[0] = 128'h01e003130058a223100108b700400293;
-//	procesador.cache.cache_memory[1] = 128'h00200513007302b3fe0286e300300393; 
-//	procesador.cache.cache_memory[2] = 128'h0063046302734633027285b30048a803; 
-//	procesador.cache.cache_memory[3] = 128'h000000000000006f0062f4330072e3b3;  
-//	procesador.cache.cache_memory[4] = 128'h00000000000000000000000000000000;  
-//	procesador.cache.cache_memory[5] = 128'h00000000000000000000000000000000;  
-//	procesador.cache.cache_memory[6] = 128'h00000000000000000000000000000000;  
-//	procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;  
-//endtask
+//-*************** FE first verification ***********************************//
+task init_test_1_cache;
+	procesador.cache.cache_memory[0] = 128'h01e003130058a223100108b700400293;
+	procesador.cache.cache_memory[1] = 128'h00200513007302b3fe0286e300300393; 
+	procesador.cache.cache_memory[2] = 128'h0063046302734633027285b30048a803; 
+	procesador.cache.cache_memory[3] = 128'h000000000000006f0062f4330072e3b3;  
+	procesador.cache.cache_memory[4] = 128'h00000000000000000000000000000000;  
+	procesador.cache.cache_memory[5] = 128'h00000000000000000000000000000000;  
+	procesador.cache.cache_memory[6] = 128'h00000000000000000000000000000000;  
+	procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;  
+endtask
 
-//-*************** Chache second verification ***********************************//
-task fill_cache;
+//-*************** FE second verification (full int rsv station) ***********************************//
+task init_test_2_cache;
 	procesador.cache.cache_memory[0] = 128'h01e60313027346330030039301e00313;
 	procesador.cache.cache_memory[1] = 128'h01b603130056039301a6031300460393; 
 	procesador.cache.cache_memory[2] = 128'h00000000000000000000006f00660393; 
+	procesador.cache.cache_memory[3] = 128'h00000000000000000000000000000000;  
+	procesador.cache.cache_memory[4] = 128'h00000000000000000000000000000000;  
+	procesador.cache.cache_memory[5] = 128'h00000000000000000000000000000000;  
+	procesador.cache.cache_memory[6] = 128'h00000000000000000000000000000000;  
+	procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;  
+endtask
+
+//-*************** FE third verification (full mult rsv station) ***********************************//
+task init_test_3_cache;
+	procesador.cache.cache_memory[0] = 128'h027305b3027305330030039301e00313;
+	procesador.cache.cache_memory[1] = 128'h0000006f02730733027306b302730633; 
+	procesador.cache.cache_memory[2] = 128'h00000000000000000000000000000000; 
+	procesador.cache.cache_memory[3] = 128'h00000000000000000000000000000000;  
+	procesador.cache.cache_memory[4] = 128'h00000000000000000000000000000000;  
+	procesador.cache.cache_memory[5] = 128'h00000000000000000000000000000000;  
+	procesador.cache.cache_memory[6] = 128'h00000000000000000000000000000000;  
+	procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;  
+endtask
+
+//-*************** FE fourth verification (full div rsv station) ***********************************//
+task init_test_4_cache;
+	procesador.cache.cache_memory[0] = 128'h027345b3027345330040039302c00313;
+	procesador.cache.cache_memory[1] = 128'h0000006f02734733027346b302734633; 
+	procesador.cache.cache_memory[2] = 128'h00000000000000000000000000000000; 
+	procesador.cache.cache_memory[3] = 128'h00000000000000000000000000000000;  
+	procesador.cache.cache_memory[4] = 128'h00000000000000000000000000000000;  
+	procesador.cache.cache_memory[5] = 128'h00000000000000000000000000000000;  
+	procesador.cache.cache_memory[6] = 128'h00000000000000000000000000000000;  
+	procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;  
+endtask
+
+//-*************** FE fifth verification (full mem rsv station) ***********************************//
+task init_test_5_cache;
+	procesador.cache.cache_memory[0] = 128'h0063a2230063a023100103b702c00313;
+	procesador.cache.cache_memory[1] = 128'h0000006f0063a8230063a6230063a423; 
+	procesador.cache.cache_memory[2] = 128'h00000000000000000000000000000000; 
+	procesador.cache.cache_memory[3] = 128'h00000000000000000000000000000000;  
+	procesador.cache.cache_memory[4] = 128'h00000000000000000000000000000000;  
+	procesador.cache.cache_memory[5] = 128'h00000000000000000000000000000000;  
+	procesador.cache.cache_memory[6] = 128'h00000000000000000000000000000000;  
+	procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;  
+endtask
+
+//-*************** FE sixth verification (sw and lw with adds after) ***********************************//
+task init_test_6_cache;
+	procesador.cache.cache_memory[0] = 128'h0003a5030063a023100103b702c00313;
+	procesador.cache.cache_memory[1] = 128'h00a3073300a306b300a3063300a305b3; 
+	procesador.cache.cache_memory[2] = 128'h00000000000000000000006f00a307b3; 
+	procesador.cache.cache_memory[3] = 128'h00000000000000000000000000000000;  
+	procesador.cache.cache_memory[4] = 128'h00000000000000000000000000000000;  
+	procesador.cache.cache_memory[5] = 128'h00000000000000000000000000000000;  
+	procesador.cache.cache_memory[6] = 128'h00000000000000000000000000000000;  
+	procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;  
+endtask
+
+
+//-*************** FE seventh verification (Two stores led by two loads with toggling base address between them) ***********************************//
+task init_test_7_cache;
+	procesador.cache.cache_memory[0] = 128'h0062a02300438293100103b702c00313;
+	procesador.cache.cache_memory[1] = 128'h0000006f0003a5830002a5030063a023; 
+	procesador.cache.cache_memory[2] = 128'h00000000000000000000000000000000; 
 	procesador.cache.cache_memory[3] = 128'h00000000000000000000000000000000;  
 	procesador.cache.cache_memory[4] = 128'h00000000000000000000000000000000;  
 	procesador.cache.cache_memory[5] = 128'h00000000000000000000000000000000;  

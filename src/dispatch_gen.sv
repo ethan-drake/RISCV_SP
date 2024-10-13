@@ -5,6 +5,8 @@ module dispatch_gen(
     input [4:0] rs2,
     input [31:0] rs1_data,
     input [31:0] rs2_data,
+    input cdb_rs1_sel,
+    input cdb_rs2_sel,
     input [6:0] opcode,
     input [2:0] func3,
     input [6:0] func7,
@@ -34,18 +36,28 @@ always @(*) begin
     cmn_fifo_data.rs2_tag = rs2_tag[5:0];
     cmn_fifo_data.rd_tag = rd_tag;
     
+    //RS1 valid evaluation
     if (rs1 == 0)begin
+        cmn_fifo_data.rs1_data_valid = 1'b1;
+    end
+    else if(cdb_rs1_sel)begin
         cmn_fifo_data.rs1_data_valid = 1'b1;
     end
     else begin
         cmn_fifo_data.rs1_data_valid = ~rs1_tag[6];//1'b0;
     end
+    
+    //RS2 valid evaluation
     if (rs2 == 0)begin
+        cmn_fifo_data.rs2_data_valid = 1'b1;
+    end
+    else if (cdb_rs2_sel)begin
         cmn_fifo_data.rs2_data_valid = 1'b1;
     end
     else begin
         cmn_fifo_data.rs2_data_valid = ~rs2_tag[6];//1'b0;
     end
+
     if (!branch_stall || br_stall_one_shot)begin
         case (opcode)
             R_TYPE: begin
@@ -98,7 +110,7 @@ always @(*) begin
                 ld_st_dispatch_en = 1'b0;
             end
             J_TYPE: begin
-                int_dispatch_en = 1'b1;
+                int_dispatch_en = 1'b0;
                 mult_dispatch_en = 1'b0;
                 div_dispatch_en = 1'b0;
                 ld_st_dispatch_en = 1'b0;
