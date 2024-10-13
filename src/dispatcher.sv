@@ -67,6 +67,7 @@ wire [31:0] rs1data_rf, rs2data_rf;
 wire [4:0] wen_regfile_rst;
 wire jmp_detected,branch_detected;
 wire br_stall_one_shot;
+wire any_rsv_station_full;
 
 //Decoder
 risc_v_decoder decoder(
@@ -84,9 +85,9 @@ rst rst_module(
     //write port 0
     .wdata0_rst({1'b1,tag_out_tf}),
     .waddr0_rst(decode_rd_addr),
-    .wen0_rst(rd_enable),
+    .wen0_rst(rd_enable & (~any_rsv_station_full)),
     //write port 1
-    .wdata1_rst(32'h0),
+    .wdata1_rst(7'h0),
     .wen1_rst(),
 
     //read ports
@@ -115,15 +116,15 @@ tag_fifo #(.DEPTH(64), .DATA_WIDTH(6)) tag_fifo_module(
     .i_rst_n(i_rst_n),
     .cdb_tag_data_tf(cdb_tag),
     .cdb_tag_valid_tf(cdb_valid),
-    .rd_en_tf(rd_enable),
+    .rd_en_tf(rd_enable & (~any_rsv_station_full)),
     .flush(1'b0),
     .tag_out_tf(tag_out_tf),
     .fifo_full_tf(fifo_full_tf),
     .empty_fifo_tf(empty_fifo_tf)
 );
 
-assign sel_rs1_cdb_mux = ({rs1valid_rst,rs1_tag_rst}== {1'b1,cdb_tag});
-assign sel_rs2_cdb_mux = ({rs2valid_rst,rs2_tag_rst}== {1'b1,cdb_tag});
+assign sel_rs1_cdb_mux = ({rs1valid_rst,rs1_tag_rst}== {1'b1,cdb_tag}) && cdb_valid;
+assign sel_rs2_cdb_mux = ({rs2valid_rst,rs2_tag_rst}== {1'b1,cdb_tag}) && cdb_valid;
 
 
 multiplexor_param #(.LENGTH(32)) rs1_cdb_mux(
@@ -190,6 +191,8 @@ dispatch_gen dispatch_gen(
     .rs2(decode_rs2_addr),
     .rs1_data(dispatch_rs1_data),
     .rs2_data(dispatch_rs2_data),
+    .cdb_rs1_sel(sel_rs1_cdb_mux),
+    .cdb_rs2_sel(sel_rs2_cdb_mux),
     .opcode(opcode),
     .func3(decode_func3),
     .func7(decode_func7),
@@ -212,13 +215,13 @@ dispatch_gen dispatch_gen(
 
 
 //Dispatch FIFOs
-exec_fifo #(.DEPTH(4), .DATA_WIDTH($bits(int_fifo_data))) int_exec_fifo(
+exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(int_fifo_data))) int_exec_fifo(
     .i_clk(i_clk),
     .i_rst_n(i_rst_n),
     .data_in(exec_int_fifo_data_in),
     .w_en(exec_int_fifo_ctrl.dispatch_en),
     .rd_en(tb_int_rd),
-    .flush(cdb_branch_taken),
+    .flush(1'b0),//cdb_branch_taken),
     .data_out(exec_int_fifo_data_out),
     .o_full(exec_int_fifo_ctrl.queue_full),
     .empty(exec_int_fifo_ctrl.queue_empty),
@@ -227,13 +230,13 @@ exec_fifo #(.DEPTH(4), .DATA_WIDTH($bits(int_fifo_data))) int_exec_fifo(
     .cdb_data(cdb_data)
 );
 
-exec_fifo #(.DEPTH(4), .DATA_WIDTH($bits(ld_st_fifo_data))) ld_st_exec_fifo(
+exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(ld_st_fifo_data))) ld_st_exec_fifo(
     .i_clk(i_clk),
     .i_rst_n(i_rst_n),
     .data_in(exec_ld_st_fifo_data_in),
     .w_en(exec_ld_st_fifo_ctrl.dispatch_en),
     .rd_en(tb_ld_sw_rd),
-    .flush(cdb_branch_taken),
+    .flush(1'b0),//cdb_branch_taken),
     .data_out(exec_ld_st_fifo_data_out),
     .o_full(exec_ld_st_fifo_ctrl.queue_full),
     .empty(exec_ld_st_fifo_ctrl.queue_empty),
@@ -242,13 +245,13 @@ exec_fifo #(.DEPTH(4), .DATA_WIDTH($bits(ld_st_fifo_data))) ld_st_exec_fifo(
     .cdb_data(cdb_data)
 );
 
-exec_fifo #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) mult_exec_fifo(
+exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) mult_exec_fifo(
     .i_clk(i_clk),
     .i_rst_n(i_rst_n),
     .data_in(exec_mult_fifo_data_in),
     .w_en(exec_mult_fifo_ctrl.dispatch_en),
     .rd_en(tb_mult_rd),
-    .flush(cdb_branch_taken),
+    .flush(1'b0),//cdb_branch_taken),
     .data_out(exec_mult_fifo_data_out),
     .o_full(exec_mult_fifo_ctrl.queue_full),
     .empty(exec_mult_fifo_ctrl.queue_empty),
@@ -257,13 +260,13 @@ exec_fifo #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) mult_exec_fifo(
     .cdb_data(cdb_data)
 );
 
-exec_fifo #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) div_exec_fifo(
+exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) div_exec_fifo(
     .i_clk(i_clk),
     .i_rst_n(i_rst_n),
     .data_in(exec_div_fifo_data_in),
     .w_en(exec_div_fifo_ctrl.dispatch_en),
     .rd_en(tb_div_rd),
-    .flush(cdb_branch_taken),
+    .flush(1'b0),//cdb_branch_taken),
     .data_out(exec_div_fifo_data_out),
     .o_full(exec_div_fifo_ctrl.queue_full),
     .empty(exec_div_fifo_ctrl.queue_empty),
@@ -275,7 +278,11 @@ exec_fifo #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) div_exec_fifo(
 assign dispatch_jmp_valid = jmp_detected | cdb_branch_taken;//or branch cdb logic TBD
 assign dispatch_jmp_br_addr = jmp_br_addr; //cdb branch logic TBD
 
-assign dispatch_rd_en = cdb_branch | (~branch_detected & (~(exec_int_fifo_ctrl.queue_full | exec_ld_st_fifo_ctrl.queue_full | exec_mult_fifo_ctrl.queue_full | exec_div_fifo_ctrl.queue_full)));
+assign any_rsv_station_full=(exec_int_fifo_ctrl.queue_full | exec_ld_st_fifo_ctrl.queue_full | exec_mult_fifo_ctrl.queue_full | exec_div_fifo_ctrl.queue_full);
+
+//assign dispatch_rd_en = cdb_branch | (~branch_detected & (~(exec_int_fifo_ctrl.queue_full | exec_ld_st_fifo_ctrl.queue_full | exec_mult_fifo_ctrl.queue_full | exec_div_fifo_ctrl.queue_full)));
+
+assign dispatch_rd_en = cdb_branch | (~branch_detected & (~any_rsv_station_full));
 
 assign fetch_next_instr = (cdb_branch==1) && (cdb_branch_taken==0) ? 1:0;
 

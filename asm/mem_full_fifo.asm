@@ -1,0 +1,8 @@
+addi t1, zero, 0x2C
+lui t2, 0x10010
+sw t1,0x0(t2)
+sw t1,0x4(t2)
+sw t1,0x8(t2)
+sw t1,0xc(t2)
+sw t1,0x10(t2)
+fin: j fin
