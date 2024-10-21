@@ -174,26 +174,7 @@ always @(*) begin
             occupied_mask = 4'b1111;
             issue_queue_rdy=1'b0;
         end
-        //if(occupied[3] && rsv_station[3][12]==1'b1 && rsv_station[3][51]==1'b1)begin
-        //    data_out = rsv_station[3];
-        //    occupied_mask = 4'b0111;
-        //end
-        //else if(occupied[2] && rsv_station[2][12]==1'b1 && rsv_station[2][51]==1'b1)begin
-        //    data_out = rsv_station[2];
-        //    occupied_mask = 4'b1011;
-        //end
-        //else if(occupied[1] && rsv_station[1][12]==1'b1 && rsv_station[1][51]==1'b1)begin
-        //    data_out = rsv_station[1];
-        //    occupied_mask = 4'b1101;
-        //end
-        //else if(occupied[0] && rsv_station[0][12]==1'b1 && rsv_station[0][51]==1'b1)begin
-        //    data_out = rsv_station[0];
-        //    occupied_mask = 4'b1110;
-        //end
-        //else begin
-        //    data_out=0;
-        //    occupied_mask = 4'b1111;
-        //end
+
     end
     else begin
         data_out=0;
@@ -201,7 +182,6 @@ always @(*) begin
     end
 end
 
-    //assign data_out = ((i_rst_n | !flush) & rd_en) ? rsv_station[rp[POINTER_WIDTH-1:0]]:0;
     //empty cuando todas las flags de occupied sean 0
     //full cuando todas las flags de occupied sean 1
     assign o_full = full;

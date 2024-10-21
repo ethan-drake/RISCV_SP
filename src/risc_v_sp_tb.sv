@@ -21,7 +21,7 @@ reg cdb_valid, cdb_branch, cdb_branch_taken;
 
 bit [31:0] memory [0:31];
 bit [31:0] expected_rf [0:31];
-
+bit [31:0] expected_mem [0:31];
 
 `define TEST "TEST_1"
 
@@ -40,30 +40,40 @@ initial begin
 			$display("EXECUTING: FE first verification");
 			init_test_1_cache();
 			fill_up_expected_rf_test_1();
+			fill_up_expected_mem_test_1();
 		end 
 		"TEST_2":begin
 			$display("EXECUTING: FE second verification (full int rsv station)");
 			init_test_2_cache();
+			fill_up_expected_rf_test_2();
 		end 
 		"TEST_3":begin
 			$display("EXECUTING: FE third verification (full mult rsv station)");
 			init_test_3_cache();
+			fill_up_expected_rf_test_3();
 		end 
 		"TEST_4":begin
 			$display("EXECUTING: FE fourth verification (full div rsv station)");
 			init_test_4_cache();
+			fill_up_expected_rf_test_4();
 		end 
 		"TEST_5":begin
 			$display("EXECUTING: FE fifth verification (full mem rsv station)");
 			init_test_5_cache();
+			fill_up_expected_rf_test_5();
+			fill_up_expected_mem_test_5();
 		end 
 		"TEST_6":begin
 			$display("EXECUTING: FE sixth verification (sw and lw with adds after)");
 			init_test_6_cache();
+			fill_up_expected_rf_test_6();
+			fill_up_expected_mem_test_6();
 		end 
 		"TEST_7":begin
 			$display("EXECUTING: FE seventh verification (Two stores led by two loads with toggling base address between them)");
 			init_test_7_cache();
+			fill_up_expected_rf_test_7();
+			fill_up_expected_mem_test_7();
 		end 
 		default:begin
 			$warning("NO MATCH TEST FOUND, executing first test by default");
@@ -652,19 +662,96 @@ task fill_up_expected_rf_test_1;
 	expected_rf[17] = 32'h10010000;
 endtask
 
+task fill_up_expected_mem_test_1;
+	expected_mem[1] =32'h04;
+endtask
+
+task fill_up_expected_rf_test_2;
+	expected_rf[2] =32'h7fffefe4;
+	expected_rf[6] =32'h25;
+	expected_rf[7] =32'h10;
+	expected_rf[12] =32'h0A;
+endtask
+
+task fill_up_expected_rf_test_3;
+	expected_rf[2] =32'h7fffefe4;
+	expected_rf[6] =32'h1E;
+	expected_rf[7] =32'h03;
+	expected_rf[10] =32'h5A;
+	expected_rf[11] =32'h5A;
+	expected_rf[12] =32'h5A;
+	expected_rf[13] =32'h5A;
+	expected_rf[14] =32'h5A;
+endtask
+
+task fill_up_expected_rf_test_4;
+	expected_rf[2] =32'h7fffefe4;
+	expected_rf[6] =32'h2C;
+	expected_rf[7] =32'h04;
+	expected_rf[10] =32'h0B;
+	expected_rf[11] =32'h0B;
+	expected_rf[12] =32'h0B;
+	expected_rf[13] =32'h0B;
+	expected_rf[14] =32'h0B;
+endtask
+
+task fill_up_expected_rf_test_5;
+	expected_rf[2] =32'h7fffefe4;
+	expected_rf[6] =32'h2C;
+	expected_rf[7] =32'h10010000;
+endtask
+
+task fill_up_expected_mem_test_5;
+	expected_mem[0] =32'h2C;
+	expected_mem[1] =32'h2C;
+	expected_mem[2] =32'h2C;
+	expected_mem[3] =32'h2C;
+	expected_mem[4] =32'h2C;
+endtask
+
+task fill_up_expected_rf_test_6;
+	expected_rf[2] =32'h7fffefe4;
+	expected_rf[6] =32'h2C;
+	expected_rf[7] =32'h10010000;
+	expected_rf[10] =32'h2C;
+	expected_rf[11] =32'h58;
+	expected_rf[12] =32'h58;
+	expected_rf[13] =32'h58;
+	expected_rf[14] =32'h58;
+	expected_rf[15] =32'h58;
+endtask
+
+task fill_up_expected_mem_test_6;
+	expected_mem[0] =32'h2C;
+endtask
+
+task fill_up_expected_rf_test_7;
+	expected_rf[2] =32'h7fffefe4;
+	expected_rf[5] =32'h10010004;
+	expected_rf[6] =32'h2C;
+	expected_rf[7] =32'h10010000;
+	expected_rf[10] =32'h2C;
+	expected_rf[11] =32'h2C;
+endtask
+
+task fill_up_expected_mem_test_7;
+	expected_mem[0] =32'h2C;
+	expected_mem[1] =32'h2C;
+endtask
 always @(procesador.dispatcher.i_fetch_instruction) begin
 	 //validate_test_1_rf_and_mem;
 	if(procesador.dispatcher.i_fetch_instruction == 32'h6f)begin
 		//@(posedge clk);
 		wait(procesador.dispatcher.int_exec_fifo.occupied == 0);
-		wait(procesador.dispatcher.ld_st_exec_fifo.occupied == 0);
+		wait(procesador.dispatcher.ld_st_exec_fifo.empty == 1);
 		wait(procesador.dispatcher.mult_exec_fifo.occupied == 0);
 		wait(procesador.dispatcher.div_exec_fifo.occupied == 0);
+		wait(procesador.dispatcher.tag_fifo_module.fifo_full_tf==1);
 		wait(cdb_publish.size() == 0);
 		@(posedge clk)
 		@(posedge clk)
-		@(posedge clk)
-		@(posedge clk)
+//		@(posedge clk)
+//		@(posedge clk)
 		$display("CDB PUBLISH SIZE: %h", cdb_publish.size());
 		check_values();
 	end
@@ -674,8 +761,8 @@ task check_values();
 	$display("***** Analyzing test results *****");
 	for (int i = 0; i<32; i++) begin
 		assert(procesador.dispatcher.rf_module.registers[i]==expected_rf[i]) else $error("Unexpected value in RF[%d], read: %h, expected: %h",i, procesador.dispatcher.rf_module.registers[i],expected_rf[i]);	
+		assert(procesador.dispatcher.exec_mem_issue.memory_ram.ram[i]==expected_mem[i]) else $error("Unexpected value in MEM[%d], read: %h, expected: %h",i, procesador.dispatcher.exec_mem_issue.memory_ram.ram[i],expected_mem[i]);	
 	end
-	assert(procesador.dispatcher.exec_mem_issue.memory_ram.ram[1]==32'h4) else $error("Unexpected value in MEM[4],read: %h, expected: %h", memory[4],4);
 	$display("################### TEST CHECK COMPLETED ####################");
 endtask
 

@@ -239,19 +239,34 @@ exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(int_fifo_data))) int_exec_fifo(
     .issue_queue_rdy(int_issue_rdy)
 );
 
-exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(ld_st_fifo_data))) ld_st_exec_fifo(
+//exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(ld_st_fifo_data))) ld_st_exec_fifo(
+//    .i_clk(i_clk),
+//    .i_rst_n(i_rst_n),
+//    .data_in(exec_ld_st_fifo_data_in),
+//    .w_en(exec_ld_st_fifo_ctrl.dispatch_en),
+//    .rd_en(tb_ld_sw_rd),
+//    .flush(1'b0),//cdb_branch_taken),
+//    .data_out(exec_ld_st_fifo_data_out),
+//    .o_full(exec_ld_st_fifo_ctrl.queue_full),
+//    .empty(exec_ld_st_fifo_ctrl.queue_empty),
+//    .cdb_tag(cdb_tag),
+//    .cdb_valid(cdb_valid),
+//    .cdb_data(cdb_data),
+//    .issue_queue_rdy(mem_issue_rdy)
+//);
+
+exec_fifo #(.DEPTH(4)) ld_st_exec_fifo(
     .i_clk(i_clk),
     .i_rst_n(i_rst_n),
     .data_in(exec_ld_st_fifo_data_in),
     .w_en(exec_ld_st_fifo_ctrl.dispatch_en),
-    .rd_en(tb_ld_sw_rd),
-    .flush(1'b0),//cdb_branch_taken),
-    .data_out(exec_ld_st_fifo_data_out),
-    .o_full(exec_ld_st_fifo_ctrl.queue_full),
-    .empty(exec_ld_st_fifo_ctrl.queue_empty),
+    .flush(1'b0),
     .cdb_tag(cdb_tag),
     .cdb_valid(cdb_valid),
     .cdb_data(cdb_data),
+    .data_out(exec_ld_st_fifo_data_out),
+    .o_full(exec_ld_st_fifo_ctrl.queue_full),
+    .empty(exec_ld_st_fifo_ctrl.queue_empty),
     .issue_queue_rdy(mem_issue_rdy)
 );
 
