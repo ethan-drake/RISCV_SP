@@ -48,6 +48,12 @@ common_fifo_data exec_div_fifo_data_in;
 common_fifo_data exec_div_fifo_data_out;
 common_fifo_ctrl exec_div_fifo_ctrl;
 
+//CDB_BFM structures
+cdb_bfm int_submit;
+cdb_bfm mult_submit;
+cdb_bfm div_submit;
+cdb_bfm mem_submit;
+
 //wire definition
 wire [6:0] opcode;
 wire [31:0] immediate;
@@ -68,6 +74,8 @@ wire [4:0] wen_regfile_rst;
 wire jmp_detected,branch_detected;
 wire br_stall_one_shot;
 wire any_rsv_station_full;
+
+wire int_issue_rdy,mem_issue_rdy,mult_issue_rdy,div_issue_rdy;
 
 //Decoder
 risc_v_decoder decoder(
@@ -227,7 +235,8 @@ exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(int_fifo_data))) int_exec_fifo(
     .empty(exec_int_fifo_ctrl.queue_empty),
     .cdb_tag(cdb_tag),
     .cdb_valid(cdb_valid),
-    .cdb_data(cdb_data)
+    .cdb_data(cdb_data),
+    .issue_queue_rdy(int_issue_rdy)
 );
 
 exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(ld_st_fifo_data))) ld_st_exec_fifo(
@@ -242,7 +251,8 @@ exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(ld_st_fifo_data))) ld_st_exec_fi
     .empty(exec_ld_st_fifo_ctrl.queue_empty),
     .cdb_tag(cdb_tag),
     .cdb_valid(cdb_valid),
-    .cdb_data(cdb_data)
+    .cdb_data(cdb_data),
+    .issue_queue_rdy(mem_issue_rdy)
 );
 
 exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) mult_exec_fifo(
@@ -257,7 +267,8 @@ exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) mult_exec_fi
     .empty(exec_mult_fifo_ctrl.queue_empty),
     .cdb_tag(cdb_tag),
     .cdb_valid(cdb_valid),
-    .cdb_data(cdb_data)
+    .cdb_data(cdb_data),
+    .issue_queue_rdy(mult_issue_rdy)
 );
 
 exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) div_exec_fifo(
@@ -272,7 +283,50 @@ exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) div_exec_fif
     .empty(exec_div_fifo_ctrl.queue_empty),
     .cdb_tag(cdb_tag),
     .cdb_valid(cdb_valid),
-    .cdb_data(cdb_data)
+    .cdb_data(cdb_data),
+    .issue_queue_rdy(div_issue_rdy)
+);
+
+//Execution units
+inst_issue exec_int_issue(
+    .clk(i_clk),
+    .rst_n(i_rst_n),
+    .issue_queue_rdy(int_issue_rdy),
+    .int_exec_fifo_data(exec_int_fifo_data_out),
+    .o_int_submit(int_submit),
+    .read_enable(),
+    .issue_done()
+);
+
+mult_issue exec_mult_issue(
+    .clk(i_clk),
+    .rst_n(i_rst_n),
+    .issue_queue_rdy(mult_issue_rdy),
+    .mult_exec_fifo_data(exec_mult_fifo_data_out),
+    .o_mult_submit(mult_submit),
+    .read_enable(),
+    .issue_done()
+);
+
+div_issue exec_div_issue(
+    .clk(i_clk),
+    .rst_n(i_rst_n),
+    .issue_queue_rdy(div_issue_rdy),
+    .div_exec_fifo_data(exec_div_fifo_data_out),
+    .o_div_submit(div_submit),
+    .read_enable(),
+    .issue_done()
+);
+
+
+mem_issue exec_mem_issue(
+    .clk(i_clk),
+    .rst_n(i_rst_n),
+    .issue_queue_rdy(mem_issue_rdy),
+    .mem_exec_fifo_data(exec_ld_st_fifo_data_out),
+    .o_mem_submit(mem_submit),
+    .read_enable(),
+    .issue_done()
 );
 
 assign dispatch_jmp_valid = jmp_detected | cdb_branch_taken;//or branch cdb logic TBD

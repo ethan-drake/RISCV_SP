@@ -17,13 +17,15 @@ module exec_rsv_station #(parameter DEPTH=4, DATA_WIDTH=128)(
     output o_full,
     input [5:0] cdb_tag,
     input cdb_valid,
-    input [31:0] cdb_data
+    input [31:0] cdb_data,
+    output reg issue_queue_rdy
 );
 localparam POINTER_WIDTH = $clog2(DEPTH);
 reg [DATA_WIDTH-1:0] rsv_station[DEPTH];
 reg [DEPTH-1:0] occupied;
 reg [DEPTH-1:0] occupied_mask;
-
+ 
+//assign issue_queue_rdy = |occupied; 
 reg full;
 
 
@@ -134,7 +136,7 @@ always @(*) begin
 end
 
 always @(posedge i_clk) begin
-    if (rd_en)begin
+    if (!empty)begin//rd_en)begin
         occupied = occupied & occupied_mask;
     end
 end
@@ -143,28 +145,34 @@ end
 always @(*) begin
     if(!i_rst_n | flush)begin
         data_out=0;
+        issue_queue_rdy=1'b0;
     end
-    else if(rd_en)begin
+    else if(!empty)begin//rd_en)begin
         //check if location is occupied and rs2 is valid and rs1 is valid
         if(occupied[0] && rsv_station[0][12]==1'b1 && rsv_station[0][51]==1'b1)begin
             data_out = rsv_station[0];
             occupied_mask = 4'b1110;
+            issue_queue_rdy=1'b1;
         end
         else if(occupied[1] && rsv_station[1][12]==1'b1 && rsv_station[1][51]==1'b1)begin
             data_out = rsv_station[1];
             occupied_mask = 4'b1101;
+            issue_queue_rdy=1'b1;
         end
         else if(occupied[2] && rsv_station[2][12]==1'b1 && rsv_station[2][51]==1'b1)begin
             data_out = rsv_station[2];
             occupied_mask = 4'b1011;
+            issue_queue_rdy=1'b1;
         end
         else if(occupied[3] && rsv_station[3][12]==1'b1 && rsv_station[3][51]==1'b1)begin
             data_out = rsv_station[3];
             occupied_mask = 4'b0111;
+            issue_queue_rdy=1'b1;
         end
         else begin
             data_out=0;
             occupied_mask = 4'b1111;
+            issue_queue_rdy=1'b0;
         end
         //if(occupied[3] && rsv_station[3][12]==1'b1 && rsv_station[3][51]==1'b1)begin
         //    data_out = rsv_station[3];
@@ -189,6 +197,7 @@ always @(*) begin
     end
     else begin
         data_out=0;
+        issue_queue_rdy=1'b0;
     end
 end
 

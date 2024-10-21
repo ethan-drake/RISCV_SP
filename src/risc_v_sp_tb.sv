@@ -20,6 +20,8 @@ reg [5:0] cdb_tag;
 reg cdb_valid, cdb_branch, cdb_branch_taken;
 
 bit [31:0] memory [0:31];
+bit [31:0] expected_rf [0:31];
+
 
 `define TEST "TEST_1"
 
@@ -37,6 +39,7 @@ initial begin
 		"TEST_1":begin
 			$display("EXECUTING: FE first verification");
 			init_test_1_cache();
+			fill_up_expected_rf_test_1();
 		end 
 		"TEST_2":begin
 			$display("EXECUTING: FE second verification (full int rsv station)");
@@ -109,42 +112,46 @@ reg branch_lock;
 
 always @(posedge clk) begin
 	`ifdef DEBUG
-	$display("ATTENDING INT FIFO");
+	$display("READING FROM INT ISSUE TO CDB");
 	`endif
-	execute_int_fifo();
+	//execute_int_fifo();
+	read_int_execution_unit();
 end
 
 always @(posedge clk)begin
 	//two cycles of latency
-	@(posedge clk);
-	@(posedge clk);
+	//@(posedge clk);
+	//@(posedge clk);
 	`ifdef DEBUG
-	$display("ATTENDING MULT FIFO");
+	$display("READING FROM MULT ISSUE TO CDB");
 	`endif
-	execute_mult_fifo();
+	//execute_mult_fifo();
+	read_mult_execution_unit();
 end
 
 always @(posedge clk)begin
 	//three cycles of latency
-	@(posedge clk);
-	@(posedge clk);
-	@(posedge clk);
+	//@(posedge clk);
+	//@(posedge clk);
+	//@(posedge clk);
 	`ifdef DEBUG
-	$display("ATTENDING DIV FIFO");
+	$display("READING FROM DIV ISSUE TO CDB");
 	`endif
-	execute_div_fifo();
+	//execute_div_fifo();
+	read_div_execution_unit();
 end
 
 always @(posedge clk)begin
 	//four cycles of latency
-	@(posedge clk);
-	@(posedge clk);
-	@(posedge clk);
-	@(posedge clk);
+	//@(posedge clk);
+	//@(posedge clk);
+	//@(posedge clk);
+	//@(posedge clk);
 	`ifdef DEBUG
-	$display("ATTENDING MEM FIFO");
+	$display("READING FROM MEM ISSUE TO CDB");
 	`endif
-	execute_ld_sw_fifo();
+	//execute_ld_sw_fifo();
+	read_ld_sw_execution_unit();
 end
 
 always @(posedge clk) begin
@@ -204,6 +211,49 @@ task set_cdb_valid;
 	cdb_valid = 1'b0;
 endtask
 
+task read_int_execution_unit();
+	if(procesador.dispatcher.exec_int_issue.issue_done)begin
+		int_submit.cdb_result = procesador.dispatcher.exec_int_issue.o_int_submit.cdb_result;
+		int_submit.cdb_tag = procesador.dispatcher.exec_int_issue.o_int_submit.cdb_tag;
+		int_submit.cdb_valid = procesador.dispatcher.exec_int_issue.o_int_submit.cdb_valid;
+		int_submit.cdb_branch = procesador.dispatcher.exec_int_issue.o_int_submit.cdb_branch;
+		int_submit.cdb_branch_taken = procesador.dispatcher.exec_int_issue.o_int_submit.cdb_branch_taken;
+		cdb_publish.push_back(int_submit);
+	end
+endtask
+
+task read_mult_execution_unit();
+	if(procesador.dispatcher.exec_mult_issue.issue_done)begin
+		mult_submit.cdb_result = procesador.dispatcher.exec_mult_issue.o_mult_submit.cdb_result;
+		mult_submit.cdb_tag = procesador.dispatcher.exec_mult_issue.o_mult_submit.cdb_tag;
+		mult_submit.cdb_valid = procesador.dispatcher.exec_mult_issue.o_mult_submit.cdb_valid;
+		mult_submit.cdb_branch = procesador.dispatcher.exec_mult_issue.o_mult_submit.cdb_branch;
+		mult_submit.cdb_branch_taken = procesador.dispatcher.exec_mult_issue.o_mult_submit.cdb_branch_taken;
+		cdb_publish.push_back(mult_submit);
+	end
+endtask
+
+task read_ld_sw_execution_unit();
+	if(procesador.dispatcher.exec_mem_issue.issue_done)begin
+		mem_submit.cdb_result = procesador.dispatcher.exec_mem_issue.o_mem_submit.cdb_result;
+		mem_submit.cdb_tag = procesador.dispatcher.exec_mem_issue.o_mem_submit.cdb_tag;
+		mem_submit.cdb_valid = procesador.dispatcher.exec_mem_issue.o_mem_submit.cdb_valid;
+		mem_submit.cdb_branch = procesador.dispatcher.exec_mem_issue.o_mem_submit.cdb_branch;
+		mem_submit.cdb_branch_taken = procesador.dispatcher.exec_mem_issue.o_mem_submit.cdb_branch_taken;
+		cdb_publish.push_back(mem_submit);
+	end
+endtask
+
+task read_div_execution_unit();
+	if(procesador.dispatcher.exec_div_issue.issue_done)begin
+		div_submit.cdb_result = procesador.dispatcher.exec_div_issue.o_div_submit.cdb_result;
+		div_submit.cdb_tag = procesador.dispatcher.exec_div_issue.o_div_submit.cdb_tag;
+		div_submit.cdb_valid = procesador.dispatcher.exec_div_issue.o_div_submit.cdb_valid;
+		div_submit.cdb_branch = procesador.dispatcher.exec_div_issue.o_div_submit.cdb_branch;
+		div_submit.cdb_branch_taken = procesador.dispatcher.exec_div_issue.o_div_submit.cdb_branch_taken;
+		cdb_publish.push_back(div_submit);
+	end
+endtask
 
 task execute_int_fifo;
 	
@@ -588,6 +638,45 @@ task init_test_7_cache;
 	procesador.cache.cache_memory[5] = 128'h00000000000000000000000000000000;  
 	procesador.cache.cache_memory[6] = 128'h00000000000000000000000000000000;  
 	procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;  
+endtask
+
+task fill_up_expected_rf_test_1;
+	expected_rf[2] =32'h7fffefe4;
+	expected_rf[5] =32'h21;
+	expected_rf[6] =32'h1E;
+	expected_rf[7] =32'h03;
+	expected_rf[10] =32'h02;
+	expected_rf[11] =32'h63;
+	expected_rf[12] =32'h0A;
+	expected_rf[16] =32'h04;
+	expected_rf[17] = 32'h10010000;
+endtask
+
+always @(procesador.dispatcher.i_fetch_instruction) begin
+	 //validate_test_1_rf_and_mem;
+	if(procesador.dispatcher.i_fetch_instruction == 32'h6f)begin
+		//@(posedge clk);
+		wait(procesador.dispatcher.int_exec_fifo.occupied == 0);
+		wait(procesador.dispatcher.ld_st_exec_fifo.occupied == 0);
+		wait(procesador.dispatcher.mult_exec_fifo.occupied == 0);
+		wait(procesador.dispatcher.div_exec_fifo.occupied == 0);
+		wait(cdb_publish.size() == 0);
+		@(posedge clk)
+		@(posedge clk)
+		@(posedge clk)
+		@(posedge clk)
+		$display("CDB PUBLISH SIZE: %h", cdb_publish.size());
+		check_values();
+	end
+end
+
+task check_values();
+	$display("***** Analyzing test results *****");
+	for (int i = 0; i<32; i++) begin
+		assert(procesador.dispatcher.rf_module.registers[i]==expected_rf[i]) else $error("Unexpected value in RF[%d], read: %h, expected: %h",i, procesador.dispatcher.rf_module.registers[i],expected_rf[i]);	
+	end
+	assert(procesador.dispatcher.exec_mem_issue.memory_ram.ram[1]==32'h4) else $error("Unexpected value in MEM[4],read: %h, expected: %h", memory[4],4);
+	$display("################### TEST CHECK COMPLETED ####################");
 endtask
 
 task init_values();

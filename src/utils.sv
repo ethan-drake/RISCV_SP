@@ -16,6 +16,7 @@ typedef struct packed {
   bit [31:0] cdb_result;
   bit cdb_branch;
   bit cdb_branch_taken;
+  bit issue_done;
 } cdb_bfm;
 
 typedef enum bit[1:0] { 
