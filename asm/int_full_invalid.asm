@@ -1,3 +1,4 @@
+#TEST 6
 addi t1, zero, 0x2C
 lui t2, 0x10010
 sw t1,0x0(t2)
