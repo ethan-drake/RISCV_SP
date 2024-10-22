@@ -77,6 +77,8 @@ wire any_rsv_station_full;
 
 wire int_issue_rdy,mem_issue_rdy,mult_issue_rdy,div_issue_rdy;
 
+wire issue_done_int, issue_done_mem, issue_done_mult, issue_done_div;
+
 //Decoder
 risc_v_decoder decoder(
     .instr(i_fetch_instruction),
@@ -223,7 +225,7 @@ dispatch_gen dispatch_gen(
 
 
 //Dispatch FIFOs
-exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(int_fifo_data))) int_exec_fifo(
+exec_rsv_station_shift #(.DEPTH(4), .DATA_WIDTH($bits(int_fifo_data))) int_exec_fifo(
     .i_clk(i_clk),
     .i_rst_n(i_rst_n),
     .data_in(exec_int_fifo_data_in),
@@ -236,7 +238,8 @@ exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(int_fifo_data))) int_exec_fifo(
     .cdb_tag(cdb_tag),
     .cdb_valid(cdb_valid),
     .cdb_data(cdb_data),
-    .issue_queue_rdy(int_issue_rdy)
+    .issue_queue_rdy(int_issue_rdy),
+    .issue_completed(issue_done_int)
 );
 
 //exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(ld_st_fifo_data))) ld_st_exec_fifo(
@@ -270,7 +273,7 @@ exec_fifo #(.DEPTH(4)) ld_st_exec_fifo(
     .issue_queue_rdy(mem_issue_rdy)
 );
 
-exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) mult_exec_fifo(
+exec_rsv_station_shift #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) mult_exec_fifo(
     .i_clk(i_clk),
     .i_rst_n(i_rst_n),
     .data_in(exec_mult_fifo_data_in),
@@ -283,10 +286,11 @@ exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) mult_exec_fi
     .cdb_tag(cdb_tag),
     .cdb_valid(cdb_valid),
     .cdb_data(cdb_data),
-    .issue_queue_rdy(mult_issue_rdy)
+    .issue_queue_rdy(mult_issue_rdy),
+    .issue_completed(issue_done_mult)
 );
 
-exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) div_exec_fifo(
+exec_rsv_station_shift #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) div_exec_fifo(
     .i_clk(i_clk),
     .i_rst_n(i_rst_n),
     .data_in(exec_div_fifo_data_in),
@@ -299,7 +303,8 @@ exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) div_exec_fif
     .cdb_tag(cdb_tag),
     .cdb_valid(cdb_valid),
     .cdb_data(cdb_data),
-    .issue_queue_rdy(div_issue_rdy)
+    .issue_queue_rdy(div_issue_rdy),
+    .issue_completed(issue_done_div)
 );
 
 //Execution units
@@ -310,7 +315,7 @@ inst_issue exec_int_issue(
     .int_exec_fifo_data(exec_int_fifo_data_out),
     .o_int_submit(int_submit),
     .read_enable(),
-    .issue_done()
+    .issue_done(issue_done_int)
 );
 
 mult_issue exec_mult_issue(
@@ -320,7 +325,7 @@ mult_issue exec_mult_issue(
     .mult_exec_fifo_data(exec_mult_fifo_data_out),
     .o_mult_submit(mult_submit),
     .read_enable(),
-    .issue_done()
+    .issue_done(issue_done_mult)
 );
 
 div_issue exec_div_issue(
@@ -330,7 +335,7 @@ div_issue exec_div_issue(
     .div_exec_fifo_data(exec_div_fifo_data_out),
     .o_div_submit(div_submit),
     .read_enable(),
-    .issue_done()
+    .issue_done(issue_done_div)
 );
 
 

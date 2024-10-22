@@ -80,6 +80,11 @@ initial begin
 			init_test_8_cache();
 			fill_up_expected_rf_test_8();
 		end 
+		"TEST_9":begin
+			$display("EXECUTING: FE ninth verification (Update int rsv station and shift at same time)");
+			init_test_9_cache();
+			fill_up_expected_rf_test_9();
+		end 
 		default:begin
 			$warning("NO MATCH TEST FOUND, executing first test by default");
 			init_test_1_cache();
@@ -667,6 +672,17 @@ task init_test_8_cache;
     procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;
 endtask
 
+task init_test_9_cache;
+    procesador.cache.cache_memory[0] = 128'h01e60293027346330030039301e00313;
+    procesador.cache.cache_memory[1] = 128'h00400b930040051301a6049300400413;
+    procesador.cache.cache_memory[2] = 128'h00100813006607930040071301bb8693;
+    procesador.cache.cache_memory[3] = 128'h00500a13004009930030091300200893;
+    procesador.cache.cache_memory[4] = 128'h000000000000006f00700b1300600a93;
+    procesador.cache.cache_memory[5] = 128'h00000000000000000000000000000000;
+    procesador.cache.cache_memory[6] = 128'h00000000000000000000000000000000;
+    procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;
+endtask
+
 task fill_up_expected_rf_test_1;
 	expected_rf[2] =32'h7fffefe4;
 	expected_rf[5] =32'h21;
@@ -777,7 +793,29 @@ task fill_up_expected_rf_test_8;
 	expected_rf[20] =32'h05;
 	expected_rf[21] =32'h06;
 	expected_rf[22] =32'h07;
-	
+endtask
+
+task fill_up_expected_rf_test_9;
+	expected_rf[2] =32'h7fffefe4;
+	expected_rf[5] =32'h28;
+	expected_rf[6] =32'h1E;
+	expected_rf[7] =32'h03;
+	expected_rf[8] =32'h04;
+	expected_rf[9] =32'h24;
+	expected_rf[10] =32'h04;
+	//expected_rf[11] =32'h0F;
+	expected_rf[12] =32'h0A;
+	expected_rf[13] =32'h1F;
+	expected_rf[14] =32'h04;
+	expected_rf[15] =32'h10;
+	expected_rf[16] =32'h01;
+	expected_rf[17] =32'h02;
+	expected_rf[18] =32'h03;
+	expected_rf[19] =32'h04;
+	expected_rf[20] =32'h05;
+	expected_rf[21] =32'h06;
+	expected_rf[22] =32'h07;
+	expected_rf[23] =32'h04;
 endtask
 
 always @(procesador.dispatcher.i_fetch_instruction) begin
