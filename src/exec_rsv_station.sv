@@ -83,21 +83,25 @@ always @(posedge i_clk, negedge i_rst_n) begin
     end
     //fifo write data
     else if(w_en & !full)begin
-        if(!occupied[0])begin
+        if(~(occupied[0] & occupied_mask[0]))begin
             rsv_station[0]=data_in;
             occupied[0]=1'b1;
+            occupied_mask[0]=1;
         end
-        else if(!occupied[1])begin
+        else if(~(occupied[1] & occupied_mask[1]))begin
             rsv_station[1]=data_in;
             occupied[1]=1'b1;
+            occupied_mask[1]=1;
         end
-        else if(!occupied[2])begin
+        else if(~(occupied[2] & occupied_mask[2]))begin
             rsv_station[2]=data_in;
             occupied[2]=1'b1;
+            occupied_mask[2]=1;
         end
-        else if(!occupied[3])begin
+        else if(~(occupied[3] & occupied_mask[3]))begin
             rsv_station[3]=data_in;
             occupied[3]=1'b1;
+            occupied_mask[3]=1;
         end
     end
 
@@ -111,6 +115,8 @@ always @(posedge i_clk, negedge i_rst_n) begin
 
 end
 
+//shifting
+
 always @(*) begin
     if(!i_rst_n)begin
         full = 1;
@@ -119,7 +125,7 @@ always @(*) begin
         full = 0;
     end
     else begin
-        full = (occupied == 4'hF) ? 1 :0;
+        full = (occupied == 4'hF && issue_queue_rdy == 1'b0) ? 1 :0;
     end
 end
 

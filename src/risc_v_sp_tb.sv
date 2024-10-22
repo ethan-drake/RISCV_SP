@@ -75,6 +75,11 @@ initial begin
 			fill_up_expected_rf_test_7();
 			fill_up_expected_mem_test_7();
 		end 
+		"TEST_8":begin
+			$display("EXECUTING: FE eight verification (Try to leave old int instrs unexecuted)");
+			init_test_8_cache();
+			fill_up_expected_rf_test_8();
+		end 
 		default:begin
 			$warning("NO MATCH TEST FOUND, executing first test by default");
 			init_test_1_cache();
@@ -650,6 +655,18 @@ task init_test_7_cache;
 	procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;  
 endtask
 
+//-*************** FE eight verification (Try to leave old int instrs unexecuted) ***********************************//
+task init_test_8_cache;
+    procesador.cache.cache_memory[0] = 128'h01e60293027346330030039301e00313;
+    procesador.cache.cache_memory[1] = 128'h005605930040051301a6049300400413;
+    procesador.cache.cache_memory[2] = 128'h006607930040071301b6069300400613;
+    procesador.cache.cache_memory[3] = 128'h00400993003009130020089300100813;
+    procesador.cache.cache_memory[4] = 128'h0000006f00700b1300600a9300500a13;
+    procesador.cache.cache_memory[5] = 128'h00000000000000000000000000000000;
+    procesador.cache.cache_memory[6] = 128'h00000000000000000000000000000000;
+    procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;
+endtask
+
 task fill_up_expected_rf_test_1;
 	expected_rf[2] =32'h7fffefe4;
 	expected_rf[5] =32'h21;
@@ -738,6 +755,31 @@ task fill_up_expected_mem_test_7;
 	expected_mem[0] =32'h2C;
 	expected_mem[1] =32'h2C;
 endtask
+
+
+task fill_up_expected_rf_test_8;
+	expected_rf[2] =32'h7fffefe4;
+	expected_rf[5] =32'h28;
+	expected_rf[6] =32'h1E;
+	expected_rf[7] =32'h03;
+	expected_rf[8] =32'h04;
+	expected_rf[9] =32'h24;
+	expected_rf[10] =32'h04;
+	expected_rf[11] =32'h0F;
+	expected_rf[12] =32'h04;
+	expected_rf[13] =32'h1F;
+	expected_rf[14] =32'h04;
+	expected_rf[15] =32'h0A;
+	expected_rf[16] =32'h01;
+	expected_rf[17] =32'h02;
+	expected_rf[18] =32'h03;
+	expected_rf[19] =32'h04;
+	expected_rf[20] =32'h05;
+	expected_rf[21] =32'h06;
+	expected_rf[22] =32'h07;
+	
+endtask
+
 always @(procesador.dispatcher.i_fetch_instruction) begin
 	 //validate_test_1_rf_and_mem;
 	if(procesador.dispatcher.i_fetch_instruction == 32'h6f)begin
