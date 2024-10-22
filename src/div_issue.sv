@@ -11,7 +11,6 @@ module div_issue #(parameter LATENCY = 4)(
     input logic issue_queue_rdy,
     input common_fifo_data div_exec_fifo_data,
     output cdb_bfm o_div_submit,
-    output reg read_enable,
     output reg issue_done
 );
 

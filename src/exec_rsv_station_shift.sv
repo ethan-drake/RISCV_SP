@@ -10,7 +10,6 @@ module exec_rsv_station_shift #(parameter DEPTH=4, DATA_WIDTH=128)(
     input i_rst_n,
     input [DATA_WIDTH-1:0] data_in,
     input w_en,
-    input rd_en,
     input flush,
     output reg [DATA_WIDTH-1:0] data_out,
     output reg empty,

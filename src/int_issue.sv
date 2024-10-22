@@ -5,13 +5,12 @@
 // Project Name:	  risc_v_sp
 // Description:	  register status table
 `include "utils.sv"
-module inst_issue #(parameter LATENCY = 1)(
+module int_issue #(parameter LATENCY = 1)(
     input clk,
     input rst_n,
     input logic issue_queue_rdy,
     input int_fifo_data int_exec_fifo_data,
     output cdb_bfm o_int_submit,
-    output reg read_enable,
     output reg issue_done
 );
 

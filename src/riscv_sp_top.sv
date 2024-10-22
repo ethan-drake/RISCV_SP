@@ -1,3 +1,5 @@
+`include "utils.sv"
+
 module riscv_sp_top(
 	//Inputs - Platform
 	input clk,
@@ -8,11 +10,7 @@ module riscv_sp_top(
     input cdb_valid,
     input [31:0] cdb_data,
     input cdb_branch,
-    input cdb_branch_taken,
-    input tb_int_rd,
-    input tb_ld_sw_rd,
-    input tb_mult_rd,
-    input tb_div_rd
+    input cdb_branch_taken
 );
 wire i_rd_en;
 wire rd_en, abort, we, dout_valid;
@@ -23,6 +21,15 @@ wire [31:0] instr;
 wire [31:0] jmp_branch_address;
 wire jmp_branch_valid;
 wire empty;
+
+int_issue_data exec_int_issue_data;
+common_issue_data exec_mult_issue_data;
+common_issue_data exec_div_issue_data;
+mem_issue_data exec_mem_issue_data;
+cdb_submit_data int_submit_data;
+cdb_submit_data mult_submit_data;
+cdb_submit_data div_submit_data;
+cdb_submit_data mem_submit_data;
 
 
 //BR NOT TAKEN SCENARIO
@@ -72,11 +79,28 @@ dispatcher dispatcher(
     .cdb_data(cdb_data),
     .cdb_branch(cdb_branch),
     .cdb_branch_taken(cdb_branch_taken),
-    .tb_int_rd(tb_int_rd),
-    .tb_ld_sw_rd(tb_ld_sw_rd),
-    .tb_mult_rd(tb_mult_rd),
-    .tb_div_rd(tb_div_rd),
-    .fetch_next_instr(fetch_next_instr)
+    .fetch_next_instr(fetch_next_instr),
+    .exec_int_issue_data(exec_int_issue_data),
+    .exec_mult_issue_data(exec_mult_issue_data),
+    .exec_div_issue_data(exec_div_issue_data),
+    .exec_mem_issue_data(exec_mem_issue_data),
+    .issue_done_int(int_submit_data.issue_done),
+    .issue_done_mem(mem_submit_data.issue_done),
+    .issue_done_mult(mult_submit_data.issue_done),
+    .issue_done_div(div_submit_data.issue_done)
+);
+
+issue issue(
+    .i_clk(clk),
+    .i_rst_n(rst_n),
+    .exec_int_issue_data(exec_int_issue_data),
+    .exec_mult_issue_data(exec_mult_issue_data),
+    .exec_div_issue_data(exec_div_issue_data),
+    .exec_mem_issue_data(exec_mem_issue_data),
+    .int_submit_data(int_submit_data),
+    .mult_submit_data(mult_submit_data),
+    .div_submit_data(div_submit_data),
+    .mem_submit_data(mem_submit_data)
 );
 
 endmodule
