@@ -1,3 +1,4 @@
+#TEST 7
 addi t1, zero, 0x2C
 lui t2, 0x10010
 addi t0, t2,4

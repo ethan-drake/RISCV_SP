@@ -22,31 +22,42 @@ module dispatcher(
     input [31:0] cdb_data,
     input cdb_branch,
     input cdb_branch_taken,
-    input tb_int_rd,
-    input tb_ld_sw_rd,
-    input tb_mult_rd,
-    input tb_div_rd,
-    output fetch_next_instr
+    output fetch_next_instr,
+    output int_issue_data exec_int_issue_data,
+    output common_issue_data exec_mult_issue_data,
+    output common_issue_data exec_div_issue_data,
+    output mem_issue_data exec_mem_issue_data,
+    input issue_done_int,
+    input issue_done_mem,
+    input issue_done_mult,
+    input issue_done_div
+
 );
 
 
 
 //Dispatch integer structure instantiation
 int_fifo_data exec_int_fifo_data_in;
-int_fifo_data exec_int_fifo_data_out;
+//int_fifo_data exec_int_fifo_data_out;
 common_fifo_ctrl exec_int_fifo_ctrl;
 //Dispatch load/store structure instantiation
 ld_st_fifo_data exec_ld_st_fifo_data_in;
-ld_st_fifo_data exec_ld_st_fifo_data_out;
+//ld_st_fifo_data exec_ld_st_fifo_data_out;
 common_fifo_ctrl exec_ld_st_fifo_ctrl;
 //Dispatch Multiplication structure instantiation
 common_fifo_data exec_mult_fifo_data_in;
-common_fifo_data exec_mult_fifo_data_out;
+//common_fifo_data exec_mult_fifo_data_out;
 common_fifo_ctrl exec_mult_fifo_ctrl;
 //Dispatch Division structure instantiation
 common_fifo_data exec_div_fifo_data_in;
-common_fifo_data exec_div_fifo_data_out;
+//common_fifo_data exec_div_fifo_data_out;
 common_fifo_ctrl exec_div_fifo_ctrl;
+
+//CDB_BFM structures
+//cdb_bfm int_submit;
+//cdb_bfm mult_submit;
+//cdb_bfm div_submit;
+//cdb_bfm mem_submit;
 
 //wire definition
 wire [6:0] opcode;
@@ -68,6 +79,9 @@ wire [4:0] wen_regfile_rst;
 wire jmp_detected,branch_detected;
 wire br_stall_one_shot;
 wire any_rsv_station_full;
+
+//wire int_issue_rdy,mem_issue_rdy,mult_issue_rdy,div_issue_rdy;
+
 
 //Decoder
 risc_v_decoder decoder(
@@ -215,65 +229,89 @@ dispatch_gen dispatch_gen(
 
 
 //Dispatch FIFOs
-exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(int_fifo_data))) int_exec_fifo(
+exec_rsv_station_shift #(.DEPTH(4), .DATA_WIDTH($bits(int_fifo_data))) int_exec_fifo(
     .i_clk(i_clk),
     .i_rst_n(i_rst_n),
     .data_in(exec_int_fifo_data_in),
     .w_en(exec_int_fifo_ctrl.dispatch_en),
-    .rd_en(tb_int_rd),
+    //.rd_en(tb_int_rd),
     .flush(1'b0),//cdb_branch_taken),
-    .data_out(exec_int_fifo_data_out),
+    .data_out(exec_int_issue_data.rsv_station_data),//exec_int_fifo_data_out),
     .o_full(exec_int_fifo_ctrl.queue_full),
     .empty(exec_int_fifo_ctrl.queue_empty),
     .cdb_tag(cdb_tag),
     .cdb_valid(cdb_valid),
-    .cdb_data(cdb_data)
+    .cdb_data(cdb_data),
+    .issue_queue_rdy(exec_int_issue_data.issue_rdy),
+    .issue_completed(issue_done_int)
 );
 
-exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(ld_st_fifo_data))) ld_st_exec_fifo(
+//exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(ld_st_fifo_data))) ld_st_exec_fifo(
+//    .i_clk(i_clk),
+//    .i_rst_n(i_rst_n),
+//    .data_in(exec_ld_st_fifo_data_in),
+//    .w_en(exec_ld_st_fifo_ctrl.dispatch_en),
+//    .rd_en(tb_ld_sw_rd),
+//    .flush(1'b0),//cdb_branch_taken),
+//    .data_out(exec_ld_st_fifo_data_out),
+//    .o_full(exec_ld_st_fifo_ctrl.queue_full),
+//    .empty(exec_ld_st_fifo_ctrl.queue_empty),
+//    .cdb_tag(cdb_tag),
+//    .cdb_valid(cdb_valid),
+//    .cdb_data(cdb_data),
+//    .issue_queue_rdy(mem_issue_rdy)
+//);
+
+exec_fifo #(.DEPTH(4)) ld_st_exec_fifo(
     .i_clk(i_clk),
     .i_rst_n(i_rst_n),
     .data_in(exec_ld_st_fifo_data_in),
     .w_en(exec_ld_st_fifo_ctrl.dispatch_en),
-    .rd_en(tb_ld_sw_rd),
-    .flush(1'b0),//cdb_branch_taken),
-    .data_out(exec_ld_st_fifo_data_out),
-    .o_full(exec_ld_st_fifo_ctrl.queue_full),
-    .empty(exec_ld_st_fifo_ctrl.queue_empty),
+    .flush(1'b0),
     .cdb_tag(cdb_tag),
     .cdb_valid(cdb_valid),
-    .cdb_data(cdb_data)
+    .cdb_data(cdb_data),
+    .data_out(exec_mem_issue_data.rsv_station_data),//exec_ld_st_fifo_data_out),
+    .o_full(exec_ld_st_fifo_ctrl.queue_full),
+    .empty(exec_ld_st_fifo_ctrl.queue_empty),
+    .issue_queue_rdy(exec_mem_issue_data.issue_rdy)//mem_issue_rdy)
 );
 
-exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) mult_exec_fifo(
+exec_rsv_station_shift #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) mult_exec_fifo(
     .i_clk(i_clk),
     .i_rst_n(i_rst_n),
     .data_in(exec_mult_fifo_data_in),
     .w_en(exec_mult_fifo_ctrl.dispatch_en),
-    .rd_en(tb_mult_rd),
+    //.rd_en(tb_mult_rd),
     .flush(1'b0),//cdb_branch_taken),
-    .data_out(exec_mult_fifo_data_out),
+    .data_out(exec_mult_issue_data.rsv_station_data),//exec_mult_fifo_data_out),
     .o_full(exec_mult_fifo_ctrl.queue_full),
     .empty(exec_mult_fifo_ctrl.queue_empty),
     .cdb_tag(cdb_tag),
     .cdb_valid(cdb_valid),
-    .cdb_data(cdb_data)
+    .cdb_data(cdb_data),
+    .issue_queue_rdy(exec_mult_issue_data.issue_rdy),//mult_issue_rdy),
+    .issue_completed(issue_done_mult)
 );
 
-exec_rsv_station #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) div_exec_fifo(
+exec_rsv_station_shift #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) div_exec_fifo(
     .i_clk(i_clk),
     .i_rst_n(i_rst_n),
     .data_in(exec_div_fifo_data_in),
     .w_en(exec_div_fifo_ctrl.dispatch_en),
-    .rd_en(tb_div_rd),
+    //.rd_en(tb_div_rd),
     .flush(1'b0),//cdb_branch_taken),
-    .data_out(exec_div_fifo_data_out),
+    .data_out(exec_div_issue_data.rsv_station_data),//exec_div_fifo_data_out),
     .o_full(exec_div_fifo_ctrl.queue_full),
     .empty(exec_div_fifo_ctrl.queue_empty),
     .cdb_tag(cdb_tag),
     .cdb_valid(cdb_valid),
-    .cdb_data(cdb_data)
+    .cdb_data(cdb_data),
+    .issue_queue_rdy(exec_div_issue_data.issue_rdy),//div_issue_rdy),
+    .issue_completed(issue_done_div)
 );
+
+
 
 assign dispatch_jmp_valid = jmp_detected | cdb_branch_taken;//or branch cdb logic TBD
 assign dispatch_jmp_br_addr = jmp_br_addr; //cdb branch logic TBD

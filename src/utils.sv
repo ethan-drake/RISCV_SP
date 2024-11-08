@@ -16,6 +16,7 @@ typedef struct packed {
   bit [31:0] cdb_result;
   bit cdb_branch;
   bit cdb_branch_taken;
+  bit issue_done;
 } cdb_bfm;
 
 typedef enum bit[1:0] { 
@@ -48,7 +49,7 @@ typedef struct packed {
     common_fifo_data common_data;
  } int_fifo_data;
 
- typedef struct packed {
+typedef struct packed {
     //1 bit opcode to distinguish between LD&ST
     logic ld_st_opcode;
     logic [2:0] func3;
@@ -56,3 +57,23 @@ typedef struct packed {
     logic [31:0] immediate;
     common_fifo_data common_data;
  } ld_st_fifo_data;
+
+typedef struct packed {
+   logic issue_rdy;
+   int_fifo_data rsv_station_data;
+ } int_issue_data;
+
+typedef struct packed {
+   logic issue_rdy;
+   common_fifo_data rsv_station_data;
+} common_issue_data;
+
+typedef struct packed {
+   logic issue_rdy;
+   ld_st_fifo_data rsv_station_data;
+} mem_issue_data;
+
+typedef struct packed {
+   cdb_bfm issue_cdb;
+   logic issue_done;
+} cdb_submit_data;
