@@ -10,18 +10,18 @@
  //`define DEBUG
 module risc_v_sp_tb();
 
-reg clk, rst_n,rd_en;
-reg [31:0] jmp_branch_address;
-reg jmp_branch_valid;
-reg [31:0] tb_int_result, tb_ld_sw_result, tb_mult_result, tb_div_result;
-reg [31:0] bfm_result;
-reg [5:0] cdb_tag;
-reg cdb_valid, cdb_branch, cdb_branch_taken;
+reg clk, rst_n;//,rd_en;
+//reg [31:0] jmp_branch_address;
+//reg jmp_branch_valid;
+//reg [31:0] tb_int_result, tb_ld_sw_result, tb_mult_result, tb_div_result;
+//reg [31:0] bfm_result;
+//reg [5:0] cdb_tag;
+//reg cdb_valid, cdb_branch, cdb_branch_taken;
 
 bit [31:0] memory [0:31];
 bit [31:0] expected_rf [0:31];
 bit [31:0] expected_mem [0:31];
-
+int simulation_errors=0;
 
 initial begin
 	string test_name;
@@ -93,14 +93,14 @@ end
 riscv_sp_top procesador(
 	//Inputs - Platform
 	.clk(clk),
-	.rst_n(rst_n),
-    .cdb_tag(cdb_tag),
-    .cdb_valid(cdb_valid),
-    .cdb_data(bfm_result),
-    .cdb_branch(cdb_branch),
-    .cdb_branch_taken(cdb_branch_taken)
+	.rst_n(rst_n)
+    //.cdb_tag(cdb_tag),
+    //.cdb_valid(cdb_valid),
+    //.cdb_data(bfm_result),
+    //.cdb_branch(cdb_branch),
+    //.cdb_branch_taken(cdb_branch_taken)
 );
-
+/*
 int_fifo_data int_exec_fifo_data;
 common_fifo_data mult_fifo_data;
 common_fifo_data div_fifo_data;
@@ -220,7 +220,7 @@ task read_div_execution_unit();
 		cdb_publish.push_back(div_submit);
 	end
 endtask
-
+*/
 
 //-*************** FE first verification ***********************************//
 task init_test_1_cache;
@@ -248,38 +248,38 @@ endtask
 
 //-*************** FE third verification (full mult rsv station) ***********************************//
 task init_test_3_cache;
-	procesador.cache.cache_memory[0] = 128'h027305b3027305330030039301e00313;
-	procesador.cache.cache_memory[1] = 128'h0000006f02730733027306b302730633; 
-	procesador.cache.cache_memory[2] = 128'h00000000000000000000000000000000; 
-	procesador.cache.cache_memory[3] = 128'h00000000000000000000000000000000;  
-	procesador.cache.cache_memory[4] = 128'h00000000000000000000000000000000;  
-	procesador.cache.cache_memory[5] = 128'h00000000000000000000000000000000;  
-	procesador.cache.cache_memory[6] = 128'h00000000000000000000000000000000;  
-	procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;  
+    procesador.cache.cache_memory[0] = 128'h027305b3027305330030039301e00313;
+    procesador.cache.cache_memory[1] = 128'h027706b302768733027606b302758633;
+    procesador.cache.cache_memory[2] = 128'h00000000000000000000006f02730733;
+    procesador.cache.cache_memory[3] = 128'h00000000000000000000000000000000;
+    procesador.cache.cache_memory[4] = 128'h00000000000000000000000000000000;
+    procesador.cache.cache_memory[5] = 128'h00000000000000000000000000000000;
+    procesador.cache.cache_memory[6] = 128'h00000000000000000000000000000000;
+    procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;
 endtask
 
 //-*************** FE fourth verification (full div rsv station) ***********************************//
 task init_test_4_cache;
-	procesador.cache.cache_memory[0] = 128'h027345b3027345330040039302c00313;
-	procesador.cache.cache_memory[1] = 128'h0000006f02734733027346b302734633; 
-	procesador.cache.cache_memory[2] = 128'h00000000000000000000000000000000; 
-	procesador.cache.cache_memory[3] = 128'h00000000000000000000000000000000;  
-	procesador.cache.cache_memory[4] = 128'h00000000000000000000000000000000;  
-	procesador.cache.cache_memory[5] = 128'h00000000000000000000000000000000;  
-	procesador.cache.cache_memory[6] = 128'h00000000000000000000000000000000;  
-	procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;  
+    procesador.cache.cache_memory[0] = 128'h027545b3027345330040039302c00313;
+    procesador.cache.cache_memory[1] = 128'h027346b30276c733027646b30275c633;
+    procesador.cache.cache_memory[2] = 128'h00000000000000000000006f02734733;
+    procesador.cache.cache_memory[3] = 128'h00000000000000000000000000000000;
+    procesador.cache.cache_memory[4] = 128'h00000000000000000000000000000000;
+    procesador.cache.cache_memory[5] = 128'h00000000000000000000000000000000;
+    procesador.cache.cache_memory[6] = 128'h00000000000000000000000000000000;
+    procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;
 endtask
 
 //-*************** FE fifth verification (full mem rsv station) ***********************************//
 task init_test_5_cache;
-	procesador.cache.cache_memory[0] = 128'h0063a2230063a023100103b702c00313;
-	procesador.cache.cache_memory[1] = 128'h0000006f0063a8230063a6230063a423; 
-	procesador.cache.cache_memory[2] = 128'h00000000000000000000000000000000; 
-	procesador.cache.cache_memory[3] = 128'h00000000000000000000000000000000;  
-	procesador.cache.cache_memory[4] = 128'h00000000000000000000000000000000;  
-	procesador.cache.cache_memory[5] = 128'h00000000000000000000000000000000;  
-	procesador.cache.cache_memory[6] = 128'h00000000000000000000000000000000;  
-	procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;  
+    procesador.cache.cache_memory[0] = 128'h0063a2230063a023100103b702c00313;
+    procesador.cache.cache_memory[1] = 128'h0263a2230263a0230063a6230063a423;
+    procesador.cache.cache_memory[2] = 128'h000000000000006f0263a6230263a423;
+    procesador.cache.cache_memory[3] = 128'h00000000000000000000000000000000;
+    procesador.cache.cache_memory[4] = 128'h00000000000000000000000000000000;
+    procesador.cache.cache_memory[5] = 128'h00000000000000000000000000000000;
+    procesador.cache.cache_memory[6] = 128'h00000000000000000000000000000000;
+    procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000; 
 endtask
 
 //-*************** FE sixth verification (sw and lw with adds after) ***********************************//
@@ -359,8 +359,8 @@ task fill_up_expected_rf_test_3;
 	expected_rf[7] =32'h03;
 	expected_rf[10] =32'h5A;
 	expected_rf[11] =32'h5A;
-	expected_rf[12] =32'h5A;
-	expected_rf[13] =32'h5A;
+	expected_rf[12] =32'h10E;
+	expected_rf[13] =32'h1C7A;
 	expected_rf[14] =32'h5A;
 endtask
 
@@ -369,8 +369,8 @@ task fill_up_expected_rf_test_4;
 	expected_rf[6] =32'h2C;
 	expected_rf[7] =32'h04;
 	expected_rf[10] =32'h0B;
-	expected_rf[11] =32'h0B;
-	expected_rf[12] =32'h0B;
+	expected_rf[11] =32'h02;
+	expected_rf[12] =32'h00;
 	expected_rf[13] =32'h0B;
 	expected_rf[14] =32'h0B;
 endtask
@@ -386,7 +386,10 @@ task fill_up_expected_mem_test_5;
 	expected_mem[1] =32'h2C;
 	expected_mem[2] =32'h2C;
 	expected_mem[3] =32'h2C;
-	expected_mem[4] =32'h2C;
+	expected_mem[8] =32'h2C;
+	expected_mem[9] =32'h2C;
+	expected_mem[10] =32'h2C;
+	expected_mem[11] =32'h2C;
 endtask
 
 task fill_up_expected_rf_test_6;
@@ -466,54 +469,62 @@ task fill_up_expected_rf_test_9;
 endtask
 
 always @(procesador.dispatcher.i_fetch_instruction) begin
-	 //validate_test_1_rf_and_mem;
+	 //wait for end of program to check values, last isntr is 0x6F (fin: j fin)
 	if(procesador.dispatcher.i_fetch_instruction == 32'h6f)begin
-		//@(posedge clk);
 		wait(procesador.dispatcher.int_exec_fifo.occupied == 0);
 		wait(procesador.dispatcher.ld_st_exec_fifo.empty == 1);
 		wait(procesador.dispatcher.mult_exec_fifo.occupied == 0);
 		wait(procesador.dispatcher.div_exec_fifo.occupied == 0);
 		wait(procesador.dispatcher.tag_fifo_module.fifo_full_tf==1);
-		wait(cdb_publish.size() == 0);
+		//wait(cdb_publish.size() == 0);
 		@(posedge clk)
 		@(posedge clk)
-//		@(posedge clk)
-//		@(posedge clk)
-		$display("CDB PUBLISH SIZE: %h", cdb_publish.size());
 		check_values();
 	end
 end
 
 task check_values();
 	$display("***** Analyzing test results *****");
+	
 	for (int i = 0; i<32; i++) begin
-		assert(procesador.dispatcher.rf_module.registers[i]==expected_rf[i]) else $error("Unexpected value in RF[%d], read: %h, expected: %h",i, procesador.dispatcher.rf_module.registers[i],expected_rf[i]);	
-		assert(procesador.issue.exec_mem_issue.memory_ram.ram[i]==expected_mem[i]) else $error("Unexpected value in MEM[%d], read: %h, expected: %h",i, procesador.issue.exec_mem_issue.memory_ram.ram[i],expected_mem[i]);	
+		assert(procesador.dispatcher.rf_module.registers[i]==expected_rf[i]) else begin
+			$error("Unexpected value in RF[%d], read: %h, expected: %h",i, procesador.dispatcher.rf_module.registers[i],expected_rf[i]);	
+			simulation_errors++;
+		end
+		assert(procesador.issue_unit.functional_unit_group.exec_mem_issue.memory_ram.ram[i]==expected_mem[i]) else begin
+			$error("Unexpected value in MEM[%d], read: %h, expected: %h",i, procesador.issue_unit.functional_unit_group.exec_mem_issue.memory_ram.ram[i],expected_mem[i]);
+			simulation_errors++;
+		end	
 	end
 	$display("################### TEST CHECK COMPLETED ####################");
+	if (simulation_errors == 0) begin
+		$display("################### TEST PASSED ####################");
+	end
+	else if (simulation_errors > 0) begin
+		$display("################### TEST FAILED ####################");
+	end
 endtask
 
 task init_values();
 	clk = 0;
 	rst_n = 1;
-	jmp_branch_address = 0;
-	jmp_branch_valid = 0;
-	current_opt=0;
-	bfm_result=0;
-	branch_lock=0;
-
-	cdb_valid = 1'b0;
-	tb_int_result = 0;
-	cdb_tag = 6'h0;
-	cdb_branch=1'b0;
-	cdb_branch_taken=1'b0;
+	//jmp_branch_address = 0;
+	//jmp_branch_valid = 0;
+	//current_opt=0;
+	//bfm_result=0;
+	//branch_lock=0;
+	//cdb_valid = 1'b0;
+	//tb_int_result = 0;
+	//cdb_tag = 6'h0;
+	//cdb_branch=1'b0;
+	//cdb_branch_taken=1'b0;
 endtask
 
 task reset_device();
 	#1 rst_n = 0;
 	#2 rst_n = 1;
 endtask
-
+/*
 task set_rd_enable;
 	#0 rd_en = 1'b1;
 endtask
@@ -521,7 +532,7 @@ endtask
 task clear_rd_enable;
 	rd_en = 1'b0;
 endtask
-
+*/
 always begin
 	#1 clk = ~clk;
 end

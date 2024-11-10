@@ -3,14 +3,14 @@
 module riscv_sp_top(
 	//Inputs - Platform
 	input clk,
-	input rst_n,
+	input rst_n
     //input [31:0] jmp_branch_address,
     //input jmp_branch_valid
-    input [5:0] cdb_tag,
-    input cdb_valid,
-    input [31:0] cdb_data,
-    input cdb_branch,
-    input cdb_branch_taken
+    //input [5:0] cdb_tag,
+    //input cdb_valid,
+    //input [31:0] cdb_data,
+    //input cdb_branch,
+    //input cdb_branch_taken
 );
 wire i_rd_en;
 wire rd_en, abort, we, dout_valid;
@@ -26,11 +26,15 @@ int_issue_data exec_int_issue_data;
 common_issue_data exec_mult_issue_data;
 common_issue_data exec_div_issue_data;
 mem_issue_data exec_mem_issue_data;
-cdb_submit_data int_submit_data;
-cdb_submit_data mult_submit_data;
-cdb_submit_data div_submit_data;
-cdb_submit_data mem_submit_data;
 
+
+
+cdb_bfm common_data_bus;
+
+wire issue_granted_int;
+wire issue_granted_mem;
+wire issue_granted_mult;
+wire issue_granted_div;
 
 //BR NOT TAKEN SCENARIO
 wire fetch_next_instr;
@@ -74,33 +78,45 @@ dispatcher dispatcher(
     .dispatch_jmp_br_addr(jmp_branch_address),
     .dispatch_jmp_valid(jmp_branch_valid),
     .dispatch_rd_en(i_rd_en),
-    .cdb_tag(cdb_tag),
-    .cdb_valid(cdb_valid),
-    .cdb_data(cdb_data),
-    .cdb_branch(cdb_branch),
-    .cdb_branch_taken(cdb_branch_taken),
+    .cdb_tag(common_data_bus.cdb_tag),
+    .cdb_valid(common_data_bus.cdb_valid),
+    .cdb_data(common_data_bus.cdb_result),
+    .cdb_branch(common_data_bus.cdb_branch),
+    .cdb_branch_taken(common_data_bus.cdb_branch_taken),
     .fetch_next_instr(fetch_next_instr),
     .exec_int_issue_data(exec_int_issue_data),
     .exec_mult_issue_data(exec_mult_issue_data),
     .exec_div_issue_data(exec_div_issue_data),
     .exec_mem_issue_data(exec_mem_issue_data),
-    .issue_done_int(int_submit_data.issue_done),
-    .issue_done_mem(mem_submit_data.issue_done),
-    .issue_done_mult(mult_submit_data.issue_done),
-    .issue_done_div(div_submit_data.issue_done)
+    .issue_done_int(issue_granted_int),
+    .issue_done_mem(issue_granted_mem),
+    .issue_done_mult(issue_granted_mult),
+    .issue_done_div(issue_granted_div)
 );
 
-issue issue(
+issue_unit issue_unit(
     .i_clk(clk),
     .i_rst_n(rst_n),
     .exec_int_issue_data(exec_int_issue_data),
     .exec_mult_issue_data(exec_mult_issue_data),
     .exec_div_issue_data(exec_div_issue_data),
     .exec_mem_issue_data(exec_mem_issue_data),
-    .int_submit_data(int_submit_data),
-    .mult_submit_data(mult_submit_data),
-    .div_submit_data(div_submit_data),
-    .mem_submit_data(mem_submit_data)
+    //.ready_int(exec_int_issue_data.issue_rdy),
+    //.ready_mult(exec_mult_issue_data.issue_rdy),
+    //.ready_div(exec_div_issue_data.issue_rdy),
+    //.ready_mem(exec_mem_issue_data.issue_rdy),
+    //.div_exec_busy(),
+    //.int_cdb_input(),
+    //.div_cdb_input(),
+    //.mult_cdb_input(),
+    //.mem_cdb_input(),
+    .issue_int(issue_granted_int),
+    .issue_mult(issue_granted_mult),
+    .issue_div(issue_granted_div),
+    .issue_mem(issue_granted_mem),
+    .cdb_output(common_data_bus)
 );
+
+
 
 endmodule
