@@ -31,53 +31,58 @@ initial begin
 	end
   	case (test_name)
 		"TEST_1":begin
-			$display("EXECUTING: FE first verification");
+			$display("EXECUTING:  first verification");
 			init_test_1_cache();
 			fill_up_expected_rf_test_1();
 			fill_up_expected_mem_test_1();
 		end 
 		"TEST_2":begin
-			$display("EXECUTING: FE second verification (full int rsv station)");
+			$display("EXECUTING:  second verification (full int rsv station)");
 			init_test_2_cache();
 			fill_up_expected_rf_test_2();
 		end 
 		"TEST_3":begin
-			$display("EXECUTING: FE third verification (full mult rsv station)");
+			$display("EXECUTING:  third verification (full mult rsv station)");
 			init_test_3_cache();
 			fill_up_expected_rf_test_3();
 		end 
 		"TEST_4":begin
-			$display("EXECUTING: FE fourth verification (full div rsv station)");
+			$display("EXECUTING:  fourth verification (full div rsv station)");
 			init_test_4_cache();
 			fill_up_expected_rf_test_4();
 		end 
 		"TEST_5":begin
-			$display("EXECUTING: FE fifth verification (full mem rsv station)");
+			$display("EXECUTING:  fifth verification (full mem rsv station)");
 			init_test_5_cache();
 			fill_up_expected_rf_test_5();
 			fill_up_expected_mem_test_5();
 		end 
 		"TEST_6":begin
-			$display("EXECUTING: FE sixth verification (sw and lw with adds after)");
+			$display("EXECUTING:  sixth verification (sw and lw with adds after)");
 			init_test_6_cache();
 			fill_up_expected_rf_test_6();
 			fill_up_expected_mem_test_6();
 		end 
 		"TEST_7":begin
-			$display("EXECUTING: FE seventh verification (Two stores led by two loads with toggling base address between them)");
+			$display("EXECUTING:  seventh verification (Two stores led by two loads with toggling base address between them)");
 			init_test_7_cache();
 			fill_up_expected_rf_test_7();
 			fill_up_expected_mem_test_7();
 		end 
 		"TEST_8":begin
-			$display("EXECUTING: FE eight verification (Try to leave old int instrs unexecuted)");
+			$display("EXECUTING:  eight verification (Try to leave old int instrs unexecuted)");
 			init_test_8_cache();
 			fill_up_expected_rf_test_8();
 		end 
 		"TEST_9":begin
-			$display("EXECUTING: FE ninth verification (Update int rsv station and shift at same time)");
+			$display("EXECUTING:  ninth verification (Update int rsv station and shift at same time)");
 			init_test_9_cache();
 			fill_up_expected_rf_test_9();
+		end 
+		"TEST_10":begin
+			$display("EXECUTING:  tenth verification (More that one ready at the same time for the  issue unit)");
+			init_test_10_cache();
+			fill_up_expected_rf_test_10();
 		end 
 		default:begin
 			$warning("NO MATCH TEST FOUND, executing first test by default");
@@ -222,7 +227,7 @@ task read_div_execution_unit();
 endtask
 */
 
-//-*************** FE first verification ***********************************//
+//-***************  first verification ***********************************//
 task init_test_1_cache;
 	procesador.cache.cache_memory[0] = 128'h01e003130058a223100108b700400293;
 	procesador.cache.cache_memory[1] = 128'h00200513007302b3fe0286e300300393; 
@@ -234,7 +239,7 @@ task init_test_1_cache;
 	procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;  
 endtask
 
-//-*************** FE second verification (full int rsv station) ***********************************//
+//-***************  second verification (full int rsv station) ***********************************//
 task init_test_2_cache;
 	procesador.cache.cache_memory[0] = 128'h01e60313027346330030039301e00313;
 	procesador.cache.cache_memory[1] = 128'h01b603130056039301a6031300460393; 
@@ -246,7 +251,7 @@ task init_test_2_cache;
 	procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;  
 endtask
 
-//-*************** FE third verification (full mult rsv station) ***********************************//
+//-***************  third verification (full mult rsv station) ***********************************//
 task init_test_3_cache;
     procesador.cache.cache_memory[0] = 128'h027305b3027305330030039301e00313;
     procesador.cache.cache_memory[1] = 128'h027706b302768733027606b302758633;
@@ -258,7 +263,7 @@ task init_test_3_cache;
     procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;
 endtask
 
-//-*************** FE fourth verification (full div rsv station) ***********************************//
+//-***************  fourth verification (full div rsv station) ***********************************//
 task init_test_4_cache;
     procesador.cache.cache_memory[0] = 128'h027545b3027345330040039302c00313;
     procesador.cache.cache_memory[1] = 128'h027346b30276c733027646b30275c633;
@@ -270,7 +275,7 @@ task init_test_4_cache;
     procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;
 endtask
 
-//-*************** FE fifth verification (full mem rsv station) ***********************************//
+//-***************  fifth verification (full mem rsv station) ***********************************//
 task init_test_5_cache;
     procesador.cache.cache_memory[0] = 128'h0063a2230063a023100103b702c00313;
     procesador.cache.cache_memory[1] = 128'h0263a2230263a0230063a6230063a423;
@@ -282,7 +287,7 @@ task init_test_5_cache;
     procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000; 
 endtask
 
-//-*************** FE sixth verification (sw and lw with adds after) ***********************************//
+//-***************  sixth verification (sw and lw with adds after) ***********************************//
 task init_test_6_cache;
 	procesador.cache.cache_memory[0] = 128'h0003a5030063a023100103b702c00313;
 	procesador.cache.cache_memory[1] = 128'h00a3073300a306b300a3063300a305b3; 
@@ -295,7 +300,7 @@ task init_test_6_cache;
 endtask
 
 
-//-*************** FE seventh verification (Two stores led by two loads with toggling base address between them) ***********************************//
+//-***************  seventh verification (Two stores led by two loads with toggling base address between them) ***********************************//
 task init_test_7_cache;
 	procesador.cache.cache_memory[0] = 128'h0062a02300438293100103b702c00313;
 	procesador.cache.cache_memory[1] = 128'h0000006f0003a5830002a5030063a023; 
@@ -307,7 +312,7 @@ task init_test_7_cache;
 	procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;  
 endtask
 
-//-*************** FE eight verification (Try to leave old int instrs unexecuted) ***********************************//
+//-***************  eight verification (Try to leave old int instrs unexecuted) ***********************************//
 task init_test_8_cache;
     procesador.cache.cache_memory[0] = 128'h01e60293027346330030039301e00313;
     procesador.cache.cache_memory[1] = 128'h005605930040051301a6049300400413;
@@ -325,6 +330,17 @@ task init_test_9_cache;
     procesador.cache.cache_memory[2] = 128'h00100813006607930040071301bb8693;
     procesador.cache.cache_memory[3] = 128'h00500a13004009930030091300200893;
     procesador.cache.cache_memory[4] = 128'h000000000000006f00700b1300600a93;
+    procesador.cache.cache_memory[5] = 128'h00000000000000000000000000000000;
+    procesador.cache.cache_memory[6] = 128'h00000000000000000000000000000000;
+    procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;
+endtask
+
+task init_test_10_cache;
+    procesador.cache.cache_memory[0] = 128'h01e60293027346330030039301e00313;
+    procesador.cache.cache_memory[1] = 128'h0046051301a60493027346b3027605b3;
+    procesador.cache.cache_memory[2] = 128'h00000000000000000000006f00460b93;
+    procesador.cache.cache_memory[3] = 128'h00000000000000000000000000000000;
+    procesador.cache.cache_memory[4] = 128'h00000000000000000000000000000000;
     procesador.cache.cache_memory[5] = 128'h00000000000000000000000000000000;
     procesador.cache.cache_memory[6] = 128'h00000000000000000000000000000000;
     procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;
@@ -466,6 +482,19 @@ task fill_up_expected_rf_test_9;
 	expected_rf[21] =32'h06;
 	expected_rf[22] =32'h07;
 	expected_rf[23] =32'h04;
+endtask
+
+task fill_up_expected_rf_test_10;
+	expected_rf[2] =32'h7fffefe4;
+	expected_rf[5] =32'h28;
+	expected_rf[6] =32'h1E;
+	expected_rf[7] =32'h03;
+	expected_rf[9] =32'h24;
+	expected_rf[10] =32'h0E;
+	expected_rf[11] =32'h1E;
+	expected_rf[12] =32'h0A;
+	expected_rf[13] =32'h0A;
+	expected_rf[23] =32'h0E;
 endtask
 
 always @(procesador.dispatcher.i_fetch_instruction) begin
