@@ -274,7 +274,8 @@ exec_fifo #(.DEPTH(4)) ld_st_exec_fifo(
     .data_out(exec_mem_issue_data.rsv_station_data),//exec_ld_st_fifo_data_out),
     .o_full(exec_ld_st_fifo_ctrl.queue_full),
     .empty(exec_ld_st_fifo_ctrl.queue_empty),
-    .issue_queue_rdy(exec_mem_issue_data.issue_rdy)//mem_issue_rdy)
+    .issue_queue_rdy(exec_mem_issue_data.issue_rdy),//mem_issue_rdy)
+    .issue_completed(issue_done_mem)
 );
 
 exec_rsv_station_shift #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) mult_exec_fifo(

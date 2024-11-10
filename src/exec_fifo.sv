@@ -15,6 +15,7 @@ module exec_fifo #(parameter DEPTH=4)(
     input [5:0] cdb_tag,
     input cdb_valid,
     input [31:0] cdb_data,
+    input issue_completed,
     output ld_st_fifo_data data_out,
     output o_full,
     output empty,
@@ -111,7 +112,7 @@ always @(posedge i_clk, negedge i_rst_n) begin
         rp = 7'b0;
     end
     //fifo write data
-    else if(issue_queue_rdy)begin
+    else if(issue_completed)begin
         rp=rp+1;
      //   if(rp[POINTER_WIDTH])begin
      //       rp=7'b0;

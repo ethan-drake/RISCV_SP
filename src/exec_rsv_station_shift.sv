@@ -44,64 +44,6 @@ always @(posedge i_clk, negedge i_rst_n) begin
         shifted=4'b0000;
     end
     else begin
-        /*
-        //element 0
-        if(~(occupied[0] & occupied_mask[0]))begin
-            if(issue_completed)begin//shifting
-                if(occupied[1])begin //if [1] has data get from it
-                    rsv_station[0]=rsv_station[1];
-                    occupied[0]=1;
-                    occupied[1]=0;
-                end
-            end
-            else if(w_en & !full)begin//writing
-                rsv_station[0]=data_in;
-                occupied[0]=1'b1;
-                occupied_mask[0]=1;
-            end
-        end
-        //element 1
-        if(~(occupied[1] & occupied_mask[1]))begin
-            if(issue_completed)begin//shifting
-                if(occupied[2])begin //if [2] has data get from it
-                    rsv_station[1]=rsv_station[2];
-                    occupied[1]=1;
-                    occupied[2]=0;
-                end
-            end
-            else if(w_en & !full)begin//writing
-                rsv_station[1]=data_in;
-                occupied[1]=1'b1;
-                occupied_mask[1]=1;
-            end
-        end
-
-        //element 2
-        if(~(occupied[2] & occupied_mask[2]))begin
-            if(issue_completed)begin//shifting
-                if(occupied[3])begin //if [3] has data get from it
-                    rsv_station[2]=rsv_station[3];
-                    occupied[2]=1;
-                    occupied[3]=0;
-                end
-            end
-            else if(w_en & !full)begin//writing
-                rsv_station[2]=data_in;
-                occupied[2]=1'b1;
-                occupied_mask[2]=1;
-            end
-        end
-
-        //element 3
-        if(~(occupied[3] & occupied_mask[3]))begin
-            if(w_en & !full)begin//writing
-                rsv_station[3]=data_in;
-                occupied[3]=1'b1;
-                occupied_mask[3]=1;
-            end
-        end
-        */
-        //////////////////// TENEMOS EL PROBLEMA EN QUE AL MOMENTO DE HACER SHIFT A LOS 33NS NO SE PASA EL OCCUPIED PORQUE TIENE CONFLICTOS CON EL OCCUPIED MASK
         if(issue_completed)begin //shifting
         //rsv_station 0
             if(~(occupied[0] & occupied_mask[0]))begin //check if its not occupied
@@ -217,51 +159,7 @@ always @(posedge i_clk) begin
         end
     end
 end
-//writing
-/*
-always @(posedge i_clk, negedge i_rst_n) begin
-    //Reset or flush
-    if(!i_rst_n | flush)begin
-        occupied = 0;
-        rsv_station[0] = 0;
-        rsv_station[1] = 0;
-        rsv_station[2] = 0;
-        rsv_station[3] = 0;
-    end
-    //fifo write data
-    else if(w_en & !full)begin
-        if(~(occupied[0] & occupied_mask[0]))begin
-            rsv_station[0]=data_in;
-            occupied[0]=1'b1;
-            occupied_mask[0]=1;
-        end
-        else if(~(occupied[1] & occupied_mask[1]))begin
-            rsv_station[1]=data_in;
-            occupied[1]=1'b1;
-            occupied_mask[1]=1;
-        end
-        else if(~(occupied[2] & occupied_mask[2]))begin
-            rsv_station[2]=data_in;
-            occupied[2]=1'b1;
-            occupied_mask[2]=1;
-        end
-        else if(~(occupied[3] & occupied_mask[3]))begin
-            rsv_station[3]=data_in;
-            occupied[3]=1'b1;
-            occupied_mask[3]=1;
-        end
-    end
 
-    if(flush)begin
-        occupied=0;
-        rsv_station[0] = 0;
-        rsv_station[1] = 0;
-        rsv_station[2] = 0;
-        rsv_station[3] = 0;
-    end
-
-end
-*/
 //full signal logic
 always @(*) begin
     if(!i_rst_n)begin
@@ -271,7 +169,7 @@ always @(*) begin
         full = 0;
     end
     else begin
-        full = (occupied == 4'hF && issue_queue_rdy == 1'b0) ? 1 :0;
+        full = (occupied == 4'hF && issue_completed == 1'b0) ? 1 :0;
     end
 end
 //empty signal logic
@@ -290,7 +188,9 @@ end
 //update occupied
 always @(posedge i_clk) begin
     if (!empty)begin//rd_en)begin
-        occupied = occupied & occupied_mask;
+        if(issue_completed)begin
+            occupied = occupied & occupied_mask;
+        end
     end
 end
 
@@ -305,22 +205,22 @@ always @(*) begin
         //check if location is occupied and rs2 is valid and rs1 is valid
         if(occupied[0] && rsv_station[0][12]==1'b1 && rsv_station[0][51]==1'b1)begin
             data_out = rsv_station[0];
-            occupied_mask = 4'b1110;
+            occupied_mask = issue_completed ? 4'b1110 : 4'b1111;
             issue_queue_rdy=1'b1;
         end
         else if(occupied[1] && rsv_station[1][12]==1'b1 && rsv_station[1][51]==1'b1)begin
             data_out = rsv_station[1];
-            occupied_mask = 4'b1101;
+            occupied_mask = issue_completed ? 4'b1101 : 4'b1111;
             issue_queue_rdy=1'b1;
         end
         else if(occupied[2] && rsv_station[2][12]==1'b1 && rsv_station[2][51]==1'b1)begin
             data_out = rsv_station[2];
-            occupied_mask = 4'b1011;
+            occupied_mask = issue_completed ? 4'b1011 : 4'b1111;
             issue_queue_rdy=1'b1;
         end
         else if(occupied[3] && rsv_station[3][12]==1'b1 && rsv_station[3][51]==1'b1)begin
             data_out = rsv_station[3];
-            occupied_mask = 4'b0111;
+            occupied_mask = issue_completed ? 4'b0111 : 4'b1111;
             issue_queue_rdy=1'b1;
         end
         else begin
