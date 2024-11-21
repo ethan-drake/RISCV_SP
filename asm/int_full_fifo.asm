@@ -1,3 +1,4 @@
+#TEST 2
 addi t1, zero, 0x1e
 addi t2, zero, 0x3
 div a2,t1,t2
