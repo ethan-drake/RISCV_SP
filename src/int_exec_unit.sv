@@ -34,6 +34,9 @@ always @(*) begin
                             int_submit.cdb_result=0;
                         end
                     end
+                    3'h2:begin
+                        int_submit.cdb_result=int_exec_fifo_data.common_data.rs1_data<int_exec_fifo_data.common_data.rs2_data ? 1 : 0;
+                    end
                     3'h4:begin
                         int_submit.cdb_result=int_exec_fifo_data.common_data.rs1_data^int_exec_fifo_data.common_data.rs2_data;
                     end

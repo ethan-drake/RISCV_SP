@@ -10,6 +10,11 @@ typedef enum bit[6:0]{
    AUIPC_TYPE=7'b0010111
 } riscv_opcode;
 
+typedef enum bit { 
+   NORMAL_OP,
+   STALL_BRANCH
+ }stall_br_enum;
+
 typedef struct packed {
   bit [5:0] cdb_tag;
   bit cdb_valid;

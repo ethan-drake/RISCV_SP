@@ -33,6 +33,7 @@ initial begin
 		"TEST_1":begin
 			$display("EXECUTING:  first verification");
 			init_test_1_cache();
+			init_test_11_RAM();
 			fill_up_expected_rf_test_1();
 			fill_up_expected_mem_test_1();
 		end 
@@ -84,14 +85,21 @@ initial begin
 			init_test_10_cache();
 			fill_up_expected_rf_test_10();
 		end 
+		"TEST_11":begin
+			$display("EXECUTING:  FINAL verification (FINAL SORT CODE)");
+			init_test_11_RAM();
+			init_test_11_cache();
+			
+			//fill_up_expected_rf_test_11();
+		end 
 		default:begin
 			$warning("NO MATCH TEST FOUND, executing first test by default");
 			init_test_1_cache();
 		end 
 	endcase 
-
 	init_values();
 	reset_device();
+	init_RAM(test_name);
 end
 
 
@@ -346,6 +354,52 @@ task init_test_10_cache;
     procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;
 endtask
 
+task init_test_11_cache;
+    procesador.cache.cache_memory[0] = 128'h00400213003001930020011300100093;
+    procesador.cache.cache_memory[1] = 128'h00800413007003930060031300500293;
+    procesador.cache.cache_memory[2] = 128'h00c0061300b0059300a0051300900493;
+    procesador.cache.cache_memory[3] = 128'h0100081300f0079300e0071300d00693;
+    procesador.cache.cache_memory[4] = 128'h01400a13013009930120091301100893;
+    procesador.cache.cache_memory[5] = 128'h01800c1301700b9301600b1301500a93;
+    procesador.cache.cache_memory[6] = 128'h01c00e1301b00d9301a00d1301900c93;
+    procesador.cache.cache_memory[7] = 128'h0000003301f00f9301e00f1301d00e93;
+    procesador.cache.cache_memory[8] = 128'h0031013303f28133100101b700020fb3;
+    procesador.cache.cache_memory[9] = 128'h0022233301f18233100101b700000033;
+    procesador.cache.cache_memory[10] = 128'h00d72333000227030001a68302030a63;
+    procesador.cache.cache_memory[11] = 128'h01f181b300d2202300e1a02300030663;
+    procesador.cache.cache_memory[12] = 128'h41f10133fc130ee30022233301f20233;
+    procesador.cache.cache_memory[13] = 128'h01fd0db310010d3700000033fc1ff06f;
+    procesador.cache.cache_memory[14] = 128'h000daf03000d2e8301ae0e3303f28e33;
+    procesador.cache.cache_memory[15] = 128'h01fd0d3300000063000c846301df2cb3;
+    procesador.cache.cache_memory[16] = 128'h00000033fe0000e301cd846301fd8db3;
+    procesador.cache.cache_memory[17] = 128'h01f284b3000281330000003300000033;
+    procesador.cache.cache_memory[18] = 128'h00118233000281b30000033300148533;
+    procesador.cache.cache_memory[19] = 128'h0006ab83008686b31001043703f186b3;
+    procesador.cache.cache_memory[20] = 128'h0087073303f20733000b8b3300068633;
+    procesador.cache.cache_memory[21] = 128'h0007063300030663016c233300072c03;
+    procesador.cache.cache_memory[22] = 128'hfc000ee300a2046300120233000c0b33;
+    procesador.cache.cache_memory[23] = 128'h001181b3017620230166a02300000033;
+    procesador.cache.cache_memory[24] = 128'h00000033fa0004e30091846300118233;
+    procesador.cache.cache_memory[25] = 128'h03f28e3301fd0db303f28d3300000033;
+    procesador.cache.cache_memory[26] = 128'h008d88330007ae83008d07b301ae0e33;
+    procesador.cache.cache_memory[27] = 128'h00000063001c846301eeacb300082f03;
+    procesador.cache.cache_memory[28] = 128'hfc000ce301cd846301fd8db301fd0d33;
+    procesador.cache.cache_memory[29] = 128'h000000000000006f0000003300000033;
+endtask
+
+task init_test_11_RAM;
+	procesador.issue_unit.functional_unit_group.exec_mem_issue.memory_ram.ram[0] = 32'h4;
+	procesador.issue_unit.functional_unit_group.exec_mem_issue.memory_ram.ram[1] = 32'h2;
+	procesador.issue_unit.functional_unit_group.exec_mem_issue.memory_ram.ram[2] = 32'h5;
+	procesador.issue_unit.functional_unit_group.exec_mem_issue.memory_ram.ram[3] = 32'h3;
+	procesador.issue_unit.functional_unit_group.exec_mem_issue.memory_ram.ram[4] = 32'h1;
+	procesador.issue_unit.functional_unit_group.exec_mem_issue.memory_ram.ram[5] = 32'h4;
+	procesador.issue_unit.functional_unit_group.exec_mem_issue.memory_ram.ram[6] = 32'h2;
+	procesador.issue_unit.functional_unit_group.exec_mem_issue.memory_ram.ram[7] = 32'h5;
+	procesador.issue_unit.functional_unit_group.exec_mem_issue.memory_ram.ram[8] = 32'h3;
+	procesador.issue_unit.functional_unit_group.exec_mem_issue.memory_ram.ram[9] = 32'h1;
+endtask
+
 task fill_up_expected_rf_test_1;
 	expected_rf[2] =32'h7fffefe4;
 	expected_rf[5] =32'h21;
@@ -534,34 +588,22 @@ task check_values();
 	end
 endtask
 
+task init_RAM(string test);
+	if(test == "TEST_11")begin
+		init_test_11_RAM();
+	end
+endtask
+
 task init_values();
 	clk = 0;
 	rst_n = 1;
-	//jmp_branch_address = 0;
-	//jmp_branch_valid = 0;
-	//current_opt=0;
-	//bfm_result=0;
-	//branch_lock=0;
-	//cdb_valid = 1'b0;
-	//tb_int_result = 0;
-	//cdb_tag = 6'h0;
-	//cdb_branch=1'b0;
-	//cdb_branch_taken=1'b0;
 endtask
 
 task reset_device();
 	#1 rst_n = 0;
 	#2 rst_n = 1;
 endtask
-/*
-task set_rd_enable;
-	#0 rd_en = 1'b1;
-endtask
 
-task clear_rd_enable;
-	rd_en = 1'b0;
-endtask
-*/
 always begin
 	#1 clk = ~clk;
 end

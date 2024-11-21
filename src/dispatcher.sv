@@ -323,6 +323,20 @@ assign any_rsv_station_full=(exec_int_fifo_ctrl.queue_full | exec_ld_st_fifo_ctr
 
 assign dispatch_rd_en = cdb_branch | (~branch_detected & (~any_rsv_station_full));
 
+dispatch_sm dispatch_branch_sm(
+    .clk(i_clk),
+    .rst_n(i_rst_n),
+    .branch_detected(branch_detected),
+    .queue_full(any_rsv_station_full),
+    .cdb_branch(cdb_branch),
+    .cdb_branch_taken(cdb_branch_taken),
+    .stall_br(),
+    .dispatch_next_instr()
+);
+
+
+//cdb_branch & branch_detected //scenario were cdb branch is high at same time as branch detected | any_rsv_station_full
+
 assign fetch_next_instr = (cdb_branch==1) && (cdb_branch_taken==0) ? 1:0;
 
 endmodule
