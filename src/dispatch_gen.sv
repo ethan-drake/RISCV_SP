@@ -17,6 +17,7 @@ module dispatch_gen(
     input [31:0] jmp_br_addr,
     input branch_stall,
     input br_stall_one_shot,
+    input br_stall_one_shot_2,
     output common_fifo_data o_mult_fifo_data,
     output common_fifo_data o_div_fifo_data,
     output reg int_dispatch_en,
@@ -58,7 +59,7 @@ always @(*) begin
         cmn_fifo_data.rs2_data_valid = ~rs2_tag[6];//1'b0;
     end
 
-    if (!branch_stall || br_stall_one_shot)begin
+    if (!branch_stall || br_stall_one_shot || br_stall_one_shot_2)begin
         case (opcode)
             R_TYPE: begin
                 if(func3==0 && func7==7'h1)begin

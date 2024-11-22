@@ -92,6 +92,12 @@ initial begin
 			
 			//fill_up_expected_rf_test_11();
 		end 
+		"TEST_12":begin
+			$display("EXECUTING:  verification 12 (non taken branch followed by taken branch)");
+			init_test_12_cache();
+			
+			//fill_up_expected_rf_test_11();
+		end 
 		default:begin
 			$warning("NO MATCH TEST FOUND, executing first test by default");
 			init_test_1_cache();
@@ -384,7 +390,23 @@ task init_test_11_cache;
     procesador.cache.cache_memory[26] = 128'h008d88330007ae83008d07b301ae0e33;
     procesador.cache.cache_memory[27] = 128'h00000063001c846301eeacb300082f03;
     procesador.cache.cache_memory[28] = 128'hfc000ce301cd846301fd8db301fd0d33;
-    procesador.cache.cache_memory[29] = 128'h000000000000006f0000003300000033;
+    procesador.cache.cache_memory[29] = 128'h10010fb7000000330000003300000033;
+    procesador.cache.cache_memory[30] = 128'h0000053300470f330090059300400213;
+    procesador.cache.cache_memory[31] = 128'h000fa183004f8fb302b50263000fa103;
+    procesador.cache.cache_memory[32] = 128'hfe9ff06f00128463001505330021a2b3;
+    procesador.cache.cache_memory[33] = 128'h004f0833002f2023fe1ff06f00018133;
+    procesador.cache.cache_memory[34] = 128'h000000000000006ffc6108e300082303;
+endtask
+
+task init_test_12_cache;
+    procesador.cache.cache_memory[0] = 128'h01300993000004630030031300900293;
+    procesador.cache.cache_memory[1] = 128'h0002806301600b1301500a9301400a13;
+    procesador.cache.cache_memory[2] = 128'h0002806301900c9301800c1301700b93;
+    procesador.cache.cache_memory[3] = 128'h000000000000000000000000fc0008e3;
+    procesador.cache.cache_memory[4] = 128'h00000000000000000000000000000000;
+    procesador.cache.cache_memory[5] = 128'h00000000000000000000000000000000;
+    procesador.cache.cache_memory[6] = 128'h00000000000000000000000000000000;
+    procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;
 endtask
 
 task init_test_11_RAM;
@@ -550,6 +572,8 @@ task fill_up_expected_rf_test_10;
 	expected_rf[13] =32'h0A;
 	expected_rf[23] =32'h0E;
 endtask
+
+
 
 always @(procesador.dispatcher.i_fetch_instruction) begin
 	 //wait for end of program to check values, last isntr is 0x6F (fin: j fin)

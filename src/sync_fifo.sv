@@ -13,6 +13,7 @@ module sync_fifo #(parameter DEPTH=4, DATA_WIDTH=128)(
     input rd_en,
     input flush,
     input [1:0] jmp_branch_address_b_3_2,
+    input second_branch_instr,
     output [DATA_WIDTH-1:0] data_out,
     output o_full,
     output [4:0] o_rp,
@@ -70,7 +71,7 @@ always @(posedge i_clk, negedge i_rst_n) begin
         rp = 5'b0;
     end
     //fifo write data
-    else if(rd_en)begin
+    else if(rd_en|second_branch_instr)begin
         if (fetch_next_instr)begin
             rp=rp+2;
         end

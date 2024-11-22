@@ -23,6 +23,7 @@ module dispatcher(
     input cdb_branch,
     input cdb_branch_taken,
     output fetch_next_instr,
+    output second_branch_instr,
     output int_issue_data exec_int_issue_data,
     output common_issue_data exec_mult_issue_data,
     output common_issue_data exec_div_issue_data,
@@ -79,6 +80,7 @@ wire [4:0] wen_regfile_rst;
 wire jmp_detected,branch_detected;
 wire br_stall_one_shot;
 wire any_rsv_station_full;
+wire br_stall_one_shot_2;
 
 //wire int_issue_rdy,mem_issue_rdy,mult_issue_rdy,div_issue_rdy;
 
@@ -197,6 +199,17 @@ ffd_one_shot branch_detected_one_shot(
     .release_one_shot(cdb_branch),
     .q(br_stall_one_shot)
 );
+assign second_branch_instr = cdb_branch & ~cdb_branch_taken & branch_detected & fetch_next_instr;
+
+ffd_one_shot second_branch_detected_one_shot(
+    .i_clk(i_clk),
+    .i_rst_n(i_rst_n),
+    .i_en(second_branch_instr),
+    .d(1'b1),
+    .hold(~exec_int_fifo_ctrl.queue_full),
+    .release_one_shot(cdb_branch),
+    .q(br_stall_one_shot_2)
+);
 
 //Dispatch packet generator
 
@@ -217,6 +230,7 @@ dispatch_gen dispatch_gen(
     .rd_tag(tag_out_tf),
     .branch_stall(branch_detected),
     .br_stall_one_shot(br_stall_one_shot),
+    .br_stall_one_shot_2(br_stall_one_shot_2),
     .o_mult_fifo_data(exec_mult_fifo_data_in),
     .o_div_fifo_data(exec_div_fifo_data_in),
     .int_dispatch_en(exec_int_fifo_ctrl.dispatch_en),
@@ -320,8 +334,18 @@ assign dispatch_jmp_br_addr = jmp_br_addr; //cdb branch logic TBD
 assign any_rsv_station_full=(exec_int_fifo_ctrl.queue_full | exec_ld_st_fifo_ctrl.queue_full | exec_mult_fifo_ctrl.queue_full | exec_div_fifo_ctrl.queue_full);
 
 //assign dispatch_rd_en = cdb_branch | (~branch_detected & (~(exec_int_fifo_ctrl.queue_full | exec_ld_st_fifo_ctrl.queue_full | exec_mult_fifo_ctrl.queue_full | exec_div_fifo_ctrl.queue_full)));
+assign fetch_next_instr = (cdb_branch==1) && (cdb_branch_taken==0) ? 1:0;
 
-assign dispatch_rd_en = cdb_branch | (~branch_detected & (~any_rsv_station_full));
+assign dispatch_rd_en = (~(fetch_next_instr & branch_detected)) & (cdb_branch | (~branch_detected & (~any_rsv_station_full)));
+
+//always @(*) begin
+//    if (cdb_branch==1'b1 && any_rsv_station_full==1'b0) begin
+//        
+//    end
+//    else begin
+//        dispatch_rd_en = 1'b1;
+//    end
+//end
 
 dispatch_sm dispatch_branch_sm(
     .clk(i_clk),
@@ -334,9 +358,7 @@ dispatch_sm dispatch_branch_sm(
     .dispatch_next_instr()
 );
 
-
 //cdb_branch & branch_detected //scenario were cdb branch is high at same time as branch detected | any_rsv_station_full
 
-assign fetch_next_instr = (cdb_branch==1) && (cdb_branch_taken==0) ? 1:0;
 
 endmodule
