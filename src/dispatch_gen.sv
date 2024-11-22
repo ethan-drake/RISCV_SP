@@ -3,6 +3,7 @@
 module dispatch_gen(
     input [4:0] rs1,
     input [4:0] rs2,
+    input [4:0] rd,
     input [31:0] rs1_data,
     input [31:0] rs2_data,
     input cdb_rs1_sel,
@@ -17,6 +18,7 @@ module dispatch_gen(
     input [31:0] jmp_br_addr,
     input branch_stall,
     input br_stall_one_shot,
+    input br_stall_one_shot_2,
     output common_fifo_data o_mult_fifo_data,
     output common_fifo_data o_div_fifo_data,
     output reg int_dispatch_en,
@@ -58,7 +60,9 @@ always @(*) begin
         cmn_fifo_data.rs2_data_valid = ~rs2_tag[6];//1'b0;
     end
 
-    if (!branch_stall || br_stall_one_shot)begin
+    cmn_fifo_data.wb_valid = 1'b1;
+
+    if (!branch_stall || br_stall_one_shot || br_stall_one_shot_2)begin
         case (opcode)
             R_TYPE: begin
                 if(func3==0 && func7==7'h1)begin
@@ -81,6 +85,10 @@ always @(*) begin
                     div_dispatch_en = 1'b0;
                     ld_st_dispatch_en = 1'b0;
                 end
+                
+                if (rd == 0)begin
+                    cmn_fifo_data.wb_valid = 1'b0;
+                end
             end
             I_TYPE: begin
                 cmn_fifo_data.rs2_data = immediate;
@@ -89,6 +97,10 @@ always @(*) begin
                 mult_dispatch_en = 1'b0;
                 div_dispatch_en = 1'b0;
                 ld_st_dispatch_en = 1'b0;
+                
+                if (rd == 0)begin
+                    cmn_fifo_data.wb_valid = 1'b0;
+                end
             end
             LOAD_TYPE: begin
                 cmn_fifo_data.rs2_data_valid = 1'b1;
@@ -96,6 +108,10 @@ always @(*) begin
                 mult_dispatch_en = 1'b0;
                 div_dispatch_en = 1'b0;
                 ld_st_dispatch_en = 1'b1;
+                
+                if (rd == 0)begin
+                    cmn_fifo_data.wb_valid = 1'b0;
+                end
             end
             STORE_TYPE: begin
                 int_dispatch_en = 1'b0;

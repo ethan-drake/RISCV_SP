@@ -14,6 +14,7 @@ module ifq(
     input [31:0] jmp_branch_address,
     input jmp_branch_valid,
     input fetch_next_instr,
+    input second_branch_instr,
     output [31:0] pc_in,
     output o_rd_en,
     output abort,
@@ -44,6 +45,7 @@ sync_fifo #(.DEPTH(4),.DATA_WIDTH(128)) fifo(
     .w_en(dout_valid),
     .rd_en(rd_en),
     .flush(jmp_branch_valid),
+    .second_branch_instr(second_branch_instr),
     .jmp_branch_address_b_3_2(jmp_branch_address[3:2]),
     .data_out(fifo_out),
     .o_rp(rp),
@@ -58,7 +60,7 @@ ffd_param_pc #(.LENGTH(32)) ffd_pc_out(
 	//inputs
 	.i_clk(i_clk),
 	.i_rst_n(i_rst_n),
-	.i_en(rd_en|jmp_branch_valid),
+	.i_en(rd_en|jmp_branch_valid|fetch_next_instr),
 	.d(pc_out_w_d),
 	.q(pc_out_w)
 );
@@ -71,7 +73,7 @@ ffd_param_pc #(.LENGTH(32)) ffd_pc_in(
 	.d(pc_in_w_d+16),
 	.q(pc_in_w)
 );
-
+//wire [31:0]pc_selector = (pc_out>>2);
 double_multiplexor_param #(.LENGTH(32)) ifq_mux (
     .i_a(fifo_out[31:0]),
     .i_b(fifo_out[63:32]),
@@ -116,7 +118,9 @@ multiplexor_param #(.LENGTH(32)) branch_not_taken_bypass (
 );
 
 assign pc_out = fetch_next_instr ? (pc_out_w+4) : pc_out_w;
-assign pc_out_w_d = fetch_next_instr? (pc_out_w+8) : jmp_branch_valid ? jmp_branch_address : (pc_out_w+4);
+//assign pc_out_w_d = second_branch_instr ? (pc_out_w+4): fetch_next_instr? (pc_out_w+8) : jmp_branch_valid ? jmp_branch_address : (pc_out_w+4);
+assign pc_out_w_d = second_branch_instr ? (pc_out_w+4): jmp_branch_valid ? jmp_branch_address : fetch_next_instr ? (pc_out_w+8) : (pc_out_w+4);
+
 assign pc_in_w_d = jmp_branch_valid ? jmp_branch_address : pc_in_w;
 assign pc_in = jmp_branch_valid ? jmp_branch_address : pc_in_w;
 assign o_rd_en = ~is_full;

@@ -6,7 +6,6 @@ addi t0, a2, 0x1e
 addi s0, zero, 0x4
 addi s1, a2, 0x1a
 addi a0, zero, 0x4
-#addi a1, a2, 0x5
 addi s7, zero, 0x4
 addi a3, s7, 0x1b
 addi a4, zero, 0x4

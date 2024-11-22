@@ -34,6 +34,9 @@ always @(*) begin
                             int_submit.cdb_result=0;
                         end
                     end
+                    3'h2:begin
+                        int_submit.cdb_result=int_exec_fifo_data.common_data.rs1_data<int_exec_fifo_data.common_data.rs2_data ? 1 : 0;
+                    end
                     3'h4:begin
                         int_submit.cdb_result=int_exec_fifo_data.common_data.rs1_data^int_exec_fifo_data.common_data.rs2_data;
                     end
@@ -75,7 +78,7 @@ always @(*) begin
             end
         endcase
             int_submit.cdb_tag = int_exec_fifo_data.common_data.rd_tag;
-            int_submit.cdb_valid = 1;
+            int_submit.cdb_valid = 1 & int_exec_fifo_data.common_data.wb_valid;
             int_submit.cdb_branch = 0;
             int_submit.cdb_branch_taken = 0;
             //int_submit.issue_done=1;

@@ -10,6 +10,11 @@ typedef enum bit[6:0]{
    AUIPC_TYPE=7'b0010111
 } riscv_opcode;
 
+typedef enum bit { 
+   NORMAL_OP,
+   STALL_BRANCH
+ }stall_br_enum;
+
 typedef struct packed {
   bit [5:0] cdb_tag;
   bit cdb_valid;
@@ -27,6 +32,7 @@ typedef enum bit[1:0] {
 } fifo_data_type;
 
 typedef struct packed {
+   logic wb_valid; //84, no mover porque altera el orden de bits para el cdb update
    logic [31:0] rs1_data;  //83:52
    logic rs1_data_valid;   //51
    logic [5:0] rs1_tag;    //50:45

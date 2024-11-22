@@ -24,11 +24,6 @@ def read_and_process_file(input_file_path):
     return tb_cache
 
 def main(asm_file_path):
-    #input_file_path = 'input.txt'  # Path to the input file
-    #existing_file_path = 'existing.txt'  # Path to the existing file to be updated
-    #target_text = 'TARGET'  # Text to be replaced in the existing file
-    
-    # Read and process the input file
     cache_lines = read_and_process_file(asm_file_path)
     for line in cache_lines:
         print("    "+line)
@@ -37,8 +32,6 @@ def main(asm_file_path):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generate cache lines from asm code')
     parser.add_argument('--asm', required=True, help='Path to the asm txt file')
-    #parser.add_argument('--existing', required=True, help='Path to the existing file to be updated')
-    #parser.add_argument('--target', required=True, help='Text to be replaced in the existing file')
     
     args = parser.parse_args()
     

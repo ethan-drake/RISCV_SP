@@ -22,6 +22,14 @@ bit [31:0] memory [0:31];
 bit [31:0] expected_rf [0:31];
 bit [31:0] expected_mem [0:31];
 int simulation_errors=0;
+bit [7:0] pc_instr_lookup;
+reg [31:0] expected_rom_memory [0:(32*32)-1];
+
+//Initial data with program to execute
+//initial begin
+//	// program
+//	$readmemh("../asm/sort_final_project.txt", expected_rom_memory);
+//end
 
 initial begin
 	string test_name;
@@ -32,66 +40,91 @@ initial begin
   	case (test_name)
 		"TEST_1":begin
 			$display("EXECUTING:  first verification");
+			$readmemh("../asm/riscv_dispatch.txt", expected_rom_memory);
 			init_test_1_cache();
+			init_test_11_RAM();
 			fill_up_expected_rf_test_1();
 			fill_up_expected_mem_test_1();
 		end 
 		"TEST_2":begin
 			$display("EXECUTING:  second verification (full int rsv station)");
+			$readmemh("../asm/int_full_fifo.txt", expected_rom_memory);
 			init_test_2_cache();
 			fill_up_expected_rf_test_2();
 		end 
 		"TEST_3":begin
 			$display("EXECUTING:  third verification (full mult rsv station)");
+			$readmemh("../asm/mult_full_fifo.txt", expected_rom_memory);
 			init_test_3_cache();
 			fill_up_expected_rf_test_3();
 		end 
 		"TEST_4":begin
 			$display("EXECUTING:  fourth verification (full div rsv station)");
+			$readmemh("../asm/div_full_fifo.txt", expected_rom_memory);
 			init_test_4_cache();
 			fill_up_expected_rf_test_4();
 		end 
 		"TEST_5":begin
 			$display("EXECUTING:  fifth verification (full mem rsv station)");
+			$readmemh("../asm/mem_full_fifo.txt", expected_rom_memory);
 			init_test_5_cache();
 			fill_up_expected_rf_test_5();
 			fill_up_expected_mem_test_5();
 		end 
 		"TEST_6":begin
 			$display("EXECUTING:  sixth verification (sw and lw with adds after)");
+			$readmemh("../asm/int_full_invalid.txt", expected_rom_memory);
 			init_test_6_cache();
 			fill_up_expected_rf_test_6();
 			fill_up_expected_mem_test_6();
 		end 
 		"TEST_7":begin
 			$display("EXECUTING:  seventh verification (Two stores led by two loads with toggling base address between them)");
+			$readmemh("../asm/mem_ops.txt", expected_rom_memory);
 			init_test_7_cache();
 			fill_up_expected_rf_test_7();
 			fill_up_expected_mem_test_7();
 		end 
 		"TEST_8":begin
 			$display("EXECUTING:  eight verification (Try to leave old int instrs unexecuted)");
+			$readmemh("../asm/test_8.txt", expected_rom_memory);
 			init_test_8_cache();
 			fill_up_expected_rf_test_8();
 		end 
 		"TEST_9":begin
 			$display("EXECUTING:  ninth verification (Update int rsv station and shift at same time)");
+			$readmemh("../asm/test_9.txt", expected_rom_memory);
 			init_test_9_cache();
 			fill_up_expected_rf_test_9();
 		end 
 		"TEST_10":begin
 			$display("EXECUTING:  tenth verification (More that one ready at the same time for the  issue unit)");
+			$readmemh("../asm/test_10.txt", expected_rom_memory);
 			init_test_10_cache();
 			fill_up_expected_rf_test_10();
+		end 
+		"TEST_11":begin
+			$display("EXECUTING:  FINAL verification (FINAL SORT CODE)");
+			$readmemh("../asm/sort_final_project.txt", expected_rom_memory);
+			init_test_11_RAM();
+			init_test_11_cache();
+			fill_up_expected_rf_test_11();
+			fill_up_expected_mem_test_11();
+		end 
+		"TEST_12":begin
+			$display("EXECUTING:  verification 12 (non taken branch followed by taken branch)");
+			init_test_12_cache();
+			
+			//fill_up_expected_rf_test_11();
 		end 
 		default:begin
 			$warning("NO MATCH TEST FOUND, executing first test by default");
 			init_test_1_cache();
 		end 
 	endcase 
-
 	init_values();
 	reset_device();
+	init_RAM(test_name);
 end
 
 
@@ -346,6 +379,68 @@ task init_test_10_cache;
     procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;
 endtask
 
+task init_test_11_cache;
+    procesador.cache.cache_memory[0] = 128'h00400213003001930020011300100093;
+    procesador.cache.cache_memory[1] = 128'h00800413007003930060031300500293;
+    procesador.cache.cache_memory[2] = 128'h00c0061300b0059300a0051300900493;
+    procesador.cache.cache_memory[3] = 128'h0100081300f0079300e0071300d00693;
+    procesador.cache.cache_memory[4] = 128'h01400a13013009930120091301100893;
+    procesador.cache.cache_memory[5] = 128'h01800c1301700b9301600b1301500a93;
+    procesador.cache.cache_memory[6] = 128'h01c00e1301b00d9301a00d1301900c93;
+    procesador.cache.cache_memory[7] = 128'h0000003301f00f9301e00f1301d00e93;
+    procesador.cache.cache_memory[8] = 128'h0031013303f28133100101b700020fb3;
+    procesador.cache.cache_memory[9] = 128'h0022233301f18233100101b700000033;
+    procesador.cache.cache_memory[10] = 128'h00d72333000227030001a68302030a63;
+    procesador.cache.cache_memory[11] = 128'h01f181b300d2202300e1a02300030663;
+    procesador.cache.cache_memory[12] = 128'h41f10133fc130ee30022233301f20233;
+    procesador.cache.cache_memory[13] = 128'h01fd0db310010d3700000033fc1ff06f;
+    procesador.cache.cache_memory[14] = 128'h000daf03000d2e8301ae0e3303f28e33;
+    procesador.cache.cache_memory[15] = 128'h01fd0d3300000063000c846301df2cb3;
+    procesador.cache.cache_memory[16] = 128'h00000033fe0000e301cd846301fd8db3;
+    procesador.cache.cache_memory[17] = 128'h01f284b3000281330000003300000033;
+    procesador.cache.cache_memory[18] = 128'h00118233000281b30000033300148533;
+    procesador.cache.cache_memory[19] = 128'h0006ab83008686b31001043703f186b3;
+    procesador.cache.cache_memory[20] = 128'h0087073303f20733000b8b3300068633;
+    procesador.cache.cache_memory[21] = 128'h0007063300030663016c233300072c03;
+    procesador.cache.cache_memory[22] = 128'hfc000ee300a2046300120233000c0b33;
+    procesador.cache.cache_memory[23] = 128'h001181b3017620230166a02300000033;
+    procesador.cache.cache_memory[24] = 128'h00000033fa0004e30091846300118233;
+    procesador.cache.cache_memory[25] = 128'h03f28e3301fd0db303f28d3300000033;
+    procesador.cache.cache_memory[26] = 128'h008d88330007ae83008d07b301ae0e33;
+    procesador.cache.cache_memory[27] = 128'h00000063001c846301eeacb300082f03;
+    procesador.cache.cache_memory[28] = 128'hfc000ce301cd846301fd8db301fd0d33;
+    procesador.cache.cache_memory[29] = 128'h10010fb7000000330000003300000033;
+    procesador.cache.cache_memory[30] = 128'h0000053300470f330090059300400213;
+    procesador.cache.cache_memory[31] = 128'h000fa183004f8fb302b50263000fa103;
+    procesador.cache.cache_memory[32] = 128'hfe9ff06f00128463001505330021a2b3;
+    procesador.cache.cache_memory[33] = 128'h004f0833002f2023fe1ff06f00018133;
+    procesador.cache.cache_memory[34] = 128'h000000000000006ffc6108e300082303;
+endtask
+
+task init_test_12_cache;
+    procesador.cache.cache_memory[0] = 128'h01300993000004630030031300900293;
+    procesador.cache.cache_memory[1] = 128'h0002806301600b1301500a9301400a13;
+    procesador.cache.cache_memory[2] = 128'h0002806301900c9301800c1301700b93;
+    procesador.cache.cache_memory[3] = 128'h000000000000000000000000fc0008e3;
+    procesador.cache.cache_memory[4] = 128'h00000000000000000000000000000000;
+    procesador.cache.cache_memory[5] = 128'h00000000000000000000000000000000;
+    procesador.cache.cache_memory[6] = 128'h00000000000000000000000000000000;
+    procesador.cache.cache_memory[7] = 128'h00000000000000000000000000000000;
+endtask
+
+task init_test_11_RAM;
+	procesador.issue_unit.functional_unit_group.exec_mem_issue.memory_ram.ram[0] = 32'h4;
+	procesador.issue_unit.functional_unit_group.exec_mem_issue.memory_ram.ram[1] = 32'h2;
+	procesador.issue_unit.functional_unit_group.exec_mem_issue.memory_ram.ram[2] = 32'h5;
+	procesador.issue_unit.functional_unit_group.exec_mem_issue.memory_ram.ram[3] = 32'h3;
+	procesador.issue_unit.functional_unit_group.exec_mem_issue.memory_ram.ram[4] = 32'h1;
+	procesador.issue_unit.functional_unit_group.exec_mem_issue.memory_ram.ram[5] = 32'h4;
+	procesador.issue_unit.functional_unit_group.exec_mem_issue.memory_ram.ram[6] = 32'h2;
+	procesador.issue_unit.functional_unit_group.exec_mem_issue.memory_ram.ram[7] = 32'h5;
+	procesador.issue_unit.functional_unit_group.exec_mem_issue.memory_ram.ram[8] = 32'h3;
+	procesador.issue_unit.functional_unit_group.exec_mem_issue.memory_ram.ram[9] = 32'h1;
+endtask
+
 task fill_up_expected_rf_test_1;
 	expected_rf[2] =32'h7fffefe4;
 	expected_rf[5] =32'h21;
@@ -497,6 +592,68 @@ task fill_up_expected_rf_test_10;
 	expected_rf[23] =32'h0E;
 endtask
 
+task fill_up_expected_rf_test_11;
+	expected_rf[1] =32'h1;
+	expected_rf[2] =32'h1;
+	expected_rf[3] =32'h5;
+	expected_rf[4] =32'h4;
+	expected_rf[5] =32'h0;
+	expected_rf[6] =32'h0;
+	expected_rf[7] =32'h7;
+	expected_rf[8] =32'h10010000;
+	expected_rf[9] =32'h9;
+	expected_rf[10] =32'h9;
+	expected_rf[11] =32'h9;
+	expected_rf[12] =32'h10010024;
+	expected_rf[13] =32'h10010020;
+	expected_rf[14] =32'h10010024;
+	expected_rf[15] =32'h10010020;
+	expected_rf[16] =32'h1001002c;
+	expected_rf[17] =32'h11;
+	expected_rf[18] =32'h12;
+	expected_rf[19] =32'h13;
+	expected_rf[20] =32'h14;
+	expected_rf[21] =32'h15;
+	expected_rf[22] =32'h4;
+	expected_rf[23] =32'h5;
+	expected_rf[24] =32'h4;
+	expected_rf[25] =32'h1;
+	expected_rf[26] =32'h24;
+	expected_rf[27] =32'h28;
+	expected_rf[28] =32'h28;
+	expected_rf[29] =32'h4;
+	expected_rf[30] =32'h10010028;
+	expected_rf[31] =32'h10010024;
+endtask
+
+task fill_up_expected_mem_test_11;
+	expected_mem[0] =32'h01;
+	expected_mem[1] =32'h02;
+	expected_mem[2] =32'h03;
+	expected_mem[3] =32'h04;
+	expected_mem[4] =32'h05;
+	expected_mem[5] =32'h01;
+	expected_mem[6] =32'h02;
+	expected_mem[7] =32'h03;
+	expected_mem[8] =32'h04;
+	expected_mem[9] =32'h05;
+	expected_mem[10] =32'h01;
+endtask
+
+always @(posedge clk, negedge rst_n) begin
+	if(rst_n==1)begin
+		pc_instr_lookup = procesador.dispatcher.i_fetch_pc_plus_4>>2;
+		if(procesador.dispatcher.i_fetch_pc_plus_4 == 32'h400000 && procesador.dispatcher.i_fetch_instruction==0)begin
+		end
+		else begin
+			assert(procesador.dispatcher.i_fetch_instruction == expected_rom_memory[pc_instr_lookup]) else begin
+				$error("Unexpected Instr in PC[%h], read: %h, expected: %h",procesador.dispatcher.i_fetch_pc_plus_4, procesador.dispatcher.i_fetch_instruction, expected_rom_memory[pc_instr_lookup]);
+				simulation_errors++;
+			end	
+		end		
+	end
+end
+
 always @(procesador.dispatcher.i_fetch_instruction) begin
 	 //wait for end of program to check values, last isntr is 0x6F (fin: j fin)
 	if(procesador.dispatcher.i_fetch_instruction == 32'h6f)begin
@@ -534,34 +691,22 @@ task check_values();
 	end
 endtask
 
+task init_RAM(string test);
+	if(test == "TEST_11")begin
+		init_test_11_RAM();
+	end
+endtask
+
 task init_values();
 	clk = 0;
 	rst_n = 1;
-	//jmp_branch_address = 0;
-	//jmp_branch_valid = 0;
-	//current_opt=0;
-	//bfm_result=0;
-	//branch_lock=0;
-	//cdb_valid = 1'b0;
-	//tb_int_result = 0;
-	//cdb_tag = 6'h0;
-	//cdb_branch=1'b0;
-	//cdb_branch_taken=1'b0;
 endtask
 
 task reset_device();
 	#1 rst_n = 0;
 	#2 rst_n = 1;
 endtask
-/*
-task set_rd_enable;
-	#0 rd_en = 1'b1;
-endtask
 
-task clear_rd_enable;
-	rd_en = 1'b0;
-endtask
-*/
 always begin
 	#1 clk = ~clk;
 end
