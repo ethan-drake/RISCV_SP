@@ -84,13 +84,13 @@ lw t5, 0(s11)		#maddr2 = M(addr2)
 slt s9, t5, t4 		#(maddr2 < maddr1) ?
 
 beq s9, zero,next_data 		#if no, proceed to the next data
-add zero, zero, zero		#REMOVE
+#add zero, zero, zero		#REMOVE
 inf_loop:beq, zero, zero,inf_loop 	#else you're stuck here
 next_data:add s10, s10, t6	#addr1 = addr1+4
 add s11, s11, t6	#addr2 = addr2 + 4
 
 beq s11, t3, next_program	#if all tested, proceed to the next program
-add zero, zero, zero	#REMOVE
+#add zero, zero, zero	#REMOVE
 beq zero, zero, test_next_data
 next_program: add zero, zero, zero
 add zero, zero, zero	#noop
@@ -120,6 +120,7 @@ add a2, a4, zero		#amin = aj
 add s6, s8, zero	#mmin = mj
 j_plus_plus:add tp, tp, ra		#j++
 beq tp, a0, j_equal_10 
+#add zero, zero, zero	#REMOVE
 beq zero, zero, mmin__mi	#if(no)
 
 j_equal_10:add zero, zero, zero	#nop
@@ -129,6 +130,8 @@ add gp, gp, ra		#i++
 
 add tp, gp, ra		#j = i+1
 beq gp, s1, i_equal_9	#(i==9)
+#add zero, zero, zero	#REMOVE
+
 beq zero, zero, selection_sort_cont 	#if(no)
 i_equal_9:add zero, zero, zero	#nop
 
@@ -146,14 +149,39 @@ lw t5, 0(a6)		#maddr2 = M(addr2)
 slt s9, t4, t5		#(maddr1 < maddr2) ?
 
 beq s9, ra, maddr1_less_than_maddr2	#if yes, proceed to the next data
+#add zero, zero, zero	#REMOVE
+
 inf_loop_2:beq zero, zero inf_loop_2	#else, youre stuck here
 maddr1_less_than_maddr2: add s10, s10, t6	#addr1 = addr1+4
 add s11, s11, t6	#addr2 = addr2 + 4
 
 beq s11, t3, all_tested	#if all tested, proceed to the next program
+#add zero, zero, zero	#REMOVE
+
 beq zero, zero, next_data_2 	#else test next data
 all_tested: add zero, zero, zero	#nop
 add zero, zero, zero	#nop
+
+add zero, zero, zero	#Programa 2
+lui t6, 0x10010	#set base mem address
+addi tp, zero, 0x4	#setup $4 to 4
+addi a1, zero, 0x9	#set limit to 10 elements (counting 0)
+add t5, a4, tp	#set $30 to mem location 11
+add a0, zero, zero
+lw sp, 0(t6)	#Content of mem location goes to $2
+LOOP:beq a0, a1, GOTO2	#track 10 numbers
+add t6, t6, tp 	#Increment $31 by 4 so it can point to the next memory
+lw gp, 0(t6)	#Content of memory location 2 goes to $3
+slt t0, gp, sp	#check if $3 < $2
+add a0, a0, ra	#incroment counter $10
+beq t0, ra, GOTO1	#if $3 < $2 then
+j LOOP		#if $3 > $2 then
+GOTO1:add sp, gp, zero	#Move ($3) --> ($2) if $3 < $2
+j LOOP
+GOTO2:sw sp, 0(t5) #store ($2) at memory location 11
+add a6, t5, tp	#set register 16 with mem location 12
+lw t1, 0(a6)	#content of memory location 12 goes to $6 --> this branch is never taken
+beq sp, t1,LOOP 	#IF $2 = $6 then this branch is always taken
 end:j end
 
 
