@@ -216,6 +216,7 @@ ffd_one_shot second_branch_detected_one_shot(
 dispatch_gen dispatch_gen(
     .rs1(decode_rs1_addr),
     .rs2(decode_rs2_addr),
+    .rd(decode_rd_addr),
     .rs1_data(dispatch_rs1_data),
     .rs2_data(dispatch_rs2_data),
     .cdb_rs1_sel(sel_rs1_cdb_mux),

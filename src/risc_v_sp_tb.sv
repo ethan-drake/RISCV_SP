@@ -22,6 +22,14 @@ bit [31:0] memory [0:31];
 bit [31:0] expected_rf [0:31];
 bit [31:0] expected_mem [0:31];
 int simulation_errors=0;
+bit [7:0] pc_instr_lookup;
+reg [31:0] expected_rom_memory [0:(32*32)-1];
+
+//Initial data with program to execute
+//initial begin
+//	// program
+//	$readmemh("../asm/sort_final_project.txt", expected_rom_memory);
+//end
 
 initial begin
 	string test_name;
@@ -32,6 +40,7 @@ initial begin
   	case (test_name)
 		"TEST_1":begin
 			$display("EXECUTING:  first verification");
+			$readmemh("../asm/riscv_dispatch.txt", expected_rom_memory);
 			init_test_1_cache();
 			init_test_11_RAM();
 			fill_up_expected_rf_test_1();
@@ -39,58 +48,68 @@ initial begin
 		end 
 		"TEST_2":begin
 			$display("EXECUTING:  second verification (full int rsv station)");
+			$readmemh("../asm/int_full_fifo.txt", expected_rom_memory);
 			init_test_2_cache();
 			fill_up_expected_rf_test_2();
 		end 
 		"TEST_3":begin
 			$display("EXECUTING:  third verification (full mult rsv station)");
+			$readmemh("../asm/mult_full_fifo.txt", expected_rom_memory);
 			init_test_3_cache();
 			fill_up_expected_rf_test_3();
 		end 
 		"TEST_4":begin
 			$display("EXECUTING:  fourth verification (full div rsv station)");
+			$readmemh("../asm/div_full_fifo.txt", expected_rom_memory);
 			init_test_4_cache();
 			fill_up_expected_rf_test_4();
 		end 
 		"TEST_5":begin
 			$display("EXECUTING:  fifth verification (full mem rsv station)");
+			$readmemh("../asm/mem_full_fifo.txt", expected_rom_memory);
 			init_test_5_cache();
 			fill_up_expected_rf_test_5();
 			fill_up_expected_mem_test_5();
 		end 
 		"TEST_6":begin
 			$display("EXECUTING:  sixth verification (sw and lw with adds after)");
+			$readmemh("../asm/int_full_invalid.txt", expected_rom_memory);
 			init_test_6_cache();
 			fill_up_expected_rf_test_6();
 			fill_up_expected_mem_test_6();
 		end 
 		"TEST_7":begin
 			$display("EXECUTING:  seventh verification (Two stores led by two loads with toggling base address between them)");
+			$readmemh("../asm/mem_ops.txt", expected_rom_memory);
 			init_test_7_cache();
 			fill_up_expected_rf_test_7();
 			fill_up_expected_mem_test_7();
 		end 
 		"TEST_8":begin
 			$display("EXECUTING:  eight verification (Try to leave old int instrs unexecuted)");
+			$readmemh("../asm/test_8.txt", expected_rom_memory);
 			init_test_8_cache();
 			fill_up_expected_rf_test_8();
 		end 
 		"TEST_9":begin
 			$display("EXECUTING:  ninth verification (Update int rsv station and shift at same time)");
+			$readmemh("../asm/test_9.txt", expected_rom_memory);
 			init_test_9_cache();
 			fill_up_expected_rf_test_9();
 		end 
 		"TEST_10":begin
 			$display("EXECUTING:  tenth verification (More that one ready at the same time for the  issue unit)");
+			$readmemh("../asm/test_10.txt", expected_rom_memory);
 			init_test_10_cache();
 			fill_up_expected_rf_test_10();
 		end 
 		"TEST_11":begin
 			$display("EXECUTING:  FINAL verification (FINAL SORT CODE)");
+			$readmemh("../asm/sort_final_project.txt", expected_rom_memory);
 			init_test_11_RAM();
 			init_test_11_cache();
-			
-			//fill_up_expected_rf_test_11();
+			fill_up_expected_rf_test_11();
+			fill_up_expected_mem_test_11();
 		end 
 		"TEST_12":begin
 			$display("EXECUTING:  verification 12 (non taken branch followed by taken branch)");
@@ -573,7 +592,67 @@ task fill_up_expected_rf_test_10;
 	expected_rf[23] =32'h0E;
 endtask
 
+task fill_up_expected_rf_test_11;
+	expected_rf[1] =32'h1;
+	expected_rf[2] =32'h1;
+	expected_rf[3] =32'h5;
+	expected_rf[4] =32'h4;
+	expected_rf[5] =32'h0;
+	expected_rf[6] =32'h0;
+	expected_rf[7] =32'h7;
+	expected_rf[8] =32'h10010000;
+	expected_rf[9] =32'h9;
+	expected_rf[10] =32'h9;
+	expected_rf[11] =32'h9;
+	expected_rf[12] =32'h10010024;
+	expected_rf[13] =32'h10010020;
+	expected_rf[14] =32'h10010024;
+	expected_rf[15] =32'h10010020;
+	expected_rf[16] =32'h1001002c;
+	expected_rf[17] =32'h11;
+	expected_rf[18] =32'h12;
+	expected_rf[19] =32'h13;
+	expected_rf[20] =32'h14;
+	expected_rf[21] =32'h15;
+	expected_rf[22] =32'h4;
+	expected_rf[23] =32'h5;
+	expected_rf[24] =32'h4;
+	expected_rf[25] =32'h1;
+	expected_rf[26] =32'h24;
+	expected_rf[27] =32'h28;
+	expected_rf[28] =32'h28;
+	expected_rf[29] =32'h4;
+	expected_rf[30] =32'h10010028;
+	expected_rf[31] =32'h10010024;
+endtask
 
+task fill_up_expected_mem_test_11;
+	expected_mem[0] =32'h01;
+	expected_mem[1] =32'h02;
+	expected_mem[2] =32'h03;
+	expected_mem[3] =32'h04;
+	expected_mem[4] =32'h05;
+	expected_mem[5] =32'h01;
+	expected_mem[6] =32'h02;
+	expected_mem[7] =32'h03;
+	expected_mem[8] =32'h04;
+	expected_mem[9] =32'h05;
+	expected_mem[10] =32'h01;
+endtask
+
+always @(posedge clk, negedge rst_n) begin
+	if(rst_n==1)begin
+		pc_instr_lookup = procesador.dispatcher.i_fetch_pc_plus_4>>2;
+		if(procesador.dispatcher.i_fetch_pc_plus_4 == 32'h400000 && procesador.dispatcher.i_fetch_instruction==0)begin
+		end
+		else begin
+			assert(procesador.dispatcher.i_fetch_instruction == expected_rom_memory[pc_instr_lookup]) else begin
+				$error("Unexpected Instr in PC[%h], read: %h, expected: %h",procesador.dispatcher.i_fetch_pc_plus_4, procesador.dispatcher.i_fetch_instruction, expected_rom_memory[pc_instr_lookup]);
+				simulation_errors++;
+			end	
+		end		
+	end
+end
 
 always @(procesador.dispatcher.i_fetch_instruction) begin
 	 //wait for end of program to check values, last isntr is 0x6F (fin: j fin)

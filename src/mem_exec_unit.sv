@@ -73,7 +73,8 @@ always @(*) begin
 			//$display("LOAD operation detected");
 			//load_mem(mem_fifo_data.common_data.rs1_data,mem_fifo_data.immediate, mem_submit.cdb_result);
 			mem_submit.cdb_tag = mem_exec_fifo_data.common_data.rd_tag;
-			mem_submit.cdb_valid = 1;
+			//mem_submit.cdb_valid = 1;
+			mem_submit.cdb_valid = 1 & mem_exec_fifo_data.common_data.wb_valid;
 			mem_submit.cdb_branch = 0;
 			mem_submit.cdb_branch_taken = 0;
             //mem_submit.issue_done=1;

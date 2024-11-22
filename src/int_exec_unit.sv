@@ -78,7 +78,7 @@ always @(*) begin
             end
         endcase
             int_submit.cdb_tag = int_exec_fifo_data.common_data.rd_tag;
-            int_submit.cdb_valid = 1;
+            int_submit.cdb_valid = 1 & int_exec_fifo_data.common_data.wb_valid;
             int_submit.cdb_branch = 0;
             int_submit.cdb_branch_taken = 0;
             //int_submit.issue_done=1;

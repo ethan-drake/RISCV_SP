@@ -29,7 +29,7 @@ reg [4:0]rp;
 reg full;
 reg overflow;
 
-wire [4:0]rp_plus_2 = rp+2;
+wire [4:0]rp_plus_1 = rp+1;
 //writing
 always @(posedge i_clk, negedge i_rst_n) begin
     //Reset or flush
@@ -72,7 +72,10 @@ always @(posedge i_clk, negedge i_rst_n) begin
     end
     //fifo write data
     else if(rd_en|second_branch_instr)begin
-        if (fetch_next_instr)begin
+        if (second_branch_instr) begin
+            rp=rp+1;
+        end
+        else if (fetch_next_instr)begin
             rp=rp+2;
         end
         else begin
@@ -109,7 +112,7 @@ always @(*) begin
 end
 
 
-    assign data_out = (i_rst_n | !flush) ? fetch_next_instr ? fifo[rp_plus_2[3:2]]: fifo[rp[3:2]]:0;
+    assign data_out = (i_rst_n | !flush) ? fetch_next_instr ? fifo[rp_plus_1[3:2]]: fifo[rp[3:2]]:0;
     //assign full = ((wp[4]) && (rp[4:2]==0)) ? 1 : (wp[4:2]+1 == rp[4:2]) ? 1 : 0;
     assign empty = ({overflow,wp[3:2]} == rp[4:2]);
     assign o_rp = rp;

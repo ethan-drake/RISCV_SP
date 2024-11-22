@@ -32,6 +32,7 @@ typedef enum bit[1:0] {
 } fifo_data_type;
 
 typedef struct packed {
+   logic wb_valid; //84, no mover porque altera el orden de bits para el cdb update
    logic [31:0] rs1_data;  //83:52
    logic rs1_data_valid;   //51
    logic [5:0] rs1_tag;    //50:45
