@@ -15,21 +15,21 @@ module rob_fifo #(parameter DEPTH=32)(
     input i_clk,
     input i_rst_n,
     //input rob_fifo_data data_in,
-    input [4:0] data_in,//instr tag
+    input [5:0] data_in,//instr tag
     input w_en,
     input flush,
     //input [5:0] cdb_tag,
     //input cdb_valid,
     //input [31:0] cdb_data,
     input issue_completed,
-    output [4:0] data_out,
+    output [5:0] data_out,
     output o_full,
     output empty
     //output reg issue_queue_rdy
 );
 localparam POINTER_WIDTH = $clog2(DEPTH);
 
-reg [4:0] fifo[DEPTH];
+reg [5:0] fifo[DEPTH];
 reg [POINTER_WIDTH:0]tail;
 reg [POINTER_WIDTH:0]head;
 reg full;

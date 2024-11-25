@@ -187,3 +187,25 @@ interface retire_bus;
    output store_executed
    );
 endinterface //retire_bus
+
+
+typedef struct packed {
+   //logic dispatch_2_en;
+   logic [4:0] rs1;
+   logic [4:0] rs2;
+   logic [4:0] rd;
+   logic [31:0] rs1_data;
+   logic [31:0] rs2_data;
+   //logic cdb_rs1_sel;
+   //logic cdb_rs2_sel;
+   logic [6:0] opcode;
+   logic [2:0] func3;
+   logic [6:0] func7;
+   logic [31:0] immediate;
+   logic rs1_valid;
+   logic rs2_valid;
+   logic [5:0] rs1_tag;
+   logic [5:0] rs2_tag;
+   logic [5:0] rd_tag;
+   logic [31:0] jmp_br_addr;
+} dispatch_gen_str;

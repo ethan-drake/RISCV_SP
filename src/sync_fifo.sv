@@ -13,14 +13,14 @@ module sync_fifo #(parameter DEPTH=4, DATA_WIDTH=128)(
     input rd_en,
     input flush,
     input [1:0] jmp_branch_address_b_3_2,
-    input second_branch_instr,
+    //input second_branch_instr,
     output [DATA_WIDTH-1:0] data_out,
     output o_full,
     output [4:0] o_rp,
     output [4:0] o_wp,
     output empty,
-    output empty_rd_plus_1,
-    input fetch_next_instr
+    output empty_rd_plus_1
+    //input fetch_next_instr
 );
 
 reg [DATA_WIDTH-1:0] fifo[DEPTH];
@@ -71,16 +71,18 @@ always @(posedge i_clk, negedge i_rst_n) begin
         rp = 5'b0;
     end
     //fifo write data
-    else if(rd_en|second_branch_instr)begin
-        if (second_branch_instr) begin
-            rp=rp+1;
-        end
-        else if (fetch_next_instr)begin
-            rp=rp+2;
-        end
-        else begin
-            rp=rp+1;
-        end
+    //else if(rd_en|second_branch_instr)begin
+    else if(rd_en)begin
+        //if (second_branch_instr) begin
+        //    rp=rp+1;
+        //end
+        //else if (fetch_next_instr)begin
+        //    rp=rp+2;
+        //end
+        //else begin
+        //    rp=rp+1;
+        //end
+        rp=rp+1;
         if(rp==5'h10)begin
             rp=5'b0;
         end
@@ -112,7 +114,8 @@ always @(*) begin
 end
 
 
-    assign data_out = (i_rst_n | !flush) ? fetch_next_instr ? fifo[rp_plus_1[3:2]]: fifo[rp[3:2]]:0;
+    //assign data_out = (i_rst_n | !flush) ? fetch_next_instr ? fifo[rp_plus_1[3:2]]: fifo[rp[3:2]]:0;
+    assign data_out = (i_rst_n | !flush) ? fifo[rp[3:2]]:0;
     //assign full = ((wp[4]) && (rp[4:2]==0)) ? 1 : (wp[4:2]+1 == rp[4:2]) ? 1 : 0;
     assign empty = ({overflow,wp[3:2]} == rp[4:2]);
     assign o_rp = rp;

@@ -29,7 +29,7 @@ module rob(
 //assign rob_fifo_input.pc = dispatch_w_to_rob_if.dispatch_pc;
 //assign rob_fifo_input.exception = 0;
 //
-logic [4:0] rob_fifo_output;
+logic [5:0] rob_fifo_output;
 //wire rob_fifo_full;
 wire rob_fifo_empty;
 
