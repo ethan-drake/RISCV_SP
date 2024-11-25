@@ -42,6 +42,9 @@ always @(posedge clk, negedge i_rst_n) begin
 			registers[write_addr_rf] <= write_data_rf;
 		end
 		if(issue_cdb.cdb_valid)begin
+			//if operation is store spec data will store mem address
+			//modified this to include stores
+			registers[issue_cdb.cdb_tag].store_data <= issue_cdb.store_data;
 			registers[issue_cdb.cdb_tag].spec_data <= issue_cdb.cdb_result;
 			registers[issue_cdb.cdb_tag].branch_taken <= issue_cdb.cdb_branch_taken;
 			registers[issue_cdb.cdb_tag].spec_valid <= 1'b1;

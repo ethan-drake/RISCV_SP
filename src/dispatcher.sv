@@ -32,8 +32,8 @@ module dispatcher(
     input issue_done_int,
     input issue_done_mem,
     input issue_done_mult,
-    input issue_done_div
-
+    input issue_done_div,
+    output retire_store retire_store
 );
 
 
@@ -169,7 +169,8 @@ rst rst_module(
 
     // remove in meantime until rob finishes .cdb_valid(cdb_valid),              //to be changed to ROB
     // remove in meantime until rob finishes .cdb_tag_rst(cdb_tag),              //to be changed to ROB
-    .cdb_valid(retire_bus_if.valid & retire_bus_if.spec_valid),
+    //.cdb_valid(retire_bus_if.valid & retire_bus_if.spec_valid),
+    .cdb_valid(retire_bus_if.valid && retire_bus_if.spec_valid && (dispatch_type'(retire_bus_if.retire_instr_type) == NON_VALID_RD_TAG)),
     .cdb_tag_rst(retire_bus_if.rd_tag)
     //.wen_regfile_rst(wen_regfile_rst)
 
@@ -205,7 +206,7 @@ reg_file rf_module(
 	//.wen_rf(),
 	//.write_data_rf(cdb.cdb_result),       //to be changed to ROB
 	//.write_addr_rf(wen_regfile_rst),    //to be changed to ROB
-    .wen_rf(retire_bus_if.valid & retire_bus_if.spec_valid),
+    .wen_rf(retire_bus_if.valid && retire_bus_if.spec_valid && (dispatch_type'(retire_bus_if.retire_instr_type) == NON_VALID_RD_TAG)),
     .write_data_rf(retire_bus_if.data),
     .write_addr_rf(retire_bus_if.rd_reg),
 	.rs1addr_rf(decode_rs1_addr),
@@ -509,6 +510,10 @@ assign any_rsv_station_full=(exec_int_fifo_ctrl.queue_full | exec_ld_st_fifo_ctr
 
 assign dispatch_rd_en = (~any_rsv_station_full) & (~rob_fifo_full);
 
+assign retire_store.store_ready = retire_bus_if.store_ready;
+assign retire_store.retire_rs2_data = retire_bus_if.store_data;
+assign retire_store.mem_address = retire_bus_if.data;
+
 //always @(*) begin
 //    if (cdb.cdb_branch==1'b1 && any_rsv_station_full==1'b0) begin
 //        
@@ -518,16 +523,16 @@ assign dispatch_rd_en = (~any_rsv_station_full) & (~rob_fifo_full);
 //    end
 //end
 
-dispatch_sm dispatch_branch_sm(
-    .clk(i_clk),
-    .rst_n(i_rst_n),
-    .branch_detected(branch_detected),
-    .queue_full(any_rsv_station_full|rob_fifo_full),
-    .cdb_branch(cdb.cdb_branch),
-    .cdb_branch_taken(cdb.cdb_branch_taken),
-    .stall_br(),
-    .dispatch_next_instr()
-);
+//dispatch_sm dispatch_branch_sm(
+//    .clk(i_clk),
+//    .rst_n(i_rst_n),
+//    .branch_detected(branch_detected),
+//    .queue_full(any_rsv_station_full|rob_fifo_full),
+//    .cdb_branch(cdb.cdb_branch),
+//    .cdb_branch_taken(cdb.cdb_branch_taken),
+//    .stall_br(),
+//    .dispatch_next_instr()
+//);
 
 //cdb.cdb_branch & branch_detected //scenario were cdb branch is high at same time as branch detected | any_rsv_station_full
 

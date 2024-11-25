@@ -10,6 +10,7 @@ module functional_unit_group(
     input logic mult_issue_granted,
     input logic div_issue_granted,
     input logic mem_issue_granted,
+	input retire_store retire_store,
     output cdb_bfm int_submit_data,
     output cdb_bfm mult_submit_data,
     output cdb_bfm div_submit_data,
@@ -51,7 +52,8 @@ module functional_unit_group(
         .rst_n(i_rst_n),
         .issue_granted(mem_issue_granted),
         .mem_exec_fifo_data(exec_mem_issue_data.rsv_station_data),
-        .o_mem_submit(mem_submit_data)//.issue_cdb),
+        .o_mem_submit(mem_submit_data),//.issue_cdb),
         //.issue_done(mem_submit_data.issue_done)
+        .retire_store(retire_store)
     );
 endmodule

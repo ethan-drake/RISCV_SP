@@ -39,6 +39,9 @@ wire issue_granted_div;
 //BR NOT TAKEN SCENARIO
 wire fetch_next_instr;
 
+retire_store retire_store;
+
+
 i_cache cache(
     .pc_in({pc_in[31:4],4'b0}),
 	.rd_en(rd_en),
@@ -94,7 +97,8 @@ dispatcher dispatcher(
     .issue_done_int(issue_granted_int),
     .issue_done_mem(issue_granted_mem),
     .issue_done_mult(issue_granted_mult),
-    .issue_done_div(issue_granted_div)
+    .issue_done_div(issue_granted_div),
+    .retire_store(retire_store)
 );
 
 issue_unit issue_unit(
@@ -117,7 +121,8 @@ issue_unit issue_unit(
     .issue_mult(issue_granted_mult),
     .issue_div(issue_granted_div),
     .issue_mem(issue_granted_mem),
-    .cdb_output(common_data_bus)
+    .cdb_output(common_data_bus),
+    .retire_store(retire_store)
 );
 
 

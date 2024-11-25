@@ -91,9 +91,11 @@ assign retire_bus_if.data = rob_rf_retire_output.spec_data;
 assign retire_bus_if.pc = rob_rf_retire_output.pc;
 assign retire_bus_if.branch = (rob_rf_retire_output.inst_type==BRANCH) ? 1'b1: 0;
 assign retire_bus_if.branch_taken = rob_rf_retire_output.branch_taken;
-//assign retire_bus_if.store_ready = ;
+assign retire_bus_if.store_ready = (rob_rf_retire_output.inst_type==STORE) ? rob_rf_retire_output.spec_valid : 0;
+assign retire_bus_if.store_data = (rob_rf_retire_output.inst_type==STORE) ? rob_rf_retire_output.store_data : 0;
 assign retire_bus_if.valid = rob_rf_retire_output.valid;
 assign retire_bus_if.spec_valid = rob_rf_retire_output.spec_valid;
+assign retire_bus_if.retire_instr_type = rob_rf_retire_output.inst_type;
 //assign retire_bus_if.flush = ;
 
 

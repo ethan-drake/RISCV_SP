@@ -19,6 +19,7 @@ module issue_unit (
     input common_issue_data exec_mult_issue_data,
     input common_issue_data exec_div_issue_data,
     input mem_issue_data exec_mem_issue_data,
+	input retire_store retire_store,
     //input cdb_bfm int_cdb_input,
     //input cdb_bfm div_cdb_input,
     //input cdb_bfm mult_cdb_input,
@@ -71,7 +72,8 @@ functional_unit_group functional_unit_group(
     .mult_submit_data(mult_submit_data),
     .div_submit_data(div_submit_data),
     .mem_submit_data(mem_submit_data),
-    .div_exec_busy(div_exec_busy)
+    .div_exec_busy(div_exec_busy),
+    .retire_store(retire_store)
 );
 
 //CDB control

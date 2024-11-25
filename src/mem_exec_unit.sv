@@ -9,6 +9,7 @@ module mem_exec_unit #(parameter LATENCY = 1)(
     input logic clk,
     input logic rst_n,
     input logic issue_granted,
+	input retire_store retire_store,
     input ld_st_fifo_data mem_exec_fifo_data,
     output cdb_bfm o_mem_submit
     //output reg issue_done
@@ -21,15 +22,22 @@ wire we_memory_2_ram, re_memory_2_ram, we_memory_2_uart, re_memory_2_uart;
 
 wire [31:0] mem_address = mem_exec_fifo_data.common_data.rs1_data+mem_exec_fifo_data.immediate;
 
+wire [31:0] memory_addr = retire_store.store_ready ? retire_store.mem_address : mem_address;
+
+wire [31:0] load_mem_temp;
+
 //Memory map
 master_memory_map #(.DATA_WIDTH(32), .ADDR_WIDTH(7)) memory_map (
 	//CORES <--> Memory map
-	.wd(mem_exec_fifo_data.common_data.rs2_data),
-	.address(mem_address),
-	.we(mem_exec_fifo_data.ld_st_opcode),
+	//.wd(mem_exec_fifo_data.common_data.rs2_data),
+	.wd(retire_store.retire_rs2_data),
+	.address(memory_addr),
+	//.we(mem_exec_fifo_data.ld_st_opcode),
+	.we(retire_store.store_ready),
 	.re(~mem_exec_fifo_data.ld_st_opcode),
 	.clk(clk),
-	.rd(mem_submit.cdb_result),
+	//.rd(mem_submit.cdb_result),
+	.rd(load_mem_temp),
 	//Memory_map <--> Slaves
 	.map_Data(data_memory_2_slave),
 	.map_Address(address_memory_2_slave),
@@ -62,10 +70,15 @@ always @(*) begin
 			//$display("STORE operation detected");
 			//store_mem(mem_fifo_data.common_data.rs1_data,mem_fifo_data.common_data.rs2_data,mem_fifo_data.immediate);
             //mem_submit.cdb_result = 0;
-            mem_submit.cdb_tag = 0;
-			mem_submit.cdb_valid = 0;
+			mem_submit.cdb_result = mem_exec_fifo_data.common_data.rs1_data+mem_exec_fifo_data.immediate;
+            //THESE MODIFICATIONS NEED TO BE REMOVED WHEN APPLIED CACHE WA
+			mem_submit.cdb_tag = mem_exec_fifo_data.common_data.rd_tag;
+			//mem_submit.cdb_tag = 0;
+//			mem_submit.cdb_valid = 0;
+			mem_submit.cdb_valid = 1;
 			mem_submit.cdb_branch = 0;
 			mem_submit.cdb_branch_taken = 0;
+			mem_submit.store_data = mem_exec_fifo_data.common_data.rs2_data;
             //mem_submit.issue_done=0;
         end
 		else begin
@@ -77,14 +90,18 @@ always @(*) begin
 			mem_submit.cdb_valid = 1 & mem_exec_fifo_data.common_data.wb_valid;
 			mem_submit.cdb_branch = 0;
 			mem_submit.cdb_branch_taken = 0;
+			mem_submit.store_data = 0;
             //mem_submit.issue_done=1;
 			//cdb_publish.push_back(mem_submit);
+			//REMOVE WHEN IMPLEMENTING CACHE SOLUTION
+			mem_submit.cdb_result = load_mem_temp;
 		end
     end
     else begin
         mem_submit.cdb_branch = 1'b0;
         mem_submit.cdb_valid = 1'b0;
         mem_submit.cdb_tag = 0;
+		mem_submit.store_data = 0;
         //mem_submit.cdb_result =0;
         //mem_submit.issue_done=0;
     end
