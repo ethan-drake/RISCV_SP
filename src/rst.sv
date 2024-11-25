@@ -15,6 +15,7 @@
 
 module rst(
 	input clk, 
+	input flush,
     //write port 0
     input [6:0] wdata0_rst,
     input [4:0] waddr0_rst,
@@ -45,10 +46,46 @@ reg [4:0] cdb_clear_addr;
 
 //Syncronus write to registers
 always @(posedge clk) begin
-	if(wen0_rst) begin
-		registers[waddr0_rst] <= wdata0_rst;
+	if(flush)begin
+		registers[0] <= 7'h0;
+		registers[1] <= 7'h0;
+		registers[2] <= 7'h0;
+		registers[3] <= 7'h0;
+		registers[4] <= 7'h0;
+		registers[5] <= 7'h0;
+		registers[6] <= 7'h0;
+		registers[7] <= 7'h0;
+		registers[8] <= 7'h0;
+		registers[9] <= 7'h0;
+		registers[10] <= 7'h0;
+		registers[11] <= 7'h0;
+		registers[12] <= 7'h0;
+		registers[13] <= 7'h0;
+		registers[14] <= 7'h0;
+		registers[15] <= 7'h0;
+		registers[16] <= 7'h0;
+		registers[17] <= 7'h0;
+		registers[18] <= 7'h0;
+		registers[19] <= 7'h0;
+		registers[20] <= 7'h0;
+		registers[21] <= 7'h0;
+		registers[22] <= 7'h0;
+		registers[23] <= 7'h0;
+		registers[24] <= 7'h0;
+		registers[25] <= 7'h0;
+		registers[26] <= 7'h0;
+		registers[27] <= 7'h0;
+		registers[28] <= 7'h0;
+		registers[29] <= 7'h0;
+		registers[30] <= 7'h0;
+		registers[31] <= 7'h0;
 	end
-	registers[cdb_clear_addr] <= 7'h0;
+	else begin
+		if(wen0_rst) begin
+			registers[waddr0_rst] <= wdata0_rst;
+		end
+		registers[cdb_clear_addr] <= 7'h0;
+	end
 end
 
 //Initialize registers

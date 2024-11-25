@@ -8,6 +8,7 @@
 module int_exec_unit #(parameter LATENCY = 1)(
     input clk,
     input rst_n,
+    input flush,
     input logic issue_granted,
     input int_fifo_data int_exec_fifo_data,
     output cdb_bfm o_int_submit
@@ -96,8 +97,10 @@ always @(*) begin
                 end 
                 endcase
             int_submit.cdb_branch = 1'b1;
-            int_submit.cdb_valid = 1'b0;
-            int_submit.cdb_tag = 0;
+//            int_submit.cdb_valid = 1'b0;
+//            int_submit.cdb_tag = 0;
+            int_submit.cdb_valid = 1'b1;
+            int_submit.cdb_tag = int_exec_fifo_data.common_data.rd_tag;
             int_submit.cdb_result =0;
             //int_submit.issue_done=1;
         end
@@ -120,6 +123,7 @@ generate
             .i_clk(clk),
             .i_rst_n(rst_n),
             .i_en(1'b1),
+            .flush(flush),
             .d(int_submit),
             .q(latency_submit[0])
         );
@@ -133,6 +137,7 @@ generate
             .i_clk(clk),
             .i_rst_n(rst_n),
             .i_en(1'b1),
+            .flush(flush),
             .d(latency_submit[i-1]),
             .q(latency_submit[i])
         );

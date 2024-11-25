@@ -646,7 +646,7 @@ always @(posedge clk, negedge rst_n) begin
 		if(procesador.dispatcher.i_fetch_pc_plus_4 == 32'h400000 && procesador.dispatcher.i_fetch_instruction==0)begin
 		end
 		else begin
-			$display("Instr in PC[%h]:%h",procesador.dispatcher.i_fetch_pc_plus_4,procesador.dispatcher.i_fetch_instruction);
+			//$display("Instr in PC[%h]:%h",procesador.dispatcher.i_fetch_pc_plus_4,procesador.dispatcher.i_fetch_instruction);
 			
 			assert(procesador.dispatcher.i_fetch_instruction == expected_rom_memory[pc_instr_lookup]) else begin
 				$error("Unexpected Instr in PC[%h], read: %h, expected: %h",procesador.dispatcher.i_fetch_pc_plus_4, procesador.dispatcher.i_fetch_instruction, expected_rom_memory[pc_instr_lookup]);

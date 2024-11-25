@@ -9,6 +9,7 @@
 module reg_file_rob (
 	input clk,
 	input i_rst_n,
+	input flush,
 	//Write ports
 	input wen_rf,
 	//input [31:0] write_data_rf,
@@ -38,20 +39,88 @@ rob_rf_data registers [0:63];
 //Syncronus write to registers (New and update writes)
 always @(posedge clk, negedge i_rst_n) begin
 	if(i_rst_n)begin
-		if(wen_rf)begin
-			registers[write_addr_rf] <= write_data_rf;
+		if(flush)begin
+			registers[0] <= 32'h0;
+			registers[1] <= 32'h0;
+			registers[2] <= 32'h0;
+			registers[3] <= 32'h0;
+			registers[4] <= 32'h0;
+			registers[5] <= 32'h0;
+			registers[6] <= 32'h0;
+			registers[7] <= 32'h0;
+			registers[8] <= 32'h0;
+			registers[9] <= 32'h0;
+			registers[10] <= 32'h0;
+			registers[11] <= 32'h0;
+			registers[12] <= 32'h0;
+			registers[13] <= 32'h0;
+			registers[14] <= 32'h0;
+			registers[15] <= 32'h0;
+			registers[16] <= 32'h0;
+			registers[17] <= 32'h0;
+			registers[18] <= 32'h0;
+			registers[19] <= 32'h0;
+			registers[20] <= 32'h0;
+			registers[21] <= 32'h0;
+			registers[22] <= 32'h0;
+			registers[23] <= 32'h0;
+			registers[24] <= 32'h0;
+			registers[25] <= 32'h0;
+			registers[26] <= 32'h0;
+			registers[27] <= 32'h0;
+			registers[28] <= 32'h0;
+			registers[29] <= 32'h0;
+			registers[30] <= 32'h0;
+			registers[31] <= 32'h0;
+			registers[32] <= 32'h0;
+			registers[33] <= 32'h0;
+			registers[34] <= 32'h0;
+			registers[35] <= 32'h0;
+			registers[36] <= 32'h0;
+			registers[37] <= 32'h0;
+			registers[38] <= 32'h0;
+			registers[39] <= 32'h0;
+			registers[40] <= 32'h0;
+			registers[41] <= 32'h0;
+			registers[42] <= 32'h0;
+			registers[43] <= 32'h0;
+			registers[44] <= 32'h0;
+			registers[45] <= 32'h0;
+			registers[46] <= 32'h0;
+			registers[47] <= 32'h0;
+			registers[48] <= 32'h0;
+			registers[49] <= 32'h0;
+			registers[50] <= 32'h0;
+			registers[51] <= 32'h0;
+			registers[52] <= 32'h0;
+			registers[53] <= 32'h0;
+			registers[54] <= 32'h0;
+			registers[55] <= 32'h0;
+			registers[56] <= 32'h0;
+			registers[57] <= 32'h0;
+			registers[58] <= 32'h0;
+			registers[59] <= 32'h0;
+			registers[60] <= 32'h0;
+			registers[61] <= 32'h0;
+			registers[62] <= 32'h0;
+			registers[63] <= 32'h0;
 		end
-		if(issue_cdb.cdb_valid)begin
-			//if operation is store spec data will store mem address
-			//modified this to include stores
-			registers[issue_cdb.cdb_tag].store_data <= issue_cdb.store_data;
-			registers[issue_cdb.cdb_tag].spec_data <= issue_cdb.cdb_result;
-			registers[issue_cdb.cdb_tag].branch_taken <= issue_cdb.cdb_branch_taken;
-			registers[issue_cdb.cdb_tag].spec_valid <= 1'b1;
-		end
-		if(rob_rf_retire_valid)begin
-			registers[rob_fifo_head].valid <= 1'b0;
-			registers[rob_fifo_head].spec_valid <= 1'b0;
+		else begin
+			if(wen_rf)begin
+				registers[write_addr_rf] <= write_data_rf;
+			end
+			if(issue_cdb.cdb_valid)begin
+				//if operation is store spec data will store mem address
+				//modified this to include stores
+				registers[issue_cdb.cdb_tag].store_data <= issue_cdb.store_data;
+				registers[issue_cdb.cdb_tag].spec_data <= issue_cdb.cdb_result;
+				registers[issue_cdb.cdb_tag].branch_taken <= issue_cdb.cdb_branch_taken;
+				registers[issue_cdb.cdb_tag].spec_valid <= 1'b1;
+			end
+			if(rob_rf_retire_valid)begin
+				registers[rob_fifo_head].valid <= 1'b0;
+				registers[rob_fifo_head].spec_valid <= 1'b0;
+			end
 		end
 	end
 end

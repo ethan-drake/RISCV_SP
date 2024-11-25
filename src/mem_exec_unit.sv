@@ -8,6 +8,7 @@
 module mem_exec_unit #(parameter LATENCY = 1)(
     input logic clk,
     input logic rst_n,
+	input logic flush,
     input logic issue_granted,
 	input retire_store retire_store,
     input ld_st_fifo_data mem_exec_fifo_data,
@@ -117,6 +118,7 @@ generate
 			.i_clk(clk),
 			.i_rst_n(rst_n),
 			.i_en(1'b1),
+			.flush(flush),
 			.d(mem_submit),
 			.q(latency_submit[0])
 		);
@@ -130,6 +132,7 @@ generate
             .i_clk(clk),
             .i_rst_n(rst_n),
             .i_en(1'b1),
+			.flush(flush),
             .d(latency_submit[i-1]),
             .q(latency_submit[i])
         );

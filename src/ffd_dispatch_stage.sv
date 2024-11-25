@@ -10,6 +10,7 @@ module ffd_dispatch_stage(
 	//inputs
 	input i_clk,
 	input i_rst_n,
+	input flush,
 	input i_en,
 	input dispatch_gen_str d,
 	//outputs
@@ -19,7 +20,7 @@ module ffd_dispatch_stage(
 //Parametrized flip flop with synchronous reset and enable signal
 always@(posedge i_clk, negedge i_rst_n)
 begin
-	if(!i_rst_n)
+	if(!i_rst_n | flush)
 		q <= 0; 
 	else if(i_en)
 		q <= d;

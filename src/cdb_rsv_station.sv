@@ -8,6 +8,7 @@
 module cdb_rsv_station (
     input i_clk,
     input i_rst_n,
+    input flush,
     input ready_int,
     input ready_mult,
     input ready_div,
@@ -59,7 +60,7 @@ end
 
 //LRU value change logic
 always @(posedge i_clk) begin
-    if(!i_rst_n)begin
+    if(!i_rst_n | flush)begin
 		lru <= 1'b1; 
     end
 	else if(lru == 1'b1 && issue_int_done == 1'b1)begin
@@ -77,6 +78,7 @@ end
 ffd_param #(.LENGTH(1)) rsv_int_mem_reg(
 	.i_clk(i_clk),
 	.i_rst_n(i_rst_n),
+    .flush(flush),
 	.i_en(1'b1),
     .d(rsv_mult[0]),
     .q(rsv_station_0)
@@ -88,6 +90,7 @@ assign current_op = issue_oneclk_write|rsv_station_0;
 ffd_param #(.LENGTH(3)) rsv_mult_reg(
 	.i_clk(i_clk),
 	.i_rst_n(i_rst_n),
+    .flush(flush),
 	.i_en(1'b1),
     .d({(issue_mult_write|rsv_div[0]),rsv_mult[2:1]}),
     .q(rsv_mult)
@@ -96,6 +99,7 @@ ffd_param #(.LENGTH(3)) rsv_mult_reg(
 ffd_param #(.LENGTH(3)) rsv_div_reg(
 	.i_clk(i_clk),
 	.i_rst_n(i_rst_n),
+    .flush(flush),
 	.i_en(1'b1),
     .d({issue_div_write,rsv_div[2:1]}),
     .q(rsv_div)

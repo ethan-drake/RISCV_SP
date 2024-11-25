@@ -16,6 +16,7 @@ module dispatcher(
     output [31:0] dispatch_jmp_br_addr,
     output dispatch_jmp_valid,
     output dispatch_rd_en,
+    output flush,
     //CDB
     //input [5:0] cdb_tag,
     //input cdb_valid,
@@ -150,6 +151,7 @@ rob rob(
 
 rst rst_module(
 	.clk(i_clk), 
+    .flush(retire_bus_if.flush),
     //write port 0
     .wdata0_rst({1'b1,tag_out_tf}),
     .waddr0_rst(decode_rd_addr),
@@ -191,7 +193,7 @@ tag_fifo #(.DEPTH(64), .DATA_WIDTH(6)) tag_fifo_module(
     .cdb_tag_valid_tf(retire_bus_if.valid & retire_bus_if.spec_valid),
     //.rd_en_tf(rd_enable & (~any_rsv_station_full)),
     .rd_en_tf((~any_rsv_station_full) && (~rob_fifo_full) && (dispatch_type'(dispatch_instr_type) != JUMP)),//always enable for ROB to work
-    .flush(1'b0),
+    .flush(retire_bus_if.flush),
     .tag_out_tf(tag_out_tf),
     .fifo_full_tf(fifo_full_tf),
     .empty_fifo_tf(empty_fifo_tf)
@@ -354,6 +356,7 @@ ffd_dispatch_stage ffd_dispatch_gen(
 	//inputs
 	.i_clk(i_clk),
 	.i_rst_n(i_rst_n),
+    .flush(flush),
 	.i_en(1'b1),
 	.d(dispatch_gen_str_input),
 	//outputs
@@ -433,7 +436,7 @@ exec_rsv_station_shift #(.DEPTH(4), .DATA_WIDTH($bits(int_fifo_data))) int_exec_
     .data_in(exec_int_fifo_data_in),
     .w_en(exec_int_fifo_ctrl.dispatch_en),
     //.rd_en(tb_int_rd),
-    .flush(1'b0),//cdb.cdb_branch_taken),
+    .flush(retire_bus_if.flush),//1'b0),//cdb.cdb_branch_taken),
     .data_out(exec_int_issue_data.rsv_station_data),//exec_int_fifo_data_out),
     .o_full(exec_int_fifo_ctrl.queue_full),
     .empty(exec_int_fifo_ctrl.queue_empty),
@@ -451,7 +454,7 @@ exec_fifo #(.DEPTH(4)) ld_st_exec_fifo(
     .i_rst_n(i_rst_n),
     .data_in(exec_ld_st_fifo_data_in),
     .w_en(exec_ld_st_fifo_ctrl.dispatch_en),
-    .flush(1'b0),
+    .flush(retire_bus_if.flush),//1'b0),
     .cdb_tag(cdb.cdb_tag),
     .cdb_valid(cdb.cdb_valid),
     .cdb_data(cdb.cdb_result),
@@ -468,7 +471,7 @@ exec_rsv_station_shift #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) mult_e
     .data_in(exec_mult_fifo_data_in),
     .w_en(exec_mult_fifo_ctrl.dispatch_en),
     //.rd_en(tb_mult_rd),
-    .flush(1'b0),//cdb.cdb_branch_taken),
+    .flush(retire_bus_if.flush),//1'b0),//cdb.cdb_branch_taken),
     .data_out(exec_mult_issue_data.rsv_station_data),//exec_mult_fifo_data_out),
     .o_full(exec_mult_fifo_ctrl.queue_full),
     .empty(exec_mult_fifo_ctrl.queue_empty),
@@ -485,7 +488,7 @@ exec_rsv_station_shift #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) div_ex
     .data_in(exec_div_fifo_data_in),
     .w_en(exec_div_fifo_ctrl.dispatch_en),
     //.rd_en(tb_div_rd),
-    .flush(1'b0),//cdb.cdb_branch_taken),
+    .flush(retire_bus_if.flush),//1'b0),//cdb.cdb_branch_taken),
     .data_out(exec_div_issue_data.rsv_station_data),//exec_div_fifo_data_out),
     .o_full(exec_div_fifo_ctrl.queue_full),
     .empty(exec_div_fifo_ctrl.queue_empty),
@@ -499,9 +502,14 @@ exec_rsv_station_shift #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) div_ex
 
 
 //assign dispatch_jmp_valid = jmp_detected | cdb.cdb_branch_taken;//or branch cdb logic TBD
-assign dispatch_jmp_valid = jmp_detected;
+//assign dispatch_jmp_valid = jmp_detected;
+assign dispatch_jmp_valid = jmp_detected | retire_bus_if.flush;
 
-assign dispatch_jmp_br_addr = jmp_br_addr; //cdb branch logic TBD
+//assign dispatch_jmp_br_addr = jmp_br_addr; //cdb branch logic TBD
+
+//assign dispatch_jmp_br_addr = (retire_bus_if.flush) ? retire_bus_if.pc : (jmp_detected) ? jmp_br_addr : 0;
+assign dispatch_jmp_br_addr = (retire_bus_if.flush == 1'b1) ? retire_bus_if.pc : jmp_br_addr;
+
 
 assign any_rsv_station_full=(exec_int_fifo_ctrl.queue_full | exec_ld_st_fifo_ctrl.queue_full | exec_mult_fifo_ctrl.queue_full | exec_div_fifo_ctrl.queue_full);
 
@@ -515,6 +523,7 @@ assign dispatch_rd_en = (~any_rsv_station_full) & (~rob_fifo_full);
 assign retire_store.store_ready = retire_bus_if.store_ready;
 assign retire_store.retire_rs2_data = retire_bus_if.store_data;
 assign retire_store.mem_address = retire_bus_if.data;
+assign flush = retire_bus_if.flush;
 
 //always @(*) begin
 //    if (cdb.cdb_branch==1'b1 && any_rsv_station_full==1'b0) begin

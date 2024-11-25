@@ -10,6 +10,7 @@ module ffd_param #(parameter LENGTH=1)(
 	input i_clk,
 	input i_rst_n,
 	input i_en,
+	input flush,
 	input [LENGTH-1:0] d,
 	//outputs
 	output reg[LENGTH-1:0] q
@@ -18,7 +19,7 @@ module ffd_param #(parameter LENGTH=1)(
 //Parametrized flip flop with synchronous reset and enable signal
 always@(posedge i_clk, negedge i_rst_n)
 begin
-	if(!i_rst_n)
+	if(!i_rst_n | flush)
 		q <= 0; 
 	else if(i_en)
 		q <= d;

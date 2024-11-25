@@ -10,6 +10,7 @@
 module issue_unit (
     input i_clk,
     input i_rst_n,
+    input flush,
     //input ready_int,
     //input ready_mult,
     //input ready_div,
@@ -44,6 +45,7 @@ wire div_exec_busy;
 cdb_rsv_station cdb_rsv_station(
     .i_clk(i_clk),
     .i_rst_n(i_rst_n),
+    .flush(flush),
     .ready_int(exec_int_issue_data.issue_rdy),
     .ready_mult(exec_mult_issue_data.issue_rdy),
     .ready_div(exec_div_issue_data.issue_rdy),
@@ -60,6 +62,7 @@ cdb_rsv_station cdb_rsv_station(
 functional_unit_group functional_unit_group(
     .i_clk(i_clk),
     .i_rst_n(i_rst_n),
+    .flush(flush),
     .exec_int_issue_data(exec_int_issue_data),
     .exec_mult_issue_data(exec_mult_issue_data),
     .exec_div_issue_data(exec_div_issue_data),
@@ -87,6 +90,7 @@ ffd_param #(.LENGTH(6)) sign_prop_div(
 	.i_clk(i_clk),
 	.i_rst_n(i_rst_n),
 	.i_en(1'b1),
+    .flush(flush),
     .d({issue_div,signal_div[5:1]}),
     .q(signal_div)
 );
@@ -98,6 +102,7 @@ ffd_param #(.LENGTH(3)) sign_prop_mult(
 	.i_clk(i_clk),
 	.i_rst_n(i_rst_n),
 	.i_en(1'b1),
+    .flush(flush),
     .d({issue_mult,signal_mult[2:1]}),
     .q(signal_mult)
 );

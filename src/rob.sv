@@ -41,7 +41,7 @@ rob_fifo rob_fifo(
     //.w_en(exec_int_fifo_ctrl.dispatch_en | exec_mult_fifo_ctrl.dispatch_en | exec_div_fifo_ctrl.dispatch_en | exec_ld_st_fifo_ctrl.dispatch_en),//dispatch_rd_en),
 //    .w_en(dispatch_w_to_rob_if.dispatch_en),
     .w_en(dispatch_w_to_rob_if.dispatch_en && (dispatch_type'(dispatch_w_to_rob_if.dispatch_instr_type) != JUMP)),
-    .flush(1'b0),
+    .flush(retire_bus_if.flush),
     .retire_completed(retire_enable),
     .data_out(rob_fifo_output),
     .o_full(rob_fifo_full),
@@ -56,6 +56,7 @@ assign rob_rf_data_input.spec_data = 0;
 assign rob_rf_data_input.spec_valid = 1'b0;
 assign rob_rf_data_input.branch_taken = 1'b0;
 assign rob_rf_data_input.valid = 1'b1;
+assign rob_rf_data_input.store_data = 0;
 rob_rf_data rob_rf_rs1_output;
 rob_rf_data rob_rf_rs2_output;
 
@@ -64,6 +65,7 @@ rob_rf_data rob_rf_retire_output;
 reg_file_rob rf_temp(
 	.clk(i_clk),
     .i_rst_n(i_rst_n),
+    .flush(retire_bus_if.flush),
 	//Write ports (New entry)
    // .wen_rf(dispatch_w_to_rob_if.dispatch_en),
     .wen_rf(dispatch_w_to_rob_if.dispatch_en && (dispatch_type'(dispatch_w_to_rob_if.dispatch_instr_type) != JUMP)),
@@ -98,7 +100,7 @@ assign retire_bus_if.store_data = (rob_rf_retire_output.inst_type==STORE) ? rob_
 assign retire_bus_if.valid = rob_rf_retire_output.valid;
 assign retire_bus_if.spec_valid = rob_rf_retire_output.spec_valid;
 assign retire_bus_if.retire_instr_type = rob_rf_retire_output.inst_type;
-//assign retire_bus_if.flush = ;
+assign retire_bus_if.flush = (retire_bus_if.branch == 1'b1 && retire_bus_if.branch_taken) ? 1'b1 : 1'b0;
 
 
 endmodule

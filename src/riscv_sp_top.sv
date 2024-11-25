@@ -21,6 +21,7 @@ wire [31:0] instr;
 wire [31:0] jmp_branch_address;
 wire jmp_branch_valid;
 wire empty;
+wire flush;
 
 int_issue_data exec_int_issue_data;
 common_issue_data exec_mult_issue_data;
@@ -82,6 +83,7 @@ dispatcher dispatcher(
     .dispatch_jmp_br_addr(jmp_branch_address),
     .dispatch_jmp_valid(jmp_branch_valid),
     .dispatch_rd_en(i_rd_en),
+    .flush(flush),
     //.cdb_tag(common_data_bus.cdb_tag),
     //.cdb_valid(common_data_bus.cdb_valid),
     //.cdb_data(common_data_bus.cdb_result),
@@ -104,6 +106,7 @@ dispatcher dispatcher(
 issue_unit issue_unit(
     .i_clk(clk),
     .i_rst_n(rst_n),
+    .flush(flush),
     .exec_int_issue_data(exec_int_issue_data),
     .exec_mult_issue_data(exec_mult_issue_data),
     .exec_div_issue_data(exec_div_issue_data),
