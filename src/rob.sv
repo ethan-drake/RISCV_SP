@@ -32,6 +32,7 @@ module rob(
 logic [5:0] rob_fifo_output;
 //wire rob_fifo_full;
 wire rob_fifo_empty;
+wire retire_enable;
 
 rob_fifo rob_fifo(
     .i_clk(i_clk),
@@ -40,7 +41,7 @@ rob_fifo rob_fifo(
     //.w_en(exec_int_fifo_ctrl.dispatch_en | exec_mult_fifo_ctrl.dispatch_en | exec_div_fifo_ctrl.dispatch_en | exec_ld_st_fifo_ctrl.dispatch_en),//dispatch_rd_en),
     .w_en(dispatch_w_to_rob_if.dispatch_en),
     .flush(1'b0),
-    .issue_completed(1'b0),
+    .retire_completed(retire_enable),
     .data_out(rob_fifo_output),
     .o_full(rob_fifo_full),
     .empty(rob_fifo_empty)
@@ -57,6 +58,8 @@ assign rob_rf_data_input.valid = 1'b1;
 rob_rf_data rob_rf_rs1_output;
 rob_rf_data rob_rf_rs2_output;
 
+rob_rf_data rob_rf_retire_output;
+
 reg_file_rob rf_temp(
 	.clk(i_clk),
     .i_rst_n(i_rst_n),
@@ -70,12 +73,28 @@ reg_file_rob rf_temp(
     .rs2addr_rf(dispatch_check_rs_status_if.rs2_token),
     .rs2data_rf(rob_rf_rs2_output),
     //update entry
-    .issue_cdb(issue_cdb)
+    .issue_cdb(issue_cdb),
+    //retire
+    .rob_fifo_head(rob_fifo_output),
+    .rob_rf_retire_valid(retire_enable),
+    .rob_retire_data(rob_rf_retire_output)
 );
 
 assign dispatch_check_rs_status_if.rs1_data_valid = rob_rf_rs1_output.valid & rob_rf_rs1_output.spec_valid;
 assign dispatch_check_rs_status_if.rs2_data_valid = rob_rf_rs2_output.valid & rob_rf_rs2_output.spec_valid;
 assign dispatch_check_rs_status_if.rs1_data_spec = rob_rf_rs1_output.spec_data;
 assign dispatch_check_rs_status_if.rs2_data_spec = rob_rf_rs2_output.spec_data;
+
+assign retire_bus_if.rd_tag = (retire_enable==1'b1) ? rob_fifo_output: 0;
+assign retire_bus_if.rd_reg = rob_rf_retire_output.rd_reg;
+assign retire_bus_if.data = rob_rf_retire_output.spec_data;
+assign retire_bus_if.pc = rob_rf_retire_output.pc;
+assign retire_bus_if.branch = (rob_rf_retire_output.inst_type==BRANCH) ? 1'b1: 0;
+assign retire_bus_if.branch_taken = rob_rf_retire_output.branch_taken;
+//assign retire_bus_if.store_ready = ;
+assign retire_bus_if.valid = rob_rf_retire_output.valid;
+assign retire_bus_if.spec_valid = rob_rf_retire_output.spec_valid;
+//assign retire_bus_if.flush = ;
+
 
 endmodule

@@ -25,7 +25,11 @@ module reg_file_rob (
 	output rob_rf_data rs2data_rf,
 
 	//update ports
-	input cdb_bfm issue_cdb
+	input cdb_bfm issue_cdb,
+	//retire ports
+    input [5:0] rob_fifo_head,
+    output reg rob_rf_retire_valid,
+    output rob_rf_data rob_retire_data
 );
 
 //Declare our memory
@@ -41,6 +45,10 @@ always @(posedge clk, negedge i_rst_n) begin
 			registers[issue_cdb.cdb_tag].spec_data <= issue_cdb.cdb_result;
 			registers[issue_cdb.cdb_tag].branch_taken <= issue_cdb.cdb_branch_taken;
 			registers[issue_cdb.cdb_tag].spec_valid <= 1'b1;
+		end
+		if(rob_rf_retire_valid)begin
+			registers[rob_fifo_head].valid <= 1'b0;
+			registers[rob_fifo_head].spec_valid <= 1'b0;
 		end
 	end
 end
@@ -116,5 +124,16 @@ end
 //Asyncronus read to registers
 assign rs1data_rf = registers[rs1addr_rf];
 assign rs2data_rf = registers[rs2addr_rf];
+
+always @(*) begin
+	if(registers[rob_fifo_head].valid == 1'b1 && registers[rob_fifo_head].spec_valid)begin
+		rob_rf_retire_valid = 1'b1;
+		rob_retire_data = registers[rob_fifo_head];
+	end
+	else begin
+		rob_rf_retire_valid = 1'b0;
+		rob_retire_data = 0;
+	end
+end
 
 endmodule

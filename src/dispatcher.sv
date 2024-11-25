@@ -169,7 +169,9 @@ rst rst_module(
 
     // remove in meantime until rob finishes .cdb_valid(cdb_valid),              //to be changed to ROB
     // remove in meantime until rob finishes .cdb_tag_rst(cdb_tag),              //to be changed to ROB
-    .wen_regfile_rst(wen_regfile_rst)
+    .cdb_valid(retire_bus_if.valid & retire_bus_if.spec_valid),
+    .cdb_tag_rst(retire_bus_if.rd_tag)
+    //.wen_regfile_rst(wen_regfile_rst)
 
 );
 
@@ -184,6 +186,8 @@ tag_fifo #(.DEPTH(64), .DATA_WIDTH(6)) tag_fifo_module(
     .i_rst_n(i_rst_n),
     // remove in meantime until rob finishes design .cdb_tag_data_tf(cdb_tag),
     // remove in meantime until rob finishes design .cdb_tag_valid_tf(cdb_valid),
+    .cdb_tag_data_tf(retire_bus_if.rd_tag),
+    .cdb_tag_valid_tf(retire_bus_if.valid & retire_bus_if.spec_valid),
     //.rd_en_tf(rd_enable & (~any_rsv_station_full)),
     .rd_en_tf((~any_rsv_station_full) & (~rob_fifo_full)),//always enable for ROB to work
     .flush(1'b0),
@@ -199,8 +203,11 @@ reg_file rf_module(
 	.clk(i_clk),
 	//Write ports
 	//.wen_rf(),
-	.write_data_rf(cdb.cdb_result),       //to be changed to ROB
-	.write_addr_rf(wen_regfile_rst),    //to be changed to ROB
+	//.write_data_rf(cdb.cdb_result),       //to be changed to ROB
+	//.write_addr_rf(wen_regfile_rst),    //to be changed to ROB
+    .wen_rf(retire_bus_if.valid & retire_bus_if.spec_valid),
+    .write_data_rf(retire_bus_if.data),
+    .write_addr_rf(retire_bus_if.rd_reg),
 	.rs1addr_rf(decode_rs1_addr),
 	.rs1data_rf(rs1data_rf),
 	.rs2addr_rf(decode_rs2_addr),

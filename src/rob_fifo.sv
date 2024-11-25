@@ -21,7 +21,7 @@ module rob_fifo #(parameter DEPTH=32)(
     //input [5:0] cdb_tag,
     //input cdb_valid,
     //input [31:0] cdb_data,
-    input issue_completed,
+    input retire_completed,
     output [5:0] data_out,
     output o_full,
     output empty
@@ -146,7 +146,7 @@ always @(posedge i_clk, negedge i_rst_n) begin
         head = 7'b0;
     end
     //fifo write data
-    else if(issue_completed)begin
+    else if(retire_completed)begin
         head=head+1;
      //   if(head[POINTER_WIDTH])begin
      //       head=7'b0;
@@ -182,7 +182,7 @@ end
 //        issue_queue_rdy = 0;
 //    end
 //end
-
+    assign data_out = fifo[head[POINTER_WIDTH-1:0]];
 	assign empty = tail[POINTER_WIDTH:0] == head[POINTER_WIDTH:0];
     assign o_full = full;
 

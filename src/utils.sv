@@ -165,7 +165,7 @@ endinterface //dispatch_w_to_rob
 
 interface retire_bus;
 
-   logic [4:0] rd_tag;
+   logic [5:0] rd_tag;
    logic [4:0] rd_reg;  //register that must be updated in register file
    logic [31:0] data;
    logic [31:0] pc;  //just makes sense in case a misspredicted branch
