@@ -8,7 +8,7 @@
 module reg_file (
 	input clk,
 	//Write ports
-	input [31:0] wen_rf,
+	//input [31:0] wen_rf,
 	input [31:0] write_data_rf,
 	input [4:0] write_addr_rf,
 

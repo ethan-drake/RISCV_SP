@@ -5,6 +5,14 @@
 // Project Name:	  risc_v_sp
 // Description:	  register status table
 
+`include "utils.sv"
+//states to use for each register
+// 
+//   PENDING_BACKEND,
+//   ROB_SPECULATIVE,
+//   REGFILE_RDY
+//} rst_state;
+
 module rst(
 	input clk, 
     //write port 0
@@ -12,8 +20,8 @@ module rst(
     input [4:0] waddr0_rst,
     input wen0_rst,
     //write port 1
-    input [6:0] wdata1_rst,
-    input [31:0] wen1_rst,//////////////
+    //input [6:0] wdata1_rst,
+    //input [31:0] wen1_rst,//////////////
 
     //read ports
     input[4:0] rs1addr_rst,
