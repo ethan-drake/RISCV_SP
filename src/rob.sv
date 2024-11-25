@@ -39,7 +39,8 @@ rob_fifo rob_fifo(
     .i_rst_n(i_rst_n),
     .data_in(dispatch_w_to_rob_if.dispatch_rd_tag),
     //.w_en(exec_int_fifo_ctrl.dispatch_en | exec_mult_fifo_ctrl.dispatch_en | exec_div_fifo_ctrl.dispatch_en | exec_ld_st_fifo_ctrl.dispatch_en),//dispatch_rd_en),
-    .w_en(dispatch_w_to_rob_if.dispatch_en),
+//    .w_en(dispatch_w_to_rob_if.dispatch_en),
+    .w_en(dispatch_w_to_rob_if.dispatch_en && (dispatch_type'(dispatch_w_to_rob_if.dispatch_instr_type) != JUMP)),
     .flush(1'b0),
     .retire_completed(retire_enable),
     .data_out(rob_fifo_output),
@@ -64,7 +65,8 @@ reg_file_rob rf_temp(
 	.clk(i_clk),
     .i_rst_n(i_rst_n),
 	//Write ports (New entry)
-    .wen_rf(dispatch_w_to_rob_if.dispatch_en),
+   // .wen_rf(dispatch_w_to_rob_if.dispatch_en),
+    .wen_rf(dispatch_w_to_rob_if.dispatch_en && (dispatch_type'(dispatch_w_to_rob_if.dispatch_instr_type) != JUMP)),
 	.write_data_rf(rob_rf_data_input),
 	.write_addr_rf(dispatch_w_to_rob_if.dispatch_rd_tag),
 	//Read ports (Consult_rs(1)(2))

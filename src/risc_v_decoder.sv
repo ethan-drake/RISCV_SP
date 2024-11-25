@@ -22,8 +22,6 @@ always @(*) begin
         R_TYPE,
         I_TYPE,
         LOAD_TYPE,
-        J_TYPE,
-        JALR_TYPE,
         LUI_TYPE,
         AUIPC_TYPE:begin
             dispatch_instr_type = NON_VALID_RD_TAG;
@@ -33,6 +31,10 @@ always @(*) begin
         end
         BRANCH_TYPE: begin
             dispatch_instr_type = BRANCH;
+        end
+        J_TYPE,
+        JALR_TYPE: begin
+            dispatch_instr_type = JUMP;
         end
         default:begin
             dispatch_instr_type = NON_VALID_RD_TAG;

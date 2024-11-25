@@ -86,7 +86,8 @@ typedef struct packed {
 typedef enum bit[1:0] { 
    NON_VALID_RD_TAG=2'h0,
    BRANCH=2'h1,
-   STORE =2'h2
+   STORE =2'h2,
+   JUMP = 2'h3
  } dispatch_type;
 
 //typedef struct packed {
