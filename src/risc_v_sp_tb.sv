@@ -664,6 +664,7 @@ always @(procesador.dispatcher.i_fetch_instruction) begin
 		wait(procesador.dispatcher.mult_exec_fifo.occupied == 0);
 		wait(procesador.dispatcher.div_exec_fifo.occupied == 0);
 		wait(procesador.dispatcher.tag_fifo_module.fifo_full_tf==1);
+		$display("Total run time: ", $time," ns");
 		//wait(cdb_publish.size() == 0);
 		@(posedge clk)
 		@(posedge clk)

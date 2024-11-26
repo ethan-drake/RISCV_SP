@@ -51,6 +51,8 @@ rob_fifo rob_fifo(
 rob_rf_data rob_rf_data_input;
 assign rob_rf_data_input.rd_reg = dispatch_w_to_rob_if.dispatch_rd_reg;
 assign rob_rf_data_input.pc = dispatch_w_to_rob_if.dispatch_pc;
+assign rob_rf_data_input.calculated_br_target = dispatch_w_to_rob_if.calculated_br_target;
+assign rob_rf_data_input.branch_prediction = dispatch_w_to_rob_if.branch_prediction;
 assign rob_rf_data_input.inst_type = dispatch_type'(dispatch_w_to_rob_if.dispatch_instr_type);
 assign rob_rf_data_input.spec_data = 0;
 assign rob_rf_data_input.spec_valid = 1'b0;
@@ -100,7 +102,9 @@ assign retire_bus_if.store_ready = (rob_rf_retire_output.inst_type==STORE) ? rob
 assign retire_bus_if.valid = rob_rf_retire_output.valid;
 assign retire_bus_if.spec_valid = rob_rf_retire_output.spec_valid;
 assign retire_bus_if.retire_instr_type = rob_rf_retire_output.inst_type;
-assign retire_bus_if.flush = (retire_bus_if.branch == 1'b1 && retire_bus_if.branch_taken) ? 1'b1 : 1'b0;
-
+assign retire_bus_if.flush = ((retire_bus_if.branch == 1'b1) && (rob_rf_retire_output.branch_taken != rob_rf_retire_output.branch_prediction)) ? 1'b1 : 1'b0;
+//assign retire_bus_if.calculated_br_target = rob_rf_retire_output.calculated_br_target;
+assign retire_bus_if.calculated_br_target = (rob_rf_retire_output.branch_taken == 1'b1) ? rob_rf_retire_output.calculated_br_target : (rob_rf_retire_output.pc + 4);
+assign retire_bus_if.branch_prediction = rob_rf_retire_output.branch_prediction;
 
 endmodule
