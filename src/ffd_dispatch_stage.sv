@@ -1,19 +1,20 @@
-// Coder:           David Adrian Michel Torres, Eduardo Ethandrake Castillo Pulido
-// Date:            16/03/23
-// File:			     ffd_param_pc_risk.v
-// Module name:	  ffd_param
+// Coder:           Eduardo Ethandrake Castillo Pulido
+// Date:            24/11/24
+// File:			     ffd_dispatch_stage.v
+// Module name:	  ffd_dispatch_stage
 // Project Name:	  risc_v_top
 // Description:	  This is a flipflopD register module
 
-module ffd_param #(parameter LENGTH=1)(
+`include "utils.sv"
+module ffd_dispatch_stage(
 	//inputs
 	input i_clk,
 	input i_rst_n,
-	input i_en,
 	input flush,
-	input [LENGTH-1:0] d,
+	input i_en,
+	input dispatch_gen_str d,
 	//outputs
-	output reg[LENGTH-1:0] q
+	output dispatch_gen_str q
 );
 
 //Parametrized flip flop with synchronous reset and enable signal

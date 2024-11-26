@@ -10,6 +10,7 @@
 module issue_unit (
     input i_clk,
     input i_rst_n,
+    input flush,
     //input ready_int,
     //input ready_mult,
     //input ready_div,
@@ -19,6 +20,7 @@ module issue_unit (
     input common_issue_data exec_mult_issue_data,
     input common_issue_data exec_div_issue_data,
     input mem_issue_data exec_mem_issue_data,
+	input retire_store retire_store,
     //input cdb_bfm int_cdb_input,
     //input cdb_bfm div_cdb_input,
     //input cdb_bfm mult_cdb_input,
@@ -43,6 +45,7 @@ wire div_exec_busy;
 cdb_rsv_station cdb_rsv_station(
     .i_clk(i_clk),
     .i_rst_n(i_rst_n),
+    .flush(flush),
     .ready_int(exec_int_issue_data.issue_rdy),
     .ready_mult(exec_mult_issue_data.issue_rdy),
     .ready_div(exec_div_issue_data.issue_rdy),
@@ -59,6 +62,7 @@ cdb_rsv_station cdb_rsv_station(
 functional_unit_group functional_unit_group(
     .i_clk(i_clk),
     .i_rst_n(i_rst_n),
+    .flush(flush),
     .exec_int_issue_data(exec_int_issue_data),
     .exec_mult_issue_data(exec_mult_issue_data),
     .exec_div_issue_data(exec_div_issue_data),
@@ -71,7 +75,8 @@ functional_unit_group functional_unit_group(
     .mult_submit_data(mult_submit_data),
     .div_submit_data(div_submit_data),
     .mem_submit_data(mem_submit_data),
-    .div_exec_busy(div_exec_busy)
+    .div_exec_busy(div_exec_busy),
+    .retire_store(retire_store)
 );
 
 //CDB control
@@ -85,6 +90,7 @@ ffd_param #(.LENGTH(6)) sign_prop_div(
 	.i_clk(i_clk),
 	.i_rst_n(i_rst_n),
 	.i_en(1'b1),
+    .flush(flush),
     .d({issue_div,signal_div[5:1]}),
     .q(signal_div)
 );
@@ -96,6 +102,7 @@ ffd_param #(.LENGTH(3)) sign_prop_mult(
 	.i_clk(i_clk),
 	.i_rst_n(i_rst_n),
 	.i_en(1'b1),
+    .flush(flush),
     .d({issue_mult,signal_mult[2:1]}),
     .q(signal_mult)
 );

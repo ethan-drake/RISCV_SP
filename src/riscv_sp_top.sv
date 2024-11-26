@@ -21,6 +21,7 @@ wire [31:0] instr;
 wire [31:0] jmp_branch_address;
 wire jmp_branch_valid;
 wire empty;
+wire flush;
 
 int_issue_data exec_int_issue_data;
 common_issue_data exec_mult_issue_data;
@@ -38,6 +39,9 @@ wire issue_granted_div;
 
 //BR NOT TAKEN SCENARIO
 wire fetch_next_instr;
+
+retire_store retire_store;
+
 
 i_cache cache(
     .pc_in({pc_in[31:4],4'b0}),
@@ -59,8 +63,8 @@ ifq ifq_module(
     .rd_en(i_rd_en),
     .jmp_branch_address(jmp_branch_address),
     .jmp_branch_valid(jmp_branch_valid),
-    .fetch_next_instr(fetch_next_instr),
-    .second_branch_instr(second_branch_instr),
+    //.fetch_next_instr(fetch_next_instr),
+    //.second_branch_instr(second_branch_instr),
     .pc_in(pc_in),
     .o_rd_en(rd_en),
     .abort(abort),
@@ -79,13 +83,15 @@ dispatcher dispatcher(
     .dispatch_jmp_br_addr(jmp_branch_address),
     .dispatch_jmp_valid(jmp_branch_valid),
     .dispatch_rd_en(i_rd_en),
-    .cdb_tag(common_data_bus.cdb_tag),
-    .cdb_valid(common_data_bus.cdb_valid),
-    .cdb_data(common_data_bus.cdb_result),
-    .cdb_branch(common_data_bus.cdb_branch),
-    .cdb_branch_taken(common_data_bus.cdb_branch_taken),
-    .fetch_next_instr(fetch_next_instr),
-    .second_branch_instr(second_branch_instr),
+    .flush(flush),
+    //.cdb_tag(common_data_bus.cdb_tag),
+    //.cdb_valid(common_data_bus.cdb_valid),
+    //.cdb_data(common_data_bus.cdb_result),
+    //.cdb_branch(common_data_bus.cdb_branch),
+    //.cdb_branch_taken(common_data_bus.cdb_branch_taken),
+    .cdb(common_data_bus),
+    //.fetch_next_instr(fetch_next_instr),
+    //.second_branch_instr(second_branch_instr),
     .exec_int_issue_data(exec_int_issue_data),
     .exec_mult_issue_data(exec_mult_issue_data),
     .exec_div_issue_data(exec_div_issue_data),
@@ -93,12 +99,14 @@ dispatcher dispatcher(
     .issue_done_int(issue_granted_int),
     .issue_done_mem(issue_granted_mem),
     .issue_done_mult(issue_granted_mult),
-    .issue_done_div(issue_granted_div)
+    .issue_done_div(issue_granted_div),
+    .retire_store(retire_store)
 );
 
 issue_unit issue_unit(
     .i_clk(clk),
     .i_rst_n(rst_n),
+    .flush(flush),
     .exec_int_issue_data(exec_int_issue_data),
     .exec_mult_issue_data(exec_mult_issue_data),
     .exec_div_issue_data(exec_div_issue_data),
@@ -116,7 +124,8 @@ issue_unit issue_unit(
     .issue_mult(issue_granted_mult),
     .issue_div(issue_granted_div),
     .issue_mem(issue_granted_mem),
-    .cdb_output(common_data_bus)
+    .cdb_output(common_data_bus),
+    .retire_store(retire_store)
 );
 
 

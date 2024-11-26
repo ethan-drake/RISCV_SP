@@ -641,11 +641,13 @@ task fill_up_expected_mem_test_11;
 endtask
 
 always @(posedge clk, negedge rst_n) begin
-	if(rst_n==1)begin
+	if(rst_n==1)begin		 
 		pc_instr_lookup = procesador.dispatcher.i_fetch_pc_plus_4>>2;
 		if(procesador.dispatcher.i_fetch_pc_plus_4 == 32'h400000 && procesador.dispatcher.i_fetch_instruction==0)begin
 		end
 		else begin
+			//$display("Instr in PC[%h]:%h",procesador.dispatcher.i_fetch_pc_plus_4,procesador.dispatcher.i_fetch_instruction);
+			
 			assert(procesador.dispatcher.i_fetch_instruction == expected_rom_memory[pc_instr_lookup]) else begin
 				$error("Unexpected Instr in PC[%h], read: %h, expected: %h",procesador.dispatcher.i_fetch_pc_plus_4, procesador.dispatcher.i_fetch_instruction, expected_rom_memory[pc_instr_lookup]);
 				simulation_errors++;

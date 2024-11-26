@@ -8,7 +8,7 @@
 module reg_file (
 	input clk,
 	//Write ports
-	input [31:0] wen_rf,
+	input wen_rf,
 	input [31:0] write_data_rf,
 	input [4:0] write_addr_rf,
 
@@ -25,7 +25,7 @@ reg [31:0] registers [0:31];
 
 //Syncronus write to registers
 always @(posedge clk) begin
-	if(write_addr_rf!=5'h0) begin
+	if(wen_rf == 1'b1 && write_addr_rf!=5'h0) begin
 		registers[write_addr_rf] <= write_data_rf;
 	end
 end

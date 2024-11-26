@@ -8,6 +8,7 @@
 module mult_exec_unit #(parameter LATENCY = 3)(
     input logic clk,
     input logic rst_n,
+    input logic flush,
     input logic issue_granted,
     input common_fifo_data mult_exec_fifo_data,
     output cdb_bfm o_mult_submit
@@ -39,6 +40,7 @@ ffd_param #(.LENGTH($bits(cdb_bfm))) latency(
     .i_clk(clk),
     .i_rst_n(rst_n),
     .i_en(1'b1),
+    .flush(flush),
     .d(mult_submit),
     .q(latency_submit[0])
 );
@@ -51,6 +53,7 @@ generate
             .i_clk(clk),
             .i_rst_n(rst_n),
             .i_en(1'b1),
+            .flush(flush),
             .d(latency_submit[i-1]),
             .q(latency_submit[i])
         );
