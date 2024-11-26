@@ -173,7 +173,7 @@ rst rst_module(
     // remove in meantime until rob finishes .cdb_valid(cdb_valid),              //to be changed to ROB
     // remove in meantime until rob finishes .cdb_tag_rst(cdb_tag),              //to be changed to ROB
     //.cdb_valid(retire_bus_if.valid & retire_bus_if.spec_valid),
-    .cdb_valid(retire_bus_if.valid && retire_bus_if.spec_valid && (dispatch_type'(retire_bus_if.retire_instr_type) == NON_VALID_RD_TAG)),
+    .cdb_valid(retire_bus_if.valid && retire_bus_if.spec_valid && (dispatch_type'(retire_bus_if.retire_instr_type) == NON_VALID_RD_TAG) && (retire_bus_if.rd_reg != 0)),
     .cdb_tag_rst(retire_bus_if.rd_tag)
     //.wen_regfile_rst(wen_regfile_rst)
 

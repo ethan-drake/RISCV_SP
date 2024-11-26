@@ -68,7 +68,7 @@ always @(*) begin
     //    cmn_fifo_data.rs2_data_valid = ~i_dispatch_gen_str.rs2_tag[6];//1'b0;
     //end
 
-    cmn_fifo_data.wb_valid = 1'b1;
+    //cmn_fifo_data.wb_valid = 1'b1;
 
     //if (!i_dispatch_gen_str.branch_stall || i_dispatch_gen_str.br_stall_one_shot || i_dispatch_gen_str.br_stall_one_shot_2)begin
     case (i_dispatch_gen_str.opcode)
@@ -94,9 +94,9 @@ always @(*) begin
                 ld_st_dispatch_en = 1'b0;
             end
             
-            if (i_dispatch_gen_str.rd == 0)begin
-                cmn_fifo_data.wb_valid = 1'b0;
-            end
+            //if (i_dispatch_gen_str.rd == 0)begin
+            //    cmn_fifo_data.wb_valid = 1'b0;
+            //end
         end
         I_TYPE: begin
             cmn_fifo_data.rs2_data = i_dispatch_gen_str.immediate;
@@ -106,9 +106,9 @@ always @(*) begin
             div_dispatch_en = 1'b0;
             ld_st_dispatch_en = 1'b0;
             
-            if (i_dispatch_gen_str.rd == 0)begin
-                cmn_fifo_data.wb_valid = 1'b0;
-            end
+            //if (i_dispatch_gen_str.rd == 0)begin
+            //    cmn_fifo_data.wb_valid = 1'b0;
+            //end
         end
         LOAD_TYPE: begin
             cmn_fifo_data.rs2_data_valid = 1'b1;
@@ -117,9 +117,9 @@ always @(*) begin
             div_dispatch_en = 1'b0;
             ld_st_dispatch_en = 1'b1;
             
-            if (i_dispatch_gen_str.rd == 0)begin
-                cmn_fifo_data.wb_valid = 1'b0;
-            end
+            //if (i_dispatch_gen_str.rd == 0)begin
+            //    cmn_fifo_data.wb_valid = 1'b0;
+            //end
         end
         STORE_TYPE: begin
             int_dispatch_en = 1'b0;
