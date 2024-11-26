@@ -106,11 +106,13 @@ typedef enum bit[1:0] {
 
 typedef struct packed {
    logic [4:0] rd_reg;
-   logic [31:0] pc; //pc address to jump when branch instr
+   logic [31:0] pc; //now it is instr_pc //pc address to jump when branch instr
+   logic [31:0] calculated_br_target;
    dispatch_type inst_type;
    logic [31:0] spec_data;
    logic spec_valid;
    logic branch_taken;
+   logic branch_prediction;
    logic valid;
    //logic [31:0] store_data;
 } rob_rf_data;
@@ -157,12 +159,14 @@ interface dispatch_w_to_rob #(parameter type DTYPE= dispatch_type);
    DTYPE dispatch_instr_type;
    logic dispatch_en;   //tells if current instruction will be sent to next pipe
    logic dispatch_need_tag;   //tells if current instruction needs update RST
+   logic [31:0] calculated_br_target;
+   logic branch_prediction;
    
    modport rob (
-   input dispatch_rd_tag, dispatch_rd_reg, dispatch_pc, dispatch_instr_type,dispatch_en
+   input dispatch_rd_tag, dispatch_rd_reg, dispatch_pc, dispatch_instr_type, dispatch_en, calculated_br_target, branch_prediction
    );
    modport dispatcher (
-   output dispatch_rd_tag, dispatch_rd_reg, dispatch_pc, dispatch_instr_type,dispatch_en
+   output dispatch_rd_tag, dispatch_rd_reg, dispatch_pc, dispatch_instr_type, dispatch_en, calculated_br_target, branch_prediction
    );
 endinterface //dispatch_w_to_rob
 
@@ -171,9 +175,12 @@ interface retire_bus;
    logic [5:0] rd_tag;
    logic [4:0] rd_reg;  //register that must be updated in register file
    logic [31:0] data;
-   logic [31:0] pc;  //just makes sense in case a misspredicted branch
+   logic [31:0] pc;  
+   logic [31:0] calculated_br_target; //just makes sense in case a misspredicted branch
+   logic [31:0] retired_branch_prediction; //branch prediction that was used originally, intend is to compare with calculated_br_target
    logic branch;     //specifies if retired instruction is a branch
    logic branch_taken;  //specifies the branch must been taken (wrong prediction)
+   logic branch_prediction;
    logic store_ready;   //if retired instruction is a store
    logic valid;      //tells if an instruction is retiring
    logic spec_valid; //tells if head instr is retired from order_queue, retire signal data are valid and rf can be modified
@@ -183,13 +190,13 @@ interface retire_bus;
    logic [1:0] retire_instr_type;
 
    modport rob (
-   input store_executed,
-   output rd_tag, rd_reg, data, pc, branch, branch_taken, store_ready, valid, flush, spec_valid, retire_instr_type
+   input store_executed, retired_branch_prediction,
+   output rd_tag, rd_reg, data, pc, branch, branch_taken, store_ready, valid, flush, spec_valid, retire_instr_type, calculated_br_target, branch_prediction
    );
 
    modport dispatcher (
-   input rd_tag, rd_reg, data, pc, branch, branch_taken, store_ready, valid, flush, spec_valid, retire_instr_type,
-   output store_executed
+   input rd_tag, rd_reg, data, pc, branch, branch_taken, store_ready, valid, flush, spec_valid, retire_instr_type, calculated_br_target, branch_prediction,
+   output store_executed, retired_branch_prediction
    );
 endinterface //retire_bus
 

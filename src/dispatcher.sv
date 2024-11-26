@@ -99,28 +99,27 @@ risc_v_decoder decoder(
     .dispatch_instr_type(dispatch_instr_type)
 );
 
-//always @(*) begin
-//    case (riscv_opcode'(opcode))
-//        R_TYPE,
-//        I_TYPE,
-//        LOAD_TYPE,
-//        J_TYPE,
-//        JALR_TYPE,
-//        LUI_TYPE,
-//        AUIPC_TYPE:begin
-//            dispatch_instr_type = NON_VALID_RD_TAG;
-//        end
-//        STORE_TYPE: begin
-//            dispatch_instr_type = STORE;
-//        end
-//        BRANCH_TYPE: begin
-//            dispatch_instr_type = BRANCH;
-//        end
-//        default:begin
-//            dispatch_instr_type = NON_VALID_RD_TAG;
-//        end 
-//    endcase
-//end
+wire branch_prediction;
+wire [31:0] branch_target;
+wire prediction_checkout_ex_mem;
+wire [31:0] retired_branch_prediction;
+branch_prediction #(.DATA_WIDTH(32),.BRANCH_NO(8)) branch_prediction_module(
+    .i_clk(i_clk),
+    .i_rst_n(i_rst_n),
+    .retired_inst_type(dispatch_type'(retire_bus_if.retire_instr_type)),//type of retired instr
+    .dispatch_inst_type(dispatch_type'(dispatch_instr_type)),//type of dispatched instr
+    .retired_branch_taken(retire_bus_if.branch_taken),//retired interface branch_taken
+    .retired_branch_target(retire_bus_if.calculated_br_target),
+    .dispatch_pc(i_fetch_pc_plus_4),
+    .retire_pc(retire_bus_if.pc),
+    .prediction(branch_prediction), //taken or not taken decision
+    .branch_target(branch_target),
+    .prediction_checkout_ex_mem(prediction_checkout_ex_mem),
+    .retired_branch_prediction(retire_bus_if.retired_branch_prediction)
+);
+
+
+
 
 wire rob_fifo_full;
 
@@ -132,7 +131,9 @@ assign dispatch_w_to_rob_if.dispatch_en = dispatch_rd_en; //only pauses when rsv
 assign dispatch_w_to_rob_if.dispatch_rd_reg = decode_rd_addr;
 assign dispatch_w_to_rob_if.dispatch_rd_tag = tag_out_tf;
 assign dispatch_w_to_rob_if.dispatch_instr_type = dispatch_type'(dispatch_instr_type);
-assign dispatch_w_to_rob_if.dispatch_pc = dispatch_jmp_br_addr;//i_fetch_pc_plus_4;
+assign dispatch_w_to_rob_if.dispatch_pc = i_fetch_pc_plus_4;//dispatch_jmp_br_addr;//i_fetch_pc_plus_4;
+assign dispatch_w_to_rob_if.calculated_br_target = jmp_br_addr;//dispatch_jmp_br_addr;//0;
+assign dispatch_w_to_rob_if.branch_prediction = branch_prediction;
 
 dispatch_check_rs_status dispatch_check_rs_status_if();
 assign dispatch_check_rs_status_if.rs1_token = rs1_tag_rst;
@@ -600,12 +601,16 @@ exec_rsv_station_shift #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) div_ex
 
 //assign dispatch_jmp_valid = jmp_detected | cdb.cdb_branch_taken;//or branch cdb logic TBD
 //assign dispatch_jmp_valid = jmp_detected;
-assign dispatch_jmp_valid = jmp_detected | retire_bus_if.flush;
+//assign dispatch_jmp_valid = jmp_detected | retire_bus_if.flush;
+assign dispatch_jmp_valid = jmp_detected | retire_bus_if.flush | branch_prediction;
 
 //assign dispatch_jmp_br_addr = jmp_br_addr; //cdb branch logic TBD
 
 //assign dispatch_jmp_br_addr = (retire_bus_if.flush) ? retire_bus_if.pc : (jmp_detected) ? jmp_br_addr : 0;
-assign dispatch_jmp_br_addr = (retire_bus_if.flush == 1'b1) ? retire_bus_if.pc : jmp_br_addr;
+//assign dispatch_jmp_br_addr = (retire_bus_if.flush == 1'b1) ? retire_bus_if.pc : jmp_br_addr;
+//assign dispatch_jmp_br_addr = (retire_bus_if.flush == 1'b1) ? retire_bus_if.calculated_br_target : jmp_br_addr;
+//assign dispatch_jmp_br_addr = (retire_bus_if.flush == 1'b1) ? retire_bus_if.calculated_br_target : (branch_prediction==1'b1) ? branch_target : jmp_br_addr;
+assign dispatch_jmp_br_addr = (flush == 1'b1) ? retire_bus_if.calculated_br_target : (branch_prediction==1'b1) ? branch_target : jmp_br_addr;
 
 
 assign any_rsv_station_full=(exec_int_fifo_ctrl.queue_full | exec_ld_st_fifo_ctrl.queue_full | exec_mult_fifo_ctrl.queue_full | exec_div_fifo_ctrl.queue_full);
@@ -621,6 +626,11 @@ assign retire_store.store_ready = retire_bus_if.store_ready;
 //assign retire_store.retire_rs2_data = retire_bus_if.store_data;
 assign retire_store.mem_address = retire_bus_if.data;
 assign flush = retire_bus_if.flush;
+//assign flush = (retire_bus_if.branch == 1'b1 && (retire_bus_if.branch_taken) && (retire_bus_if.branch_prediction) && (retired_branch_prediction != retire_bus_if.calculated_br_target)) ? 1'b1 : retire_bus_if.flush;
+
+wire different_taken_branch;
+assign different_taken_branch = (retire_bus_if.branch == 1'b1 && (retire_bus_if.branch_taken) && (retire_bus_if.branch_prediction) && (retired_branch_prediction != retire_bus_if.calculated_br_target)) ? 1'b1 : 1'b0;// retire_bus_if.flush;
+//NOTE: TBD METHOD TO FLUSH WHEN BRANCH WAS TAKEN TO INCORRECT PLACE
 
 //always @(*) begin
 //    if (cdb.cdb_branch==1'b1 && any_rsv_station_full==1'b0) begin
