@@ -177,6 +177,7 @@ interface retire_bus;
    logic [31:0] data;
    logic [31:0] pc;  
    logic [31:0] calculated_br_target; //just makes sense in case a misspredicted branch
+   logic [31:0] retired_branch_prediction; //branch prediction that was used originally, intend is to compare with calculated_br_target
    logic branch;     //specifies if retired instruction is a branch
    logic branch_taken;  //specifies the branch must been taken (wrong prediction)
    logic branch_prediction;
@@ -189,13 +190,13 @@ interface retire_bus;
    logic [1:0] retire_instr_type;
 
    modport rob (
-   input store_executed,
+   input store_executed, retired_branch_prediction,
    output rd_tag, rd_reg, data, pc, branch, branch_taken, store_ready, valid, flush, spec_valid, retire_instr_type, calculated_br_target, branch_prediction
    );
 
    modport dispatcher (
    input rd_tag, rd_reg, data, pc, branch, branch_taken, store_ready, valid, flush, spec_valid, retire_instr_type, calculated_br_target, branch_prediction,
-   output store_executed
+   output store_executed, retired_branch_prediction
    );
 endinterface //retire_bus
 

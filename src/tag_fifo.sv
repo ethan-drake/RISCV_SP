@@ -143,7 +143,8 @@ always @(*) begin
         full = 1;
     end
     else if(flush)begin
-        full = 0;
+        //full = 0;
+		full = 1;
     end
     else begin
         //full = (overflow && (rp[POINTER_WIDTH:0]==0)) ? 1 : (wp[POINTER_WIDTH:0]+1 == rp[POINTER_WIDTH:0]) ? 1 : 0;

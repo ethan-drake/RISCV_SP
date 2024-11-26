@@ -115,7 +115,7 @@ branch_prediction #(.DATA_WIDTH(32),.BRANCH_NO(8)) branch_prediction_module(
     .prediction(branch_prediction), //taken or not taken decision
     .branch_target(branch_target),
     .prediction_checkout_ex_mem(prediction_checkout_ex_mem),
-    .retired_branch_prediction(retired_branch_prediction)
+    .retired_branch_prediction(retire_bus_if.retired_branch_prediction)
 );
 
 
@@ -627,6 +627,9 @@ assign retire_store.store_ready = retire_bus_if.store_ready;
 assign retire_store.mem_address = retire_bus_if.data;
 assign flush = retire_bus_if.flush;
 //assign flush = (retire_bus_if.branch == 1'b1 && (retire_bus_if.branch_taken) && (retire_bus_if.branch_prediction) && (retired_branch_prediction != retire_bus_if.calculated_br_target)) ? 1'b1 : retire_bus_if.flush;
+
+wire different_taken_branch;
+assign different_taken_branch = (retire_bus_if.branch == 1'b1 && (retire_bus_if.branch_taken) && (retire_bus_if.branch_prediction) && (retired_branch_prediction != retire_bus_if.calculated_br_target)) ? 1'b1 : 1'b0;// retire_bus_if.flush;
 //NOTE: TBD METHOD TO FLUSH WHEN BRANCH WAS TAKEN TO INCORRECT PLACE
 
 //always @(*) begin

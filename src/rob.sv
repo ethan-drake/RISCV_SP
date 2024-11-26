@@ -102,9 +102,16 @@ assign retire_bus_if.store_ready = (rob_rf_retire_output.inst_type==STORE) ? rob
 assign retire_bus_if.valid = rob_rf_retire_output.valid;
 assign retire_bus_if.spec_valid = rob_rf_retire_output.spec_valid;
 assign retire_bus_if.retire_instr_type = rob_rf_retire_output.inst_type;
-assign retire_bus_if.flush = ((retire_bus_if.branch == 1'b1) && (rob_rf_retire_output.branch_taken != rob_rf_retire_output.branch_prediction)) ? 1'b1 : 1'b0;
-//assign retire_bus_if.calculated_br_target = rob_rf_retire_output.calculated_br_target;
 assign retire_bus_if.calculated_br_target = (rob_rf_retire_output.branch_taken == 1'b1) ? rob_rf_retire_output.calculated_br_target : (rob_rf_retire_output.pc + 4);
 assign retire_bus_if.branch_prediction = rob_rf_retire_output.branch_prediction;
+
+wire usual_flush;
+//assign retire_bus_if.flush = ((retire_bus_if.branch == 1'b1) && (rob_rf_retire_output.branch_taken != rob_rf_retire_output.branch_prediction)) ? 1'b1 : 1'b0;
+assign usual_flush = ((retire_bus_if.branch == 1'b1) && (rob_rf_retire_output.branch_taken != rob_rf_retire_output.branch_prediction)) ? 1'b1 : 1'b0;
+//assign flush = (retire_bus_if.branch == 1'b1 && (retire_bus_if.branch_taken) && (retire_bus_if.branch_prediction) && (retire_bus_if.retired_branch_prediction != retire_bus_if.calculated_br_target)) ? 1'b1 : retire_bus_if.flush;
+assign retire_bus_if.flush = (retire_bus_if.branch == 1'b1 && (retire_bus_if.branch_taken) && (retire_bus_if.branch_prediction) && (retire_bus_if.retired_branch_prediction != retire_bus_if.calculated_br_target)) ? 1'b1 : usual_flush;
+
+//assign retire_bus_if.calculated_br_target = rob_rf_retire_output.calculated_br_target;
+
 
 endmodule
