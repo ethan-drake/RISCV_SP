@@ -127,7 +127,8 @@ wire rob_fifo_full;
 
 
 dispatch_w_to_rob #(.DTYPE(dispatch_type)) dispatch_w_to_rob_if();
-assign dispatch_w_to_rob_if.dispatch_en = 1'b1;//como ya no se hara hold nunca esta señal siempre es 1 dispatch_rd_en;//exec_int_fifo_ctrl.dispatch_en | exec_mult_fifo_ctrl.dispatch_en | exec_div_fifo_ctrl.dispatch_en | exec_ld_st_fifo_ctrl.dispatch_en;
+//assign dispatch_w_to_rob_if.dispatch_en = 1'b1;//como ya no se hara hold nunca esta señal siempre es 1 dispatch_rd_en;//exec_int_fifo_ctrl.dispatch_en | exec_mult_fifo_ctrl.dispatch_en | exec_div_fifo_ctrl.dispatch_en | exec_ld_st_fifo_ctrl.dispatch_en;
+assign dispatch_w_to_rob_if.dispatch_en = dispatch_rd_en; //only pauses when rsv stations are full or rob fifo is full
 assign dispatch_w_to_rob_if.dispatch_rd_reg = decode_rd_addr;
 assign dispatch_w_to_rob_if.dispatch_rd_tag = tag_out_tf;
 assign dispatch_w_to_rob_if.dispatch_instr_type = dispatch_type'(dispatch_instr_type);
@@ -292,21 +293,27 @@ end
 
 //checking results for rs2
 always @(*) begin
-    if(rs2valid_rst == 1'b0)begin
-        //data is located in RF get that data and set valid flag to 1
-        rs2data_tmp = rs2data_rf;
+    //if operation is of kind immediate
+    if(opcode == I_TYPE) begin
         rs2_valid_tmp = 1'b1;
     end
     else begin
-        if(dispatch_check_rs_status_if.rs2_data_valid==1'b1)begin
-            //data is located in spec_data get that data and set valid flag to 1
-            rs2data_tmp = dispatch_check_rs_status_if.rs2_data_spec;
+        if(rs2valid_rst == 1'b0)begin
+            //data is located in RF get that data and set valid flag to 1
+            rs2data_tmp = rs2data_rf;
             rs2_valid_tmp = 1'b1;
         end
         else begin
-            //data not yet published by cdb, doesnt matter the data cause valid flag will be 0
-            rs2data_tmp = 0;
-            rs2_valid_tmp = 1'b0;
+            if(dispatch_check_rs_status_if.rs2_data_valid==1'b1)begin
+                //data is located in spec_data get that data and set valid flag to 1
+                rs2data_tmp = dispatch_check_rs_status_if.rs2_data_spec;
+                rs2_valid_tmp = 1'b1;
+            end
+            else begin
+                //data not yet published by cdb, doesnt matter the data cause valid flag will be 0
+                rs2data_tmp = 0;
+                rs2_valid_tmp = 1'b0;
+            end
         end
     end
 end
@@ -349,7 +356,8 @@ multiplexor_param #(.LENGTH(32)) rs2_cdb_mux(
 );
 
 //ffd to separate dispatch 1 and dispatch 2 stages
-
+dispatch_gen_str bypass_2_result_if_any_output;
+dispatch_gen_str bypass_2_result_if_any_output_floped;
 dispatch_gen_str dispatch_gen_str_output;
 
 ffd_dispatch_stage ffd_dispatch_gen(
@@ -357,14 +365,20 @@ ffd_dispatch_stage ffd_dispatch_gen(
 	.i_clk(i_clk),
 	.i_rst_n(i_rst_n),
     .flush(flush),
-	.i_en(1'b1),
-	.d(dispatch_gen_str_input),
+	//.i_en(1'b1),
+	.i_en(dispatch_rd_en),
+//    .i_en(dispatch_rd_en | post_feedback_sel),
+//    .d(dispatch_gen_str_post_feedback),
+    .d(dispatch_gen_str_input),
 	//outputs
     .q(dispatch_gen_str_output)
 );
 // HERE WILL BE THE SECOND BYPASS
 
 dispatch_gen_str dispatch_gen_str_bypass_2;
+assign dispatch_gen_str_bypass_2.rs1 = dispatch_gen_str_output.rs1;
+assign dispatch_gen_str_bypass_2.rs2 = dispatch_gen_str_output.rs2;
+assign dispatch_gen_str_bypass_2.rd = dispatch_gen_str_output.rd;
 assign dispatch_gen_str_bypass_2.opcode = dispatch_gen_str_output.opcode;
 assign dispatch_gen_str_bypass_2.func3 = dispatch_gen_str_output.func3;
 assign dispatch_gen_str_bypass_2.func7 = dispatch_gen_str_output.func7;
@@ -395,6 +409,87 @@ multiplexor_param #(.LENGTH(32)) rs2_cdb_mux_bypass_2(
     .out(dispatch_gen_str_bypass_2.rs2_data)
 );
 
+//assign dispatch_gen_str_bypass_2.rs2_data = sel_rs2_cdb_mux_bypass2 ? cdb.cdb_result : dispatch_gen_str_output.rs2_data;
+wire bypass_2_result_if_any_sel;
+assign bypass_2_result_if_any_sel = (dispatch_rd_en == 1'b0) && (sel_rs1_cdb_mux_bypass2 || sel_rs2_cdb_mux_bypass2);
+
+multiplexor_param #(.LENGTH($bits(dispatch_gen_str))) mux_bypass_2_result_if_any(
+    .i_a(180'h0),
+    .i_b(dispatch_gen_str_bypass_2),
+    .i_selector(bypass_2_result_if_any_sel),
+    .out(bypass_2_result_if_any_output)
+);
+
+
+
+ffd_dispatch_stage ffd_dispatch_gen_bp2_if_any(
+	//inputs
+	.i_clk(i_clk),
+	.i_rst_n(i_rst_n),
+    .flush(flush),
+	.i_en(1'b1),
+	//.i_en(dispatch_rd_en),
+//    .i_en(dispatch_rd_en | post_feedback_sel),
+//    .d(dispatch_gen_str_post_feedback),
+    .d(bypass_2_result_if_any_output),
+	//outputs
+    .q(bypass_2_result_if_any_output_floped)
+);
+
+////////////// BYPASS 2.1
+
+dispatch_gen_str dispatch_gen_str_bypass_2_1;
+assign dispatch_gen_str_bypass_2_1.rs1 = bypass_2_result_if_any_output_floped.rs1;
+assign dispatch_gen_str_bypass_2_1.rs2 = bypass_2_result_if_any_output_floped.rs2;
+assign dispatch_gen_str_bypass_2_1.rd = bypass_2_result_if_any_output_floped.rd;
+
+assign dispatch_gen_str_bypass_2_1.opcode = bypass_2_result_if_any_output_floped.opcode;
+assign dispatch_gen_str_bypass_2_1.func3 = bypass_2_result_if_any_output_floped.func3;
+assign dispatch_gen_str_bypass_2_1.func7 = bypass_2_result_if_any_output_floped.func7;
+assign dispatch_gen_str_bypass_2_1.immediate = bypass_2_result_if_any_output_floped.immediate;
+assign dispatch_gen_str_bypass_2_1.rs1_tag = bypass_2_result_if_any_output_floped.rs1_tag;
+assign dispatch_gen_str_bypass_2_1.rs2_tag = bypass_2_result_if_any_output_floped.rs2_tag;
+assign dispatch_gen_str_bypass_2_1.rd_tag = bypass_2_result_if_any_output_floped.rd_tag;
+assign dispatch_gen_str_bypass_2_1.jmp_br_addr = bypass_2_result_if_any_output_floped.jmp_br_addr;
+
+
+wire sel_rs1_cdb_mux_bypass2_1;
+wire sel_rs2_cdb_mux_bypass2_1;
+
+assign sel_rs1_cdb_mux_bypass2_1 = (bypass_2_result_if_any_output_floped != 0) && (~bypass_2_result_if_any_output_floped.rs1_valid) && (bypass_2_result_if_any_output_floped.rs1_tag== cdb.cdb_tag) && cdb.cdb_valid;
+assign sel_rs2_cdb_mux_bypass2_1 = (bypass_2_result_if_any_output_floped != 0) && (~bypass_2_result_if_any_output_floped.rs2_valid) && (bypass_2_result_if_any_output_floped.rs2_tag== cdb.cdb_tag) && cdb.cdb_valid;
+
+
+multiplexor_param #(.LENGTH(32)) rs1_cdb_mux_bypass2_1(
+    .i_a(bypass_2_result_if_any_output_floped.rs1_data),
+    .i_b(cdb.cdb_result),
+    .i_selector(sel_rs1_cdb_mux_bypass2_1),
+    .out(dispatch_gen_str_bypass_2_1.rs1_data)
+);
+
+assign dispatch_gen_str_bypass_2_1.rs1_valid = bypass_2_result_if_any_output_floped.rs1_valid | sel_rs1_cdb_mux_bypass2_1;
+assign dispatch_gen_str_bypass_2_1.rs2_valid = bypass_2_result_if_any_output_floped.rs2_valid | sel_rs2_cdb_mux_bypass2_1;
+
+multiplexor_param #(.LENGTH(32)) rs2_cdb_mux_bypass_2_1(
+    .i_a(bypass_2_result_if_any_output_floped.rs2_data),
+    .i_b(cdb.cdb_result),
+    .i_selector(sel_rs2_cdb_mux_bypass2_1),
+    .out(dispatch_gen_str_bypass_2_1.rs2_data)
+);
+//////////////////////////////////////////////////
+
+wire mux_bypass_2_1_output_sel;
+assign mux_bypass_2_1_output_sel = (dispatch_gen_str_bypass_2_1 != 0) ? 1'b1 : 1'b0;
+dispatch_gen_str final_dispatch_gen;
+
+multiplexor_param #(.LENGTH($bits(dispatch_gen_str))) mux_bypass_2_1_output(
+    .i_a(dispatch_gen_str_bypass_2),
+    .i_b(dispatch_gen_str_bypass_2_1),
+    .i_selector(mux_bypass_2_1_output_sel),
+    .out(final_dispatch_gen)
+);
+
+
 //Dispatch packet generator
 dispatch_gen dispatch_gen(
     //.rs1(decode_rs1_addr),
@@ -415,7 +510,9 @@ dispatch_gen dispatch_gen(
     //.branch_stall(branch_detected),
     //.br_stall_one_shot(br_stall_one_shot),
     //.br_stall_one_shot_2(br_stall_one_shot_2),
-    .i_dispatch_gen_str(dispatch_gen_str_bypass_2),
+    //.i_dispatch_gen_str(dispatch_gen_str_bypass_2),
+    //.i_dispatch_gen_str(dispatch_gen_str_post_feedback),
+    .i_dispatch_gen_str(final_dispatch_gen),
     .o_mult_fifo_data(exec_mult_fifo_data_in),
     .o_div_fifo_data(exec_div_fifo_data_in),
     .int_dispatch_en(exec_int_fifo_ctrl.dispatch_en),
