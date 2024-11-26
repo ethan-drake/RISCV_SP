@@ -7,7 +7,8 @@
 
 module data_memory #(parameter DATA_WIDTH = 32, parameter ADDR_WIDTH = 32) (
 	//inputs
-	input [(DATA_WIDTH-1):0] wd, address,
+	input [(DATA_WIDTH-1):0] wd, w_address,
+	input [(DATA_WIDTH-1):0] r_address,
 	input we, re, clk,
 	//outputs
 	output [(DATA_WIDTH-1):0] rd
@@ -26,10 +27,11 @@ always @(posedge clk)
 begin
 	//Write
 	if (we)
-		ram[address] <= wd;
+		ram[w_address] <= wd;
 end
 	
 // Reading if memory read enable
-assign rd = ram[address];
+//assign rd = ram[address];
+assign rd = ram[r_address];
 
 endmodule

@@ -618,7 +618,7 @@ assign any_rsv_station_full=(exec_int_fifo_ctrl.queue_full | exec_ld_st_fifo_ctr
 assign dispatch_rd_en = (~any_rsv_station_full) & (~rob_fifo_full);
 
 assign retire_store.store_ready = retire_bus_if.store_ready;
-assign retire_store.retire_rs2_data = retire_bus_if.store_data;
+//assign retire_store.retire_rs2_data = retire_bus_if.store_data;
 assign retire_store.mem_address = retire_bus_if.data;
 assign flush = retire_bus_if.flush;
 

@@ -56,7 +56,7 @@ assign rob_rf_data_input.spec_data = 0;
 assign rob_rf_data_input.spec_valid = 1'b0;
 assign rob_rf_data_input.branch_taken = 1'b0;
 assign rob_rf_data_input.valid = 1'b1;
-assign rob_rf_data_input.store_data = 0;
+//assign rob_rf_data_input.store_data = 0;
 rob_rf_data rob_rf_rs1_output;
 rob_rf_data rob_rf_rs2_output;
 
@@ -96,7 +96,7 @@ assign retire_bus_if.pc = rob_rf_retire_output.pc;
 assign retire_bus_if.branch = (rob_rf_retire_output.inst_type==BRANCH) ? 1'b1: 0;
 assign retire_bus_if.branch_taken = rob_rf_retire_output.branch_taken;
 assign retire_bus_if.store_ready = (rob_rf_retire_output.inst_type==STORE) ? rob_rf_retire_output.spec_valid : 0;
-assign retire_bus_if.store_data = (rob_rf_retire_output.inst_type==STORE) ? rob_rf_retire_output.store_data : 0;
+//assign retire_bus_if.store_data = (rob_rf_retire_output.inst_type==STORE) ? rob_rf_retire_output.store_data : 0;
 assign retire_bus_if.valid = rob_rf_retire_output.valid;
 assign retire_bus_if.spec_valid = rob_rf_retire_output.spec_valid;
 assign retire_bus_if.retire_instr_type = rob_rf_retire_output.inst_type;

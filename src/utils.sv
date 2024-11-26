@@ -25,7 +25,7 @@ typedef struct packed {
   bit [31:0] cdb_result;
   bit cdb_branch;
   bit cdb_branch_taken;
-  logic [31:0] store_data;
+  //logic [31:0] store_data;
   //bit issue_done;
 } cdb_bfm;
 
@@ -112,7 +112,7 @@ typedef struct packed {
    logic spec_valid;
    logic branch_taken;
    logic valid;
-   logic [31:0] store_data;
+   //logic [31:0] store_data;
 } rob_rf_data;
 
 enum bit[1:0] { 
@@ -179,16 +179,16 @@ interface retire_bus;
    logic spec_valid; //tells if head instr is retired from order_queue, retire signal data are valid and rf can be modified
    logic flush;  //tells if flush needed, RTS & TAG FIFO will restart to original state, dispatch stages not proceding with instr
    logic store_executed;   //tells if store has been executed
-   logic [31:0] store_data;
+  // logic [31:0] store_data;
    logic [1:0] retire_instr_type;
 
    modport rob (
    input store_executed,
-   output rd_tag, rd_reg, data, pc, branch, branch_taken, store_ready, valid, flush, spec_valid, store_data, retire_instr_type
+   output rd_tag, rd_reg, data, pc, branch, branch_taken, store_ready, valid, flush, spec_valid, retire_instr_type
    );
 
    modport dispatcher (
-   input rd_tag, rd_reg, data, pc, branch, branch_taken, store_ready, valid, flush, spec_valid, store_data, retire_instr_type,
+   input rd_tag, rd_reg, data, pc, branch, branch_taken, store_ready, valid, flush, spec_valid, retire_instr_type,
    output store_executed
    );
 endinterface //retire_bus
@@ -220,3 +220,9 @@ typedef struct packed {
    logic [31:0] mem_address;
    logic [31:0] retire_rs2_data;
 } retire_store;
+
+typedef struct packed {
+   logic [31:0] data;
+   logic [31:0] address;
+   logic valid;
+} wc_array;
