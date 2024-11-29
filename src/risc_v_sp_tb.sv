@@ -24,6 +24,7 @@ bit [31:0] expected_mem [0:31];
 int simulation_errors=0;
 bit [7:0] pc_instr_lookup;
 reg [31:0] expected_rom_memory [0:(32*32)-1];
+bit sort_test=0;
 
 //Initial data with program to execute
 //initial begin
@@ -106,6 +107,7 @@ initial begin
 		"TEST_11":begin
 			$display("EXECUTING:  FINAL verification (FINAL SORT CODE)");
 			$readmemh("../asm/sort_final_project.txt", expected_rom_memory);
+			sort_test =1;
 			init_test_11_RAM();
 			init_test_11_cache();
 			fill_up_expected_rf_test_11();
@@ -118,8 +120,14 @@ initial begin
 			//fill_up_expected_rf_test_11();
 		end 
 		default:begin
-			$warning("NO MATCH TEST FOUND, executing first test by default");
-			init_test_1_cache();
+			$display("NO MATCH TEST FOUND, EXECUTING:  FINAL verification (FINAL SORT CODE) by default");
+			$display("To try other tests please use +TEST_NAME=TEST_<1..11> when simulating");
+			$readmemh("../asm/sort_final_project.txt", expected_rom_memory);
+			sort_test =1;
+			init_test_11_RAM();
+			init_test_11_cache();
+			fill_up_expected_rf_test_11();
+			fill_up_expected_mem_test_11();
 		end 
 	endcase 
 	init_values();
@@ -659,10 +667,10 @@ end
 always @(procesador.dispatcher.i_fetch_instruction) begin
 	 //wait for end of program to check values, last isntr is 0x6F (fin: j fin)
 	if(procesador.dispatcher.i_fetch_instruction == 32'h6f)begin
-		wait(procesador.dispatcher.int_exec_fifo.occupied == 0);
-		wait(procesador.dispatcher.ld_st_exec_fifo.empty == 1);
-		wait(procesador.dispatcher.mult_exec_fifo.occupied == 0);
-		wait(procesador.dispatcher.div_exec_fifo.occupied == 0);
+		wait(procesador.rsv_stations.int_exec_fifo.occupied == 0);
+		wait(procesador.rsv_stations.ld_st_exec_fifo.empty == 1);
+		wait(procesador.rsv_stations.mult_exec_fifo.occupied == 0);
+		wait(procesador.rsv_stations.div_exec_fifo.occupied == 0);
 		wait(procesador.dispatcher.tag_fifo_module.fifo_full_tf==1);
 		wait(procesador.dispatcher.rob.rob_fifo.empty==1);
 		//wait(cdb_publish.size() == 0);
@@ -698,7 +706,7 @@ task check_values();
 endtask
 
 task init_RAM(string test);
-	if(test == "TEST_11")begin
+	if(sort_test == 1)begin
 		init_test_11_RAM();
 	end
 endtask

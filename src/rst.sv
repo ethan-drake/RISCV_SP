@@ -34,11 +34,12 @@ module rst(
     output rs2valid_rst,
 
     input cdb_valid,
-    input [5:0] cdb_tag_rst,
-    output reg [4:0] wen_regfile_rst 
+    input [5:0] cdb_tag_rst
+//    output reg [4:0] wen_regfile_rst 
 
 );
 
+reg [4:0] wen_regfile_rst; 
 
 //Declare our memory
 reg [6:0] registers [0:31];

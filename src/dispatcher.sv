@@ -26,19 +26,32 @@ module dispatcher(
     input cdb_bfm cdb,
     //output fetch_next_instr,
     //output second_branch_instr,
-    output int_issue_data exec_int_issue_data,
-    output common_issue_data exec_mult_issue_data,
-    output common_issue_data exec_div_issue_data,
-    output mem_issue_data exec_mem_issue_data,
-    input issue_done_int,
-    input issue_done_mem,
-    input issue_done_mult,
-    input issue_done_div,
+    //output int_issue_data exec_int_issue_data,
+    //output common_issue_data exec_mult_issue_data,
+    //output common_issue_data exec_div_issue_data,
+    //output mem_issue_data exec_mem_issue_data,
+    //input issue_done_int,
+    //input issue_done_mem,
+    //input issue_done_mult,
+    //input issue_done_div,
+    input exec_int_fifo_ctrl_empty,
+    input exec_ld_st_fifo_ctrl_empty,
+    input exec_mult_fifo_ctrl_empty,
+    input exec_div_fifo_ctrl_empty,
+    input any_rsv_station_full,
+    output int_fifo_data exec_int_fifo_data_in,
+    output exec_int_fifo_ctrl_w_en,
+    output ld_st_fifo_data exec_ld_st_fifo_data_in,
+    output exec_ld_st_fifo_ctrl_w_en,
+    output common_fifo_data exec_mult_fifo_data_in,
+    output exec_mult_fifo_ctrl_w_en,
+    output common_fifo_data exec_div_fifo_data_in,
+    output exec_div_fifo_ctrl_w_en,
     output retire_store retire_store
 );
 
 
-
+/*
 //Dispatch integer structure instantiation
 int_fifo_data exec_int_fifo_data_in;
 //int_fifo_data exec_int_fifo_data_out;
@@ -55,6 +68,7 @@ common_fifo_ctrl exec_mult_fifo_ctrl;
 common_fifo_data exec_div_fifo_data_in;
 //common_fifo_data exec_div_fifo_data_out;
 common_fifo_ctrl exec_div_fifo_ctrl;
+*/
 
 //CDB_BFM structures
 //cdb_bfm int_submit;
@@ -81,7 +95,7 @@ wire [31:0] rs1data_rf, rs2data_rf;
 wire [4:0] wen_regfile_rst;
 wire jmp_detected,branch_detected;
 wire br_stall_one_shot;
-wire any_rsv_station_full;
+//wire any_rsv_station_full;
 wire br_stall_one_shot_2;
 wire [1:0] dispatch_instr_type;
 //wire int_issue_rdy,mem_issue_rdy,mult_issue_rdy,div_issue_rdy;
@@ -516,17 +530,16 @@ dispatch_gen dispatch_gen(
     .i_dispatch_gen_str(final_dispatch_gen),
     .o_mult_fifo_data(exec_mult_fifo_data_in),
     .o_div_fifo_data(exec_div_fifo_data_in),
-    .int_dispatch_en(exec_int_fifo_ctrl.dispatch_en),
-    .mult_dispatch_en(exec_mult_fifo_ctrl.dispatch_en),
-    .div_dispatch_en(exec_div_fifo_ctrl.dispatch_en),
-    .ld_st_dispatch_en(exec_ld_st_fifo_ctrl.dispatch_en),
+    .int_dispatch_en(exec_int_fifo_ctrl_w_en),
+    .mult_dispatch_en(exec_mult_fifo_ctrl_w_en),
+    .div_dispatch_en(exec_div_fifo_ctrl_w_en),
+    .ld_st_dispatch_en(exec_ld_st_fifo_ctrl_w_en),
     .o_int_fifo_data(exec_int_fifo_data_in),
     .o_ld_st_fifo_data(exec_ld_st_fifo_data_in)
 );
 
 
-//Receive information from ROB for roll-back process
-
+/*
 //Dispatch FIFOs
 exec_rsv_station_shift #(.DEPTH(4), .DATA_WIDTH($bits(int_fifo_data))) int_exec_fifo(
     .i_clk(i_clk),
@@ -596,7 +609,7 @@ exec_rsv_station_shift #(.DEPTH(4), .DATA_WIDTH($bits(common_fifo_data))) div_ex
     .issue_queue_rdy(exec_div_issue_data.issue_rdy),//div_issue_rdy),
     .issue_completed(issue_done_div)
 );
-
+*/
 
 
 //assign dispatch_jmp_valid = jmp_detected | cdb.cdb_branch_taken;//or branch cdb logic TBD
@@ -613,7 +626,7 @@ assign dispatch_jmp_valid = jmp_detected | retire_bus_if.flush | branch_predicti
 assign dispatch_jmp_br_addr = (flush == 1'b1) ? retire_bus_if.calculated_br_target : (branch_prediction==1'b1) ? branch_target : jmp_br_addr;
 
 
-assign any_rsv_station_full=(exec_int_fifo_ctrl.queue_full | exec_ld_st_fifo_ctrl.queue_full | exec_mult_fifo_ctrl.queue_full | exec_div_fifo_ctrl.queue_full);
+//assign any_rsv_station_full=(exec_int_fifo_ctrl.queue_full | exec_ld_st_fifo_ctrl.queue_full | exec_mult_fifo_ctrl.queue_full | exec_div_fifo_ctrl.queue_full);
 
 //assign dispatch_rd_en = cdb.cdb_branch | (~branch_detected & (~(exec_int_fifo_ctrl.queue_full | exec_ld_st_fifo_ctrl.queue_full | exec_mult_fifo_ctrl.queue_full | exec_div_fifo_ctrl.queue_full)));
 //assign fetch_next_instr = (cdb.cdb_branch==1) && (cdb.cdb_branch_taken==0) ? 1:0;

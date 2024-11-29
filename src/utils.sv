@@ -47,11 +47,11 @@ typedef struct packed {
    logic [5:0] rd_tag;     //5:0
  } common_fifo_data;
 
-typedef struct packed {
-    logic dispatch_en;
-    logic queue_full;
-    logic queue_empty;
-} common_fifo_ctrl;
+//typedef struct packed {
+//    logic dispatch_en;
+//    logic queue_full;
+//    logic queue_empty;
+//} common_fifo_ctrl;
 
  typedef struct packed {
     logic [6:0] opcode;
