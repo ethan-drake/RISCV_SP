@@ -2489,10 +2489,13 @@
         <mxCell id="sfvwWMNCOpsZ8LelUhja-45" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="sfvwWMNCOpsZ8LelUhja-46">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1760" y="1555" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1760" y="1555" />
+            </Array>
           </mxGeometry>
         </mxCell>
         <mxCell id="sfvwWMNCOpsZ8LelUhja-46" value="&lt;span style=&quot;font-size: 8px;&quot;&gt;1&#39;b1&lt;/span&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontFamily=Helvetica;fontColor=default;labelBackgroundColor=default;" vertex="1" parent="1">
-          <mxGeometry x="1726" y="1550" width="14" height="10" as="geometry" />
+          <mxGeometry x="1733" y="1550" width="14" height="10" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
