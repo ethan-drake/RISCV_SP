@@ -1318,7 +1318,7 @@
           <mxGeometry x="1766" y="1374" width="120" height="83" as="geometry" />
         </mxCell>
         <mxCell id="_QN9Bqcpa8QOcH6YJn4k-98" value="second branch one shot" style="whiteSpace=wrap;html=1;fontFamily=Helvetica;fontSize=12;fontColor=default;labelBackgroundColor=default;" parent="1" vertex="1">
-          <mxGeometry x="1760" y="1550" width="120" height="60" as="geometry" />
+          <mxGeometry x="1760" y="1530" width="120" height="80" as="geometry" />
         </mxCell>
         <mxCell id="_QN9Bqcpa8QOcH6YJn4k-99" value="dispatch gen" style="whiteSpace=wrap;html=1;fontFamily=Helvetica;fontSize=12;labelBackgroundColor=default;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
           <mxGeometry x="1270" y="1760" width="590" height="80" as="geometry" />
